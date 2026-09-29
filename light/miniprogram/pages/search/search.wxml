@@ -7,7 +7,7 @@
   <view class="ico ico-search search-bar__ico"></view>
   <input class="search-bar__input" value="{{kw}}" focus="{{focus}}" confirm-type="search"
          placeholder="输入单词或中文释义" placeholder-class="search-bar__ph"
-         bindinput="onInput" bindconfirm="onConfirm" />
+         bindinput="onInput" bindfocus="onFocus" bindblur="onBlur" bindconfirm="onConfirm" />
   <view class="search-bar__clear" wx:if="{{kw}}" hover-class="hover-dim" hover-stay-time="120" bindtap="onClear">×</view>
 </view>
 

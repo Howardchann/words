@@ -53,6 +53,10 @@ Page({
 
   onUnload() {
     if (this._deb) { clearTimeout(this._deb); this._deb = null; }
+    // 本页可能被 switchTab 销毁（从结果跳今日页），落盘保住关键词
+    if (typeof this._kw === 'string') {
+      try { wx.setStorageSync(KW_KEY, this._kw); } catch (err) { /* 存不下不影响搜索 */ }
+    }
     speech.stop();
     if (this._offSpeech) this._offSpeech();
     this._offSpeech = null;
@@ -60,11 +64,18 @@ Page({
 
   onBack() { wx.navigateBack(); },
 
+  // ⚠️ focus 只做「同步」不做「控制」：
+  //    在输入过程中 setData({ focus:false }) 等价于「主动收起键盘」——实测按一个字母输入法就缩回去，
+  //    一个单词都打不完（v1.1.47 修复）。所以 onInput 里绝不碰 focus，只在真实的 focus/blur 事件里回写，
+  //    保证 data.focus 与输入框真实状态一致（否则页面重渲染时可能把陈旧的 false 重新应用一次）。
+  onFocus() { if (!this.data.focus) this.setData({ focus: true }); },
+  onBlur() { if (this.data.focus) this.setData({ focus: false }); },
+
   onInput(e) {
     const kw = e.detail.value;
-    // focus 置 false：用户已开始输入，撤掉自动聚焦 —— 否则之后每次 setData 都会重新弹一次键盘
-    this.setData({ kw: kw, focus: false });
-    try { wx.setStorageSync(KW_KEY, kw); } catch (err) { /* 存不下不影响搜索 */ }
+    this._kw = kw;
+    // 只回写输入内容，focus 一律不动（见上面注释）
+    this.setData({ kw: kw });
     if (this._deb) clearTimeout(this._deb);
     this._deb = setTimeout(() => { this._deb = null; this._run(kw); }, DEBOUNCE);
   },
@@ -76,13 +87,18 @@ Page({
 
   onClear() {
     if (this._deb) { clearTimeout(this._deb); this._deb = null; }
+    this._kw = '';
     try { wx.setStorageSync(KW_KEY, ''); } catch (err) {}
     speech.stop();
+    // 这里的 focus:true 是「真想让它聚焦」——输入框此刻通常已是聚焦态，等于无变化；
+    // 若用户已手动收起键盘，则借此重新弹起。与 onInput 里的禁用场景不同。
     this.setData({ kw: '', focus: true, total: 0, more: false, list: [] });
   },
 
   _run(kw) {
     speech.stop();
+    // 关键词落盘放在这里（而非每次按键）——同步写存储在安卓上是阻塞调用，打字时不该每键一次
+    try { wx.setStorageSync(KW_KEY, kw); } catch (err) { /* 存不下不影响搜索 */ }
     const r = plan.searchWords(kw);
     this.setData({ total: r.total, list: r.list, more: r.total > r.list.length });
   },
