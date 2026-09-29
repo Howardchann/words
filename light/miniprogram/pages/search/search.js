@@ -90,9 +90,10 @@ Page({
     this._kw = '';
     try { wx.setStorageSync(KW_KEY, ''); } catch (err) {}
     speech.stop();
-    // 这里的 focus:true 是「真想让它聚焦」——输入框此刻通常已是聚焦态，等于无变化；
-    // 若用户已手动收起键盘，则借此重新弹起。与 onInput 里的禁用场景不同。
-    this.setData({ kw: '', focus: true, total: 0, more: false, list: [] });
+    // ⚠️ 这里刻意**不写 focus**：配合 input 的 hold-keyboard，点 × 不会让输入框失焦，
+    //    键盘原地保持、无「收起又弹出」的闪动；若用户此前已手动收起键盘，也不强行弹起。
+    //    （v1.1.47 曾在这一行 setData focus:true，实测会闪一下：点 × 时输入框先失焦，这一行又把它拉回来。）
+    this.setData({ kw: '', total: 0, more: false, list: [] });
   },
 
   _run(kw) {
@@ -105,15 +106,32 @@ Page({
 
   // 点词条 → 跳到该词所在的 Day 并定位高亮。
   // switchTab 不能带参，走 globalData 中转（与周计划点日期跳今日页同一套机制）。
+  // 跳转所需数据全部取自 dataset，**不再回头查 this.data.list**：
+  // 列表随时可能被防抖、朗读回调 setData 重写，依赖 list 状态是「点了没反应」的隐患之一。
   onJump(e) {
-    const w = e.currentTarget.dataset.w;
-    const it = (this.data.list || []).find(x => x.w === w);
-    if (!it) return;
+    if (this._jumping) return;            // 连点两次不重复发 switchTab（并发 switchTab 会静默失败）
+    const ds = e.currentTarget.dataset;
+    const w = ds.w;
+    const day = Number(ds.day) || 0;
+    if (!w || !day) return;
+    this._jumping = true;
+    if (this._deb) { clearTimeout(this._deb); this._deb = null; }
     speech.stop();
     const app = getApp();
-    app.globalData.jumpDay = it.day;
-    app.globalData.jumpWord = it.w;
-    wx.switchTab({ url: '/pages/today/today' });
+    app.globalData.jumpDay = day;
+    app.globalData.jumpWord = w;
+    wx.switchTab({
+      url: '/pages/today/today',
+      fail: () => {
+        // switchTab 偶发被并发的切换动画打断而静默失败（表现为「点了没反应」）→ 重试一次
+        setTimeout(() => {
+          wx.switchTab({
+            url: '/pages/today/today',
+            fail: () => { this._jumping = false; wx.showToast({ title: '跳转失败，请再点一次', icon: 'none' }); },
+          });
+        }, 200);
+      },
+    });
   },
 
   // 喇叭 / 例句：用 catchtap 拦在本页朗读，不触发整行的跳转

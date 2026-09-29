@@ -6,6 +6,7 @@
 <view class="search-bar">
   <view class="ico ico-search search-bar__ico"></view>
   <input class="search-bar__input" value="{{kw}}" focus="{{focus}}" confirm-type="search"
+         hold-keyboard="{{true}}"
          placeholder="输入单词或中文释义" placeholder-class="search-bar__ph"
          bindinput="onInput" bindfocus="onFocus" bindblur="onBlur" bindconfirm="onConfirm" />
   <view class="search-bar__clear" wx:if="{{kw}}" hover-class="hover-dim" hover-stay-time="120" bindtap="onClear">×</view>
@@ -24,7 +25,7 @@
   <!-- 结果列表：词行与今日页完全同构（单词/音标/词性/释义/例句/喇叭） -->
   <view class="card search-card" wx:if="{{list.length}}">
     <block wx:for="{{list}}" wx:key="w">
-      <view class="word-row search-row" data-w="{{item.w}}" hover-class="search-row--press" hover-stay-time="60" bindtap="onJump">
+      <view class="word-row search-row" data-w="{{item.w}}" data-day="{{item.day}}" hover-class="search-row--press" hover-stay-time="60" bindtap="onJump">
         <view class="word-speak {{playingText === item.w ? 'playing' : ''}}"
               hover-class="speak-hover" hover-stay-time="120"
               data-text="{{item.w}}" data-ai="{{item.ai}}" data-kind="w" catchtap="onSpeakWord"><view class="spk-ico {{playingText === item.w ? 'spk-ico--on' : ''}}"></view></view>

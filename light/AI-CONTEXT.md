@@ -125,8 +125,10 @@
 
 - `onInput` 里**绝不碰 `focus`**，只回写输入内容（`value` 回写同值是无操作，官方文档的示例就是这个写法，安全）；
 - `focus` 只在真实焦点事件里回写，保证 `data.focus` 与输入框真实状态一致：`bindfocus → focus:true`（仅在当前为 false 时）、`bindblur → focus:false`（仅在当前为 true 时）；
-- 只有 `onClear` 里的 `focus:true` 是**真意图**（点 × 后重新聚焦），此时键盘通常已在，等于无变化；
+- **input 上加 `hold-keyboard="{{true}}"`**（2.8.2+，＝「focus 时点击页面不收起键盘」）：点 × / 点词条都不会让输入框失焦。**这是「点 × 键盘闪一下」的解法** —— 原先点 × 先失焦、`onClear` 里再 `focus:true` 拉回来，一来一回就是那一下闪动；现已删掉 `onClear` 的 focus 写入；
 - 顺带把 `wx.setStorageSync(关键词)` 从「每次按键」挪到防抖后的 `_run()` + `onUnload()`——安卓上同步写存储是阻塞调用，打字时不该每键一次。
+
+**点词条跳转的稳健性（v1.1.48）**：结果行的跳转数据全部挂 `dataset`（`data-w` + `data-day`），**不要回头查 `this.data.list`**（列表会被防抖/朗读回调重写）；`onJump` 有 `_jumping` 重入锁 + `switchTab` 的 `fail` 重试（并发 switchTab 会静默失败，表现为「点了没反应」）。今日页 `_scrollToWord` 遇到 `findIndex` 找不到词时**按未上屏重试**（120ms×3），不要直接 return。
 
 ## 交互定稿（继承 cloud v1.1.38）
 

@@ -112,7 +112,8 @@ Page({
   _scrollToWord(w, tries) {
     const n = tries || 0;
     const idx = (this.data.vocab || []).findIndex(v => v.w === w);
-    if (idx < 0) return;
+    // 词还没上屏（renderDay 的 setData 尚未落到视图层）→ 稍后重试，别静默放弃（v1.1.48）
+    if (idx < 0) { if (n < 3) setTimeout(() => this._scrollToWord(w, n + 1), 120); return; }
     if (n === 0) {
       this._clearHl();
       this.setData({ hlWord: w });
