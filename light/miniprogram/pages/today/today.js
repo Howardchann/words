@@ -31,6 +31,7 @@ Page({
     coreCount: 0,
     extraCount: 0,
     checked: false,
+    hlWord: '',       // 从搜索页跳来时的定位高亮词（v1.1.46），2s 后自动清空
     playingText: '',
     playingMode: 'idle',
     pluginOk: false,
@@ -62,8 +63,13 @@ Page({
     theme.syncTabBar(this, 0);
     this.applyTheme();
     store.onResume();
-    const jump = getApp().globalData.jumpDay || 0;
-    getApp().globalData.jumpDay = 0;
+    // 跨页跳天（周计划点某天 / 搜索页点结果）：switchTab 不能带参，一律走 globalData 中转。
+    // jumpWord 只有搜索页会设，消费后立即清掉 —— 否则下次切 tab 回来会再定位一次。
+    const app = getApp();
+    const jump = app.globalData.jumpDay || 0;
+    const jumpWord = app.globalData.jumpWord || '';
+    app.globalData.jumpDay = 0;
+    app.globalData.jumpWord = '';
     const todayNum = plan.currentDayFromStart(store.get('startDate'));
     // 切 tab 返回（无 jump 且页面未销毁）：保持离开时的浏览位置与准备期预览态，仅刷新打卡/同步数据。
     // 重新冷启动小程序才回到默认落点（第一个未完成日 / 准备期卡片）。
@@ -71,6 +77,9 @@ Page({
       // 同值守卫：todayNum/daysToStart 多数时候没变，裸 setData 会整树重渲染（切 tab 闪屏）
       theme.sameSet(this, { todayNum, daysToStart: this._daysToStart() });
       this.renderDay(this.data.viewDay);
+      // 防御：理论上 jump 与 jumpWord 同生共死，走不到这条分支；万一 jumpDay 被别的入口清了，
+      // jumpWord 仍应生效（搜索页的定位不该因为绕路而丢）
+      if (jumpWord) this._scrollToWord(jumpWord);
       return;
     }
     // 默认落点 = 第一个未完成的学习日（打卡驱动）：没学/没学完，第二天仍停在这一天；
@@ -84,13 +93,45 @@ Page({
     if (viewDay < 1) viewDay = 1;
     if (viewDay > plan.TOTAL_DAYS) viewDay = plan.TOTAL_DAYS;
     this.renderDay(viewDay);
+    if (jumpWord) this._scrollToWord(jumpWord);
   },
 
   onUnload() {
+    this._clearHl();
     speech.stop();
     if (this._offSpeech) this._offSpeech();
     this._offSpeech = null;
   },
+
+  // 搜索入口（v1.1.46）：搜索页是普通页面（非 tab），走 navigateTo
+  goSearch() { wx.navigateTo({ url: '/pages/search/search' }); },
+
+  // 从搜索页跳来时的定位（v1.1.46）：等渲染上屏 → 量目标行位置 → 滚进视口 → 闪一下。
+  // renderDay 的 setData 是异步的，量不到（还没上屏）就重试，最多 3 次；
+  // 高亮只在首次进入时设，重试不重复设。
+  _scrollToWord(w, tries) {
+    const n = tries || 0;
+    const idx = (this.data.vocab || []).findIndex(v => v.w === w);
+    if (idx < 0) return;
+    if (n === 0) {
+      this._clearHl();
+      this.setData({ hlWord: w });
+      this._hlTimer = setTimeout(() => { this._hlTimer = null; this.setData({ hlWord: '' }); }, 2000);
+    }
+    setTimeout(() => {
+      wx.createSelectorQuery()
+        .select('#w' + idx).boundingClientRect()
+        .selectViewport().scrollOffset()
+        .exec(res => {
+          const rect = res && res[0], sv = res && res[1];
+          if (!rect || !sv) { if (n < 3) this._scrollToWord(w, n + 1); return; }
+          // 上移 140px：让目标行落在导航栏下方一点，而不是贴着屏幕顶端
+          wx.pageScrollTo({ scrollTop: Math.max(0, rect.top + sv.scrollTop - 140), duration: 320 });
+        });
+    }, n === 0 ? 180 : 160);
+  },
+
+  _clearHl() { if (this._hlTimer) { clearTimeout(this._hlTimer); this._hlTimer = null; } },
 
   // 导航标题统一出口（v1.1.33 起为自定义导航栏）：day=null → 「今日计划」（准备期）；
   // 否则「Day N · 周X」。标题是 data 字段，经 sameSet 同值守卫绑定到 <nav-bar>，

@@ -55,3 +55,18 @@
 /* 准备期打卡按钮置灰（JS 拦截 + 提示） */
 .btn-primary.btn-primary--dis { background: var(--disabled-bg); color: var(--disabled-ink); }
 .btn-primary.btn-primary--dis .ico { opacity: .5; }
+
+/* ── 搜索入口（v1.1.46）── */
+/* 放在自定义导航栏左区插槽内：左区本身宽 ≈94px（与右侧胶囊区对称），图标在其内左对齐，
+   标题居中不受影响。点击热区 30px，视觉图标 22px。 */
+.nav-search { width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border-radius: 50%; }
+.nav-search .ico { margin-right: 0; width: 22px; height: 22px; }
+.nav-search--press { opacity: .5; }
+
+/* 从搜索页跳来的定位高亮：底色闪一下再淡出（forwards 保持终态全透明，不残留底色） */
+.word-row--hl { border-radius: 14rpx; animation: word-hl 1.9s ease-out forwards; }
+@keyframes word-hl {
+  0%   { background: var(--press2); box-shadow: 0 0 0 14rpx var(--press2); }
+  62%  { background: var(--press2); box-shadow: 0 0 0 14rpx var(--press2); }
+  100% { background: transparent; box-shadow: 0 0 0 14rpx transparent; }
+}

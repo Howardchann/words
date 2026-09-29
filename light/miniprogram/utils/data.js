@@ -200,8 +200,54 @@ function demo() {
   return w ? { word: w.w, example: w.e, ai: w.ai } : null;
 }
 
+// ── 全库搜索（v1.1.46 搜索页）────────────────────────────────────────
+// 词下标 → 所属学习日的「日历天」序号：词表按学习日顺序平铺，DAY_OFF[di] 是第 di 个
+// 学习日的起点。二分定位所属学习日，再按「每周 5 个学习日 + 周末 2 天」换算日历天
+// （di=0 → Day 1 周一；di=4 → Day 5 周五；di=5 → Day 8 下周一）。
+// ⚠️ 口径必须与 App 的 Day 一致：App 里 Day N = 自然日（每周 7 天），不是学习日序号。
+function dayOfWordIndex(i) {
+  let lo = 0, hi = DAY_OFF.length - 1;
+  while (lo < hi) {
+    const mid = (lo + hi + 1) >> 1;
+    if (DAY_OFF[mid] <= i) lo = mid; else hi = mid - 1;
+  }
+  return lo + Math.floor(lo / 5) * 2 + 1;
+}
+
+// 全库搜索：完全匹配 > 英文前缀 > 英文包含 > 中文释义包含（每组内部保持词表序 = 由易到难 = Day 升序）。
+// 完全匹配必须置顶：搜 good 时若前缀组里有 goods/goodbye 排前面，用户会以为搜错了。
+// 8000 词单次遍历，实测 <5ms，不需要索引。limit 只截断返回条数，total 始终是真实命中数。
+const SEARCH_LIMIT = 60;
+function searchWords(kw, limit) {
+  const q = String(kw || '').trim().toLowerCase();
+  if (!q) return { total: 0, list: [] };
+  const ws = allWords();
+  const exact = [], pre = [], inc = [], zh = [];
+  for (let i = 0; i < ws.length; i++) {
+    const it = ws[i];
+    const lw = it.w.toLowerCase();
+    if (lw === q) exact.push(i);
+    else if (lw.indexOf(q) === 0) pre.push(i);
+    else if (lw.indexOf(q) > 0) inc.push(i);
+    else if (it.m && it.m.indexOf(q) >= 0) zh.push(i);
+  }
+  const total = exact.length + pre.length + inc.length + zh.length;
+  const cap = limit > 0 ? limit : SEARCH_LIMIT;
+  const list = exact.concat(pre, inc, zh).slice(0, cap).map(function (i) {
+    const it = ws[i];
+    const day = dayOfWordIndex(i);
+    const info = dayInfo(day);
+    return {
+      w: it.w, p: it.p, m: it.m, e: it.e, ai: it.ai, ipa: it.ipa || '',
+      day: day, dow: DOW[info.k - 1], wn: info.wIdx + 1,
+    };
+  });
+  return { total: total, list: list };
+}
+
 module.exports = {
   WEEKS, TOTAL_DAYS, PHASE_NAMES, DOW, DEFAULT_START, SATURDAY,
-  RAMP, CORE_CNT, WORD_TOTAL, WEEK_COUNT, P1_TOTAL,
+  RAMP, CORE_CNT, WORD_TOTAL, WEEK_COUNT, P1_TOTAL, SEARCH_LIMIT,
   dayInfo, getDay, currentDayFromStart, learnedWords, allWords, demo,
+  searchWords, dayOfWordIndex,
 };

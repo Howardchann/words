@@ -1,6 +1,6 @@
 <page-meta page-style="{{pageStyle}}" />
 <view class="page-root {{dark ? 'theme-dark' : ''}}">
-<nav-bar title="{{navTitle}}" />
+<nav-bar title="{{navTitle}}"><view class="nav-search" hover-class="nav-search--press" hover-stay-time="120" bindtap="goSearch" aria-role="button" aria-label="搜索单词"><view class="ico ico-search"></view></view></nav-bar>
 <!-- 今日学习计划 -->
 <!-- 准备期：计划尚未开始 -->
 <view class="card prestart-card" wx:if="{{preStart}}">
@@ -54,7 +54,7 @@
     <block wx:for="{{vocab}}" wx:key="w">
       <view class="group-tag" wx:if="{{index === 0 && coreCount > 0}}">主题词 · {{coreCount}}</view>
       <view class="group-tag group-tag--extra" wx:if="{{index === extraStart}}">扩展词 · {{extraCount}}</view>
-      <view class="word-row">
+      <view class="word-row{{hlWord === item.w ? ' word-row--hl' : ''}}" id="w{{index}}">
       <view class="word-speak {{playingText === item.w ? 'playing' : ''}}"
             hover-class="speak-hover" hover-stay-time="120"
             data-text="{{item.w}}" data-ai="{{item.ai}}" data-kind="w" bindtap="onSpeakWord"><view class="spk-ico {{playingText === item.w ? 'spk-ico--on' : ''}}"></view></view>

@@ -1,0 +1,51 @@
+/* 开溜 · 搜索页（v1.1.46）
+   词行/喇叭/歌词高亮全部复用全局 app.wxss（.word-row / .word-speak / .spk-ico / .kara-lit），
+   本文件只写搜索页特有的三条：搜索条、结果计数、Day 标签。 */
+/* 本页不是 tab 页：撤掉 app.wxss 给 tabBar 预留的 132rpx 底部内边距 */
+page { padding-bottom: env(safe-area-inset-bottom); }
+
+/* 搜索条 */
+.search-bar { display: flex; align-items: center; margin: 16rpx 24rpx 4rpx; padding: 0 22rpx; height: 80rpx;
+  background: var(--card); border-radius: 40rpx; border: 1rpx solid var(--card-line); }
+.search-bar__ico { flex-shrink: 0; width: 32rpx; height: 32rpx; margin-right: 14rpx; }
+.search-bar__input { flex: 1; min-width: 0; height: 80rpx; font-size: 28rpx; color: var(--ink); }
+.search-bar__ph { color: var(--muted); font-size: 28rpx; }
+.search-bar__clear { flex-shrink: 0; width: 48rpx; height: 48rpx; line-height: 46rpx; text-align: center;
+  font-size: 38rpx; color: var(--muted); border-radius: 50%; }
+
+/* 空态（还没输入） */
+.search-hint { margin: 24rpx 32rpx; font-size: 26rpx; color: var(--muted); line-height: 1.8; }
+.search-hint__n { color: var(--green); font-weight: 700; }
+.search-hint__sub { margin-top: 8rpx; font-size: 24rpx; color: var(--muted2); }
+
+/* 结果计数 */
+.search-meta { margin: 16rpx 32rpx 0; font-size: 25rpx; color: var(--muted3); }
+.search-meta__n { color: var(--green); font-weight: 700; }
+
+/* 结果卡片：上下内边距比通用卡小（词行自带 14rpx 上下留白，避免行距显得过大） */
+.search-card { padding: 6rpx 28rpx; }
+.search-row--press { background: var(--soft); border-radius: 14rpx; }
+.search-day { font-size: 22rpx; color: var(--green); margin-top: 10rpx; }
+.search-day__go { color: var(--muted); }
+.search-tip { margin: 20rpx 32rpx 0; font-size: 24rpx; color: var(--muted2); text-align: center; }
+
+/* 无结果 */
+.search-empty { text-align: center; padding: 70rpx 48rpx; }
+.search-empty__sub { margin-top: 16rpx; font-size: 25rpx; color: var(--muted); line-height: 1.8; }
+
+/* iPad / 宽屏覆盖（纯追加，手机端不受影响），字号 = rpx × 0.5 */
+@media (min-width:700px) {
+  .search-bar { margin: 8px 12px 2px; padding: 0 11px; height: 40px; border-radius: 20px; }
+  .search-bar__ico { width: 16px; height: 16px; margin-right: 7px; }
+  .search-bar__input { height: 40px; font-size: 14px; }
+  .search-bar__ph { font-size: 14px; }
+  .search-bar__clear { width: 24px; height: 24px; line-height: 23px; font-size: 19px; }
+  .search-hint { margin: 12px 16px; font-size: 13px; }
+  .search-hint__sub { font-size: 12px; }
+  .search-meta { margin: 8px 16px 0; font-size: 13px; }
+  .search-card { padding: 3px 14px; }
+  .search-day { font-size: 11px; margin-top: 5px; }
+  .search-tip { margin: 10px 16px 0; font-size: 12px; }
+  .search-empty { padding: 35px 24px; }
+  .search-empty__sub { font-size: 13px; }
+}
