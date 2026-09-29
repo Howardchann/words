@@ -11,6 +11,9 @@ const speech = require('../../utils/speech.js');
 
 const KW_KEY = 'ielts-365-search-kw';
 const DEBOUNCE = 160;
+// 跳转重入锁的有效期 + 看门狗超时（v1.1.49）：锁必须能自愈，见 onJump 注释
+const JUMP_LOCK_MS = 1200;
+const JUMP_WATCHDOG = 1600;
 
 Page({
   data: {
@@ -24,6 +27,7 @@ Page({
     wordTotal: plan.WORD_TOTAL,
     playingText: '',
     playingMode: 'idle',
+    jumpingW: '',   // 正在跳转的词（行内显示「跳转中…」，让「点了没反应」不再无声）
   },
 
   onLoad() {
@@ -33,14 +37,28 @@ Page({
     speech.setEngine(store.get('engine'));
     speech.setEngineMode(store.get('engineMode') || 'auto');
     this._offSpeech = speech.onStateChange((payload) => {
-      const upd = { playingText: payload.playing ? payload.text : '', playingMode: payload.mode };
-      // 歌词式进度：与今日页同一套（已读部分染绿）
-      if (payload.playing && payload.text) {
+      // 同值守卫（v1.1.49）：朗读状态回调里带着只有 1~2 个字段变化的数据，而 setData 不做深度 diff，
+      // 同值也会把 60 行结果列表整棵重渲染 —— 低端机上就是「播放时卡一下」。
+      // 只在真的有变化时才 setData。
+      const text = payload.playing ? payload.text : '';
+      const upd = {};
+      if (text !== this.data.playingText) upd.playingText = text;
+      if (payload.mode !== this.data.playingMode) upd.playingMode = payload.mode;
+      if (text && payload.text) {
         const lit = Math.round((payload.progress || 0) * payload.text.length);
-        upd.karaLit = payload.text.slice(0, lit);
-        upd.karaRest = payload.text.slice(lit);
-      } else { upd.karaLit = ''; upd.karaRest = ''; }
-      this.setData(upd);
+        if (lit !== this._lit) {
+          this._lit = lit;
+          upd.karaLit = payload.text.slice(0, lit);
+          upd.karaRest = payload.text.slice(lit);
+        }
+      } else if (this._lit) {
+        this._lit = 0;
+        upd.karaLit = '';
+        upd.karaRest = '';
+      }
+      if (upd.playingText !== undefined || upd.playingMode !== undefined || upd.karaLit !== undefined) {
+        this.setData(upd);
+      }
     });
     // 恢复上次关键词（含结果）：本页可能刚被 switchTab 销毁过
     let last = '';
@@ -53,6 +71,9 @@ Page({
 
   onUnload() {
     if (this._deb) { clearTimeout(this._deb); this._deb = null; }
+    // switchTab 成功 = 本页被销毁：务必清掉跳转看门狗，否则它会在页面销毁后 setData
+    if (this._wd) { clearTimeout(this._wd); this._wd = null; }
+    this._jumping = false;
     // 本页可能被 switchTab 销毁（从结果跳今日页），落盘保住关键词
     if (typeof this._kw === 'string') {
       try { wx.setStorageSync(KW_KEY, this._kw); } catch (err) { /* 存不下不影响搜索 */ }
@@ -104,34 +125,54 @@ Page({
     this.setData({ total: r.total, list: r.list, more: r.total > r.list.length });
   },
 
-  // 点词条 → 跳到该词所在的 Day 并定位高亮。
+  // 点卡片 → 跳到该词所在的 Day 并定位高亮（整张卡片除两个喇叭图标外都是跳转区）。
   // switchTab 不能带参，走 globalData 中转（与周计划点日期跳今日页同一套机制）。
   // 跳转所需数据全部取自 dataset，**不再回头查 this.data.list**：
   // 列表随时可能被防抖、朗读回调 setData 重写，依赖 list 状态是「点了没反应」的隐患之一。
   onJump(e) {
-    if (this._jumping) return;            // 连点两次不重复发 switchTab（并发 switchTab 会静默失败）
     const ds = e.currentTarget.dataset;
     const w = ds.w;
     const day = Number(ds.day) || 0;
-    if (!w || !day) return;
+    // 不静默 return：数据缺失也要让用户看见（静默 = 表现为「点了没反应」）
+    if (!w || !day) { wx.showToast({ title: '这个词没有所属学习日', icon: 'none' }); return; }
+    // 重入锁：并发 switchTab 会被静默打断（没有任何报错）。但锁**必须能自愈** ——
+    // 安卓上存在 switchTab「既不回调 success 也不回调 fail」的情况，硬锁一旦卡住，
+    // 之后每次点击都会静默失效（现象正是「偶发点了不跳」）。
+    const now = Date.now();
+    if (this._jumping && now - (this._jumpAt || 0) < JUMP_LOCK_MS) return;
     this._jumping = true;
+    this._jumpAt = now;
     if (this._deb) { clearTimeout(this._deb); this._deb = null; }
     speech.stop();
     const app = getApp();
     app.globalData.jumpDay = day;
     app.globalData.jumpWord = w;
-    wx.switchTab({
-      url: '/pages/today/today',
-      fail: () => {
-        // switchTab 偶发被并发的切换动画打断而静默失败（表现为「点了没反应」）→ 重试一次
-        setTimeout(() => {
-          wx.switchTab({
-            url: '/pages/today/today',
-            fail: () => { this._jumping = false; wx.showToast({ title: '跳转失败，请再点一次', icon: 'none' }); },
-          });
-        }, 200);
-      },
-    });
+    // 行内反馈：「点到了但没跳」与「根本没点到」从此可区分
+    this.setData({ jumpingW: w });
+    const release = () => {
+      this._jumping = false;
+      this._jumpAt = 0;
+      if (this._wd) { clearTimeout(this._wd); this._wd = null; }
+      if (this.data.jumpingW) this.setData({ jumpingW: '' });
+    };
+    // 看门狗：即便 switchTab 一个回调都不给，也必须解锁
+    // （跳转成功时本页会被销毁，onUnload 负责清掉它，不会误触发）
+    this._wd = setTimeout(() => {
+      if (!this._jumping) return;
+      release();
+      wx.showToast({ title: '跳转超时，请再点一次', icon: 'none' });
+    }, JUMP_WATCHDOG);
+    const go = (retried) => {
+      wx.switchTab({
+        url: '/pages/today/today',
+        fail: () => {
+          if (!retried) { setTimeout(() => go(true), 220); return; }   // 被切换动画打断 → 220ms 后重试一次
+          release();
+          wx.showToast({ title: '跳转失败，请再点一次', icon: 'none' });
+        },
+      });
+    };
+    go(false);
   },
 
   // 喇叭 / 例句：用 catchtap 拦在本页朗读，不触发整行的跳转

@@ -107,13 +107,13 @@ Page({
   goSearch() { wx.navigateTo({ url: '/pages/search/search' }); },
 
   // 从搜索页跳来时的定位（v1.1.46）：等渲染上屏 → 量目标行位置 → 滚进视口 → 闪一下。
-  // renderDay 的 setData 是异步的，量不到（还没上屏）就重试，最多 3 次；
-  // 高亮只在首次进入时设，重试不重复设。
+  // renderDay 的 setData 是异步的，量不到（还没上屏）就重试，最多 5 次（v1.1.49 由 3 次放宽，
+  // 低端机上首屏渲染慢于 360ms 时不会再把定位丢掉）；高亮只在首次进入时设，重试不重复设。
   _scrollToWord(w, tries) {
     const n = tries || 0;
     const idx = (this.data.vocab || []).findIndex(v => v.w === w);
     // 词还没上屏（renderDay 的 setData 尚未落到视图层）→ 稍后重试，别静默放弃（v1.1.48）
-    if (idx < 0) { if (n < 3) setTimeout(() => this._scrollToWord(w, n + 1), 120); return; }
+    if (idx < 0) { if (n < 5) setTimeout(() => this._scrollToWord(w, n + 1), 120); return; }
     if (n === 0) {
       this._clearHl();
       this.setData({ hlWord: w });
@@ -125,7 +125,7 @@ Page({
         .selectViewport().scrollOffset()
         .exec(res => {
           const rect = res && res[0], sv = res && res[1];
-          if (!rect || !sv) { if (n < 3) this._scrollToWord(w, n + 1); return; }
+          if (!rect || !sv) { if (n < 5) this._scrollToWord(w, n + 1); return; }
           // 上移 140px：让目标行落在导航栏下方一点，而不是贴着屏幕顶端
           wx.pageScrollTo({ scrollTop: Math.max(0, rect.top + sv.scrollTop - 140), duration: 320 });
         });
