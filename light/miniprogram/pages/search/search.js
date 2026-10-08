@@ -44,14 +44,20 @@ Page({
       const upd = {};
       if (text !== this.data.playingText) upd.playingText = text;
       if (payload.mode !== this.data.playingMode) upd.playingMode = payload.mode;
-      if (text && payload.text) {
-        const lit = Math.round((payload.progress || 0) * payload.text.length);
-        if (lit !== this._lit) {
+      if (text) {
+        const lit = Math.round((payload.progress || 0) * text.length);
+        // 守卫键 = 文本 + 已亮字符数（v1.1.50 修复）。
+        // 旧守卫只比 lit：上一次播放结束时 _lit 已归 0，新播放开始 lit=0 与旧值相等 →
+        // karaLit/karaRest 不更新（残留空串）而 playingText 已切换 → 词/例句渲染成空，
+        // 等第一个进度回调 lit≥1 才显现 —— 真机表现即「先消失再显现」。
+        if (text !== this._karaText || lit !== this._lit) {
+          this._karaText = text;
           this._lit = lit;
-          upd.karaLit = payload.text.slice(0, lit);
-          upd.karaRest = payload.text.slice(lit);
+          upd.karaLit = text.slice(0, lit);
+          upd.karaRest = text.slice(lit);
         }
-      } else if (this._lit) {
+      } else if (this._karaText) {
+        this._karaText = '';
         this._lit = 0;
         upd.karaLit = '';
         upd.karaRest = '';

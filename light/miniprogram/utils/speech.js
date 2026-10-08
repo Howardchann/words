@@ -211,8 +211,14 @@ function tryPregenRel(rel, lp, onResult) {
   });
 }
 
+// 预生成音频修正表（v1.1.50）：编号唯一性已全量验证（8000 编号零共用），
+// 但个别编号的**源音频内容本身有误** —— 已知 ai=15「come」读成 co'me（重音错位）。
+// 列入此表的词（仅单词 kind='w'）跳过预生成、直接走在线 TTS（有道/百度读该词文本，读音正确）。
+// 注意：engineMode=pregen（仅预生成）的用户，表内词将无音源 → 朗读失败 toast，属预期取舍。
+const BAD_PREGEN_AI = new Set([15]);   // 15 = come
+
 function tryPregen(kind, ai, onResult) {
-  if (!ai) { onResult(false); return; }
+  if (!ai || (kind === 'w' && BAD_PREGEN_AI.has(ai))) { onResult(false); return; }
   const slow = state.rate <= SLOW_GATE;
   tryPregenRel(relPath(kind, ai, slow), localPath(kind, ai, slow), onResult);
 }

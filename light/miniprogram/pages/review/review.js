@@ -4,6 +4,13 @@ const store = require('../../utils/store.js');
 const theme = require('../../utils/theme.js');
 const speech = require('../../utils/speech.js');
 
+// 收藏词在 store 里是快照（v1.1.44 之前的存量没有 ipa 字段）→ 渲染前按词反查词表补全。
+let _ipaMap = null;
+function ipaOf(w) {
+  if (!_ipaMap) { _ipaMap = {}; plan.allWords().forEach(x => { if (x.ipa) _ipaMap[x.w] = x.ipa; }); }
+  return _ipaMap[w] || '';
+}
+
 Page({
   data: {
     // 主题 data 初始化（与 tabBar 同款）：首帧即正确深浅，见 today.js 注释
@@ -76,8 +83,9 @@ Page({
     store.onResume();
     this._pool = null;
     this.refreshPool();
-    // 收藏列表同值守卫（新数组实例同值也会触发重渲染）
-    const starred = store.get('starredWords') || [];
+    // 收藏列表同值守卫（新数组实例同值也会触发重渲染）；ipa 渲染时反查补全（v1.1.50）
+    const raw = store.get('starredWords') || [];
+    const starred = raw.map(v => (v.ipa ? v : Object.assign({}, v, { ipa: ipaOf(v.w) })));
     const sj = JSON.stringify(starred);
     if (sj !== this._starredJson) { this._starredJson = sj; this.setData({ starred }); }
   },

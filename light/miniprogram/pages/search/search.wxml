@@ -32,7 +32,7 @@
       <view class="word-row search-row" data-w="{{item.w}}" data-day="{{item.day}}"
             hover-class="search-row--press" hover-start-time="0" hover-stay-time="60" bindtap="onJump">
         <view class="word-speak {{playingText === item.w ? 'playing' : ''}}"
-              hover-class="speak-hover" hover-stay-time="120"
+              hover-class="speak-hover" hover-stay-time="120" hover-stop-propagation="{{true}}"
               data-text="{{item.w}}" data-ai="{{item.ai}}" data-kind="w" catchtap="onSpeakWord"><view class="spk-ico {{playingText === item.w ? 'spk-ico--on' : ''}}"></view></view>
         <view class="word-main">
           <view class="word-head"><text class="word-en"><text wx:if="{{playingText === item.w}}" class="kara-lit">{{karaLit}}</text>{{playingText === item.w ? karaRest : item.w}}</text><text class="word-ipa" wx:if="{{item.ipa}}">{{item.ipa}}</text><text class="word-pos">{{item.p}}</text></view>
@@ -40,7 +40,7 @@
           <view class="word-example-row">
             <view class="word-example"><text wx:if="{{playingText === item.e}}" class="kara-lit">{{karaLit}}</text>{{playingText === item.e ? karaRest : item.e}}</view>
             <view class="ex-speak {{playingText === item.e ? 'playing' : ''}}"
-                  hover-class="speak-hover" hover-stay-time="120"
+                  hover-class="speak-hover" hover-stay-time="120" hover-stop-propagation="{{true}}"
                   data-text="{{item.e}}" data-ai="{{item.ai}}" data-kind="s" catchtap="onSpeakWord"><view class="spk-ico {{playingText === item.e ? 'spk-ico--on' : ''}}"></view></view>
           </view>
           <view class="search-day">Day {{item.day}} · 第{{item.wn}}周 {{item.dow}}<text class="search-day__go">{{jumpingW === item.w ? ' 跳转中…' : ' ›'}}</text></view>
