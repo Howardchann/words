@@ -2,6 +2,45 @@
 
 > 本实例由 cloud 实例 v1.1.38（仓库提交 `dbe76dc` 的 cloud/ 树）派生，**共享全部产品与机制历史**——完整变更史见 `../cloud/CHANGELOG.md`，此处只记录本实例自身的差异与后续变更。
 
+## 2026-10-09 · L3 第三轮：去考试色彩「宽口径收口」（v1.1.62）
+
+> **范围**：`miniprogram/utils/data-p1..p6.js`（周计划 / 日计划文案）+ `miniprogram/utils/words.js`（8000 条例句 / 释义）。**无代码改动**。本地提交，**未推远端**。
+> **触发**：上传体验版前用户问「改干净了吗」→ 复核发现前两轮报的「零残留」都是**窄口径**结论。
+
+### 一、前两轮漏在哪（口径教训）
+- 第 1 轮（`3cd28a7`）只替换**中文术语表**（雅思/考试/模考/考前/真题/冲刺/考官/Section/Part，754 字符串）。
+- 第 2 轮（`06d9040`）扩到 band 分数、英文题型标签、雅思题型名、考试流程的**中文**表述。
+- **两轮共同漏掉两类**：① **英文科目模块名**（`Listening / Reading / Writing / Speaking` 作为科目出现，如 `9:00 - 9:40 Listening + transfer`）；② **英文应试流程话术**（`Arrive 60 minutes before the written test`、`ID card + confirmation letter`、`Water bottle without label`、`full test`、`exam day`、`Record your score in your error log.`）。
+- 第 2 轮我还**自己制造**了残留：`rewrite_content.js` 的 `TASK_MAP = {1:'图表作文', 2:'议论文'}` 把「要删的词」当成了替换结果，`patch_p15/p6` 的新文案也手写「图表作文」。`Task 1` 被替换后接在「图表动词」前 → 产生 **4 处病句**（`图表作文图表动词（上升）`、`图表作文图表文+…`）。
+- **口径定论（写死）**：说「零残留」必须先声明**词表口径**；检测表必须同时覆盖**中文与英文**，并区分「科目模块名」与「普通英语词」。
+
+### 二、处理（宽口径，5 批）
+| 批 | 工具 | 内容 |
+|---|---|---|
+| 1 | `fix_l3_residual.js --map=_fix_l3.json` | 47 组整串精确替换 + 4 条全局规则（`图表作文图表文`→图表描述 / `图表作文图表`→图表 / `图表作文`→图表描述 / `议论文`→观点短文）；修 4 处病句；雅思作文题干（`Some people think… To what extent do you agree?`）改述为**话题式**（「话题『金钱与幸福』——先亮立场再展开」）；英文 `ex` 数组的科目表与应试话术重写 |
+| 2 | `--map=_fix_l3b.json` | 收尾零头：`Water bottle without label`、物品清单「水（无标签）」→「水」 |
+| 3 | `--map=_fix_l3c.json` | **书面表达四题型模块**（p5[3] + p6[1]）：删 `To what extent do you agree?` / `Discuss both views` / `What are the causes and solutions?` 等 Task 2 题干公式，改成描述性说法（观点类＝就一个观点表态 / 双边讨论类＝两方都要讲、最后你站谁 / 原因对策类＝只写原因+解决）；`报告类题型`→`原因对策类` |
+| 4 | `--map=_fix_l3d.json` | 写作语境里的「对话对象」错配（`考官`→`对话对象` 的连带残留）→ 改「读者 / 让人」 |
+| 5 | `fix_words_exam.js` | 词库 **25 条 App 自撰应试句**（`Estimate your band score.` / `Simulate real exam conditions.` / `Finalize your exam-day checklist.` / `Revise the five score-boosting patterns.` / `Confirm your test date and venue.` / `Know the exam-day procedure by heart.` …）＋ 顺带修数据脏点：`band` 的 band-score 语境、`authentic` 释义「真实的；**真题的**」→「真正的；正宗的」、`estimate` 译文「估算你的**乐队**得分」 |
+
+### 三、刻意保留（判定为普通英语 / 中性练习约束）
+- **普通英语词**：`The test was hard, so I failed.`、`I wish the exam were easier.`、`If only the test were next month!`、`worth reading`、`I remembered to bring my ID card.`；词库中 `exam` / `pass` / `fail` / `examination` / `cram school` / `stool examination` 等词，释义与例句**本就必须**是考试语境。
+- **学术写作词**：`Thesis:`、`Overview paragraph`、`Verdict:`、`outweigh`（议题词汇）。
+- **词根例词**：`predict · prediction · verdict · jurisdiction`。
+- **中性约束**：「限时」「250 词」「各科时间红线」「答对 / 打分」（自测用语）。
+
+### 四、核验
+- `verify_l3_final.js` **四项全过**：① 往返逐字节一致（6 文件）② 结构 周 13 / 日 65 ③ 考试色彩**零命中**（检测表本轮已扩到中英 80+ 词）④ 格式异常 0。
+- **偏执扫描**（考 / 分数 / 卷证卡 / 英文考试词 / 英文题型词 / 品牌 / 留痕 七类）→ 仅剩 7 处，逐条确认为合法用法。
+- `words.js` 单验：**8000 条 / 字段分布 `8:8000` / CR 11（CRLF 未破坏）/ 强考试词零命中**。
+- 体积：`miniprogram` 合计 **1731.8 KB / 2048 KB**（余量 ≈316 KB）；`words.js` 1118.5 KB、`data-p1..p6` 合计 319.8 KB。
+
+### 五、工具（`_ipa_build/`，可复用）
+- `_scan_residual.js`（中英双口径残留扫描）、`_scan_paranoid.js`（偏执七类）
+- `fix_l3_residual.js`（整串精确替换 + 全局规则 + **往返校验** + 未命中配对告警；`--map=<json>` 换批次）
+- `fix_words_exam.js`（**词库字段级修补**：复刻原格式序列化 → 往返校验 → 按词断言旧值 → 改字段；支持改「释义」字段；`--rules=<json>` 换批次）
+- 备份：`bak/data-p*.js.bak-residual-*`、`bak/words.js.bak-exam-*`
+
 ## 2026-10-09 · L3 第二轮：教学内容去考试色彩「全量泛化」（v1.1.61）
 
 > **范围**：`miniprogram/utils/data-p1..p6.js`（周计划 / 日计划文案）；无代码改动。本地提交，**未推远端**。
