@@ -32,7 +32,7 @@
       <view class="word-row search-row" data-w="{{item.w}}" data-day="{{item.day}}"
             hover-class="search-row--press" hover-start-time="0" hover-stay-time="60" bindtap="onJump">
         <view class="word-main">
-          <view class="word-head"><text class="word-en"><text wx:if="{{playingText === item.w}}" class="kara-lit">{{karaLit}}</text>{{playingText === item.w ? karaRest : item.w}}</text><text class="word-pos">{{item.p}}</text></view>
+          <view class="word-head"><text class="word-en"><text wx:if="{{playingText === item.w}}" class="kara-lit">{{karaLit}}</text>{{playingText === item.w ? karaRest : item.w}}</text><text class="word-pos">{{item.p}}</text><view class="word-zh">{{item.m}}</view>
           <!-- 双音标模块（v1.1.51 方案A）。点击归属不变：模块是「朗读」，其余位置是「跳转」 -->
           <view class="ipa-row">
             <view class="ipa-mod {{playingText === item.w && playingAccent === 'us' ? 'on' : ''}}"
@@ -42,8 +42,7 @@
                   wx:if="{{item.uk}}"
                   hover-class="speak-hover" hover-stay-time="120" hover-stop-propagation="{{true}}"
                   data-text="{{item.w}}" data-ai="{{item.ai}}" data-kind="w" data-accent="uk" catchtap="onSpeakWord"><view class="spk-ico {{playingText === item.w && playingAccent === 'uk' ? 'spk-ico--on' : ''}}"></view><text class="ipa-txt">{{item.uk}}</text></view>
-          </view>
-          <view class="word-zh">{{item.m}}</view>
+          </view></view>
           <view class="word-example-row">
             <view class="word-example"><text wx:if="{{playingText === item.e}}" class="kara-lit">{{karaLit}}</text>{{playingText === item.e ? karaRest : item.e}}</view>
             <view class="ex-speak {{playingText === item.e ? 'playing' : ''}}"

@@ -111,7 +111,9 @@ page {
 .word-speak::before, .ex-speak::before, .ex-eye::before, .word-star::before { content:'\200B'; }
 /* 按下即时反馈：无底色后改「缩放+变淡」（小程序里 view 的 :active 不可靠，统一用 hover-class="speak-hover"） */
 .word-speak.speak-hover, .ex-speak.speak-hover { transform:scale(.85); opacity:.6; }
-.word-main { flex:1; min-width:0; }
+/* 词区右移（v1.1.57 用户反馈「太靠左」）：v1.1.51 移除左侧喇叭后词区整体左移了
+   约 72rpx（喇叭56+间距16），补 16rpx 找回平衡；today/review/search 三页同步 */
+.word-main { flex:1; min-width:0; padding-left:16rpx; }
 .word-head { display:flex; align-items:baseline; flex-wrap:wrap; }
 .word-en { font-size:32rpx; font-weight:700; color:var(--ink); }
 /* 音标（v1.1.44 纯文本 → v1.1.51 方案A 双音标模块）：
@@ -137,6 +139,12 @@ page {
 .ipa-mod--uk .spk-ico--on{background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Cpath%20d='M3%209v6h4l5%205V4L7%209H3z%20M16.5%2012c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73%202.5-2.25%202.5-4.02z%20M14%203.23v2.06c2.89.86%205%203.54%205%206.71s-2.11%205.85-5%206.71v2.06c4.01-.91%207-4.49%207-8.77s-2.99-7.86-7-8.77z'%20fill='%231E4468'/%3E%3C/svg%3E");}
 .theme-dark .ipa-mod--uk .spk-ico{background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Cpath%20d='M3%209v6h4l5%205V4L7%209H3z%20M16.5%2012c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73%202.5-2.25%202.5-4.02z%20M14%203.23v2.06c2.89.86%205%203.54%205%206.71s-2.11%205.85-5%206.71v2.06c4.01-.91%207-4.49%207-8.77s-2.99-7.86-7-8.77z'%20fill='%237FB3E8'/%3E%3C/svg%3E");}
 .word-zh { font-size:26rpx; color:var(--ink2); margin-top:4rpx; }
+/* 词头行 v1.1.57（用户拍板方案B）：单词+词性+释义+双音标 全部并入一个可折行的横排流。
+   「边线 + 超长自动换行」不用写条件判断 —— .word-head 本来就是 flex-wrap:wrap，
+   放进来的内容碰到右边线就整体折到下一行（实测 hello/cat 挤进 1 行，
+   government/international 的音标自动折到第 2 行）。 */
+.word-head .word-zh { margin-top:0; margin-left:12rpx; }
+.word-head .ipa-row { margin-top:0; margin-left:8rpx; }
 .word-example { font-size:25rpx; color:var(--muted2); margin-top:6rpx; padding-left:4rpx; }
 /* 例句行：文本占满 + 右侧播放按钮（与语法区 ex-speak 同款，让人一眼看出可以播） */
 .word-example-row { display:flex; align-items:baseline; }
@@ -265,7 +273,11 @@ page {
   .ipa-mod { height:28px; padding:0 7px; margin:3px 5px 0 0; border-radius:7px; }
   .ipa-mod .spk-ico { width:15px; height:15px; margin-right:3px; }
   .ipa-txt { font-size:12px; }
-  .word-zh { font-size:13px; margin-top:2px; }
+  .word-zh { font-size:13px; margin-top:0; }
+  /* 词头行方案B（v1.1.57）：宽屏块 rpx 会放大 3 倍，边距必须显式 px（6px=12rpx@1x） */
+  .word-head .word-zh { margin-left:6px; }
+  .word-head .ipa-row { margin-left:4px; }
+  .word-main { padding-left:8px; }
   .word-example { font-size:13px; margin-top:3px; padding-left:2px; }
   .word-star { width:32px; height:32px; font-size:16px; }
   .grammar-ex { padding:7px 0; }
