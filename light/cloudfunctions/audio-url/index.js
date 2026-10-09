@@ -9,6 +9,7 @@
 // 调用：wx.cloud.callFunction({ name: 'audio-url', data: { paths: ['w/0/0001.mp3', ...] } })
 // 返回：{ ok: true, items: [{ fileID, path, url, status, errMsg }] }
 // 限制：单次最多 50 条（getTempFileURL 的上限）
+// 路径桶：w/=美音单词、s/=词汇例句、g/=语法例句哈希、wuk/=英音单词（v1.1.58 新增）
 const cloud = require('wx-server-sdk');
 
 cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV });
@@ -16,7 +17,7 @@ cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV });
 const FILE_PREFIX = 'cloud://cloud1-d2gfv3f254c476e40.636c-cloud1-d2gfv3f254c476e40-1493393272';
 const MAX_BATCH = 50;
 const MAX_AGE = 7200;                            // 显式指定 2 小时（各版本文档口径不一，写死以免踩默认值差异）
-const PATH_RE = /^([ws]\/[0-8]\/\d{4}s?\.mp3|g\/[0-9]\/[0-9a-f]{8}s?\.mp3)$/;   // 只允许音频路径（w/s=词库编号，g=语法例句哈希），避免被拿来当通用签名器
+const PATH_RE = /^([ws]\/[0-8]\/\d{4}s?\.mp3|wuk\/[0-8]\/\d{4}s?\.mp3|g\/[0-9]\/[0-9a-f]{8}s?\.mp3)$/;   // 只允许音频路径（w=美音单词 s=词汇例句 wuk=英音单词 g=语法例句哈希），避免被拿来当通用签名器
 
 exports.main = async (event) => {
   const raw = (event && event.paths) || [];

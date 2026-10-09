@@ -2,6 +2,50 @@
 
 > 本实例由 cloud 实例 v1.1.38（仓库提交 `dbe76dc` 的 cloud/ 树）派生，**共享全部产品与机制历史**——完整变更史见 `../cloud/CHANGELOG.md`，此处只记录本实例自身的差异与后续变更。
 
+## 2026-10-09 · 英音离线音频（edge-tts）+ 英音朗读路由接线（v1.1.58）
+
+> **范围**：新增云存储桶 `wuk/`（8000 个英音单词音频）；改 `miniprogram/utils/speech.js` 路由。未推远端。
+
+### 背景
+用户：「在线 TTS 之前尝试过很多单词都有问题，这个英音还用这个形式是否可行？」→ 拍板 **补英音单词离线音频**。
+此前英音**一律走在线有道 `type=1`**（失败再退百度 `lan=en` —— 百度读的是美音，属真缺陷）。
+
+### 音频生成
+- 音色 `en-GB-SoniaNeural`（edge-tts，与美音 `en-US-AvaMultilingualNeural` 女声对位），rate −4%。
+- 规模 **8000 个单词（仅正常速）**、**75 MB**（本地 `D:/idea/ielts-audio/dist2uk/w/{分片}/`）；耗时 26.7 分钟、**失败 0**。
+- 只做正常速的理由（容量账）：云存储免费额度 2 GB，原有 847 MB（42%）；+75 MB ≈ 46%。慢速可由 `playbackRate` 变速替代，不必再占一份。
+- 清单 `_ipa_build/uk_words.json`（ai + 单词）、脚本 `_ipa_build/gen_uk.py`（断点续跑：文件 >512 字节则跳过）。
+
+### 上传（复刻当初美音的方式）
+`tcb storage upload <分片目录> wuk/<分片> -e <环境ID>` —— **必须分片**（整目录会挂死），8 片 × 约 1000 文件，约 35 秒/片、零失败。
+CLI 实际入口 `…/node/workspace/node_modules/@cloudbase/cli/dist/standalone/cli.js`（直接 node 调用可绕开 PATH 问题）；当初的 `_wordbank/upload_shards.sh` 已被清理。
+
+### 代码接线（`utils/speech.js`）
+- `relPath/localPath` 增 `accent` 维度：`accent='uk' && kind='w'` → **`wuk/`** 桶；其余沿用 `w/ s/ g/`。
+- `tryPregen(kind, ai, accent, cb)`：英音**非单词**条目（例句 / 语法例句）无英音音源 → 直接 false 走在线；英音单词**忽略** `BAD_PREGEN_AI`（英音由 edge-tts 按词文本独立合成，不继承 Azure「ai=15 come」的缺陷）。
+- 慢速回退：英音只有正常速文件 → `slow=false`，靠 `playbackRate` 变速。
+- 链构造：`accent='uk' && kind='w'` 进预生成档；**「仅预生成」模式下英音的非单词条目仍放行在线**（否则永远无声）。
+- `evict()` 本地缓存目录扫描加入 `wuk/`。
+- 验收：`_ipa_build/t_uk_route.js`（桩住 wx，13 断言）**13/13 通过**。
+
+### 未做（等拍板）
+- 英音链里的**百度兜底**是否移除（`lan=en` 实为美音）。
+- 英音**慢速**音频（当前用变速替代）。
+- cloud / dark 实例按「功能内核」规则同步本次改动（只同步 `speech.js` 等内核，**外观配色不同步**）。
+
+## 2026-10-09 · 词行版式方案 B + 词区右移（v1.1.57）
+
+> 只改 light；`app.wxss` + `today/review/search` 三处 WXML。效果图 `tools/wordrow-layout-20261009.html`。
+
+- 词行改 **方案 B**：`.word-head` 内「单词 + 词性 + 释义 + 美/英双音标」同一行 `flex-wrap` 流，贴近右边界自动折行（原为 5 行堆叠）。
+- 词区整体**右移 16rpx**：`.word-main{padding-left:16rpx}`、`.word-head .word-zh{margin-left:12rpx}`、`.ipa-row{margin-left:8rpx}`；宽屏块 px 化。
+- 三页同构（今日词行 / 复习重点词磁贴 / 搜索页）；验收 `_ipa_build/t_wordrow_b.js` **31/31**。
+
+## 2026-10-09 · 绿色喇叭补深色变体（v1.1.56）
+
+- `.theme-dark .spk-ico` / `.spk-ico--on`：`#176B5B→#7CD6B4`、`#0E4C41→#8FE0C0`（原对比度约 2.5:1 不达标）。
+- 注意 `darkicons.js` 只处理「规则体仅 background-image 一条声明」的类，故这两条**手写**；且 `background-repeat` 写在 `background-image` 之前，避免被自动生成脚本重复追加。
+
 ## 2026-10-09 · 例句喇叭放大 + 眼睛对齐（v1.1.55）
 
 > **范围**：只改 `app.wxss`（5 处规则 + 2 处注释），零 WXML/JS 改动；未推远端。效果图 `tools/exspeak-align-20261009.html`（含三方案实测表与深色模式发现）。

@@ -178,8 +178,8 @@
 - **残余已知量（脚本 `t_uk_data.js` 输出）**：美英重音位置不一致 **127/5723 = 2.2%**（可比词 = 双方都有主重音的 5723 词）。其中约 25 条是**英美固有差异（两边都对）**，如 weekend `US /ˈwiˌkɛnd/` vs `UK /wiːˈkɛnd/`、garage、laboratory、donate、southeast；其余为 ipa-dict 源自身的偶发错位（如 `contribute` 英音标成 `ˈkɒntrɪˌbjuːt`，OALD 是 `kənˈtrɪbjuːt`；`bitumen` 源写成 `ˈbɪtʃuːmən`）。**量级 ≈2%，暂不做人工逐词修表**，等真机验收后按用户实际看到的问题点单点修（`uk_norm.js#UK_FIX` 已留人工修正表接口）。
 - **源约定（非缺陷，勿改）**：词尾次重音 `ˌ` 两侧都保留（US 737 条 / UK 477 条，`photograph /ˈfoʊtəˌɡræf/`、`basketball /ˈbæskətˌbɔl/` 这类复合词本就该标）；词尾 `ə` 保留（`table /ˈteɪbəl/`）。
 
-**朗读链路（`utils/speech.js`）**：预生成音频**只有美音一套**（Azure en-US）→ 仅 `accent==='us'` 且 `engineMode!=='online'` 时进链；**`accent==='uk'` 一律走在线有道 `type=1`**，因此 `engineMode='pregen'`（仅预生成）的用户点英音也放行在线，否则英音模块将永远无音源。`notify` 载荷新增 `accent`；`speak(text,{ai,kind,accent})` 对象通道在 `ai` 或 `accent` 存在时启用。已用 `_ipa_build/t_accent.js`（桩住 wx 直载 speech.js）穷举 engineMode×accent 组合，8/8 通过。
-设置页「发音口音」卡改名为「**默认口音**」，明确「影响例句朗读与朗读全部；单词页美/英音标各读各的口音」，并提示英音走在线音源、暂无离线音频。
+**朗读链路（`utils/speech.js`，v1.1.58 更新）**：预生成音频**两套**——美音 Azure en-US（桶 `w/`（单词）、`s/`（词汇例句）、`g/`（语法例句））+ **英音 edge-tts en-GB（仅单词，桶 `wuk/`）**，8000 条 / 75 MB。路由规则：`accent='us'` → 单词/例句/语法例句全部走预生成；`accent='uk'` → **只有单词**走 `wuk/`，例句与语法例句无英音音源 → 走在线有道 `type=1`，且**「仅预生成」模式下这两类也放行在线**（否则永远无声）。英音单词**忽略 `BAD_PREGEN_AI`**（英音是按词文本独立合成的，不继承 Azure「ai=15 come」的缺陷）；英音只做了正常速 → 慢速需求用 `playbackRate` 变速。`notify` 载荷带 `accent`；`speak(text,{ai,kind,accent})` 对象通道在 `ai` 或 `accent` 存在时启用。验收：`_ipa_build/t_accent.js`（8/8，穷举 engineMode×accent）+ `_ipa_build/t_uk_route.js`（13/13，英音路由）。
+设置页「发音口音」卡改名为「**默认口音**」，明确「影响例句朗读与朗读全部；单词页美/英音标各读各的口音」，并提示「英音单词走离线音频，英音例句暂走在线音源」（v1.1.58 从「暂无离线音频」更新）。
 
 **四实例同步状态**：方案 A 的 UI/数据/语音改动**只在 light**（主项）。`cloud/`、`dark/` 仍是旧词行（`.word-speak` 左喇叭 + 单选音标），同步待真机验收后按「功能内核」规则做；`app.wxss` 里 `.word-speak`/`.word-ipa` 已成 light 的死规则，**暂不删除**（待 cloud/dark 一并改造时再清理，避免同步脚本出现不对称）。
 

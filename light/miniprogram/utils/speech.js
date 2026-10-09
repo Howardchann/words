@@ -51,10 +51,16 @@ function notify(text, playing, mode, progress) {
 }
 
 // ---------- 预生成音频路径 ----------
+// 词表序号 shard(0~9) → 例：w/0/0001.mp3（美音单词） wuk/0/0001.mp3（英音单词）
 function shard(n) { return Math.floor(n / 1000); }
 function fname(ai, slow) { return ('0000' + ai).slice(-4) + (slow ? 's' : '') + '.mp3'; }
-function relPath(kind, ai, slow) { return kind + '/' + shard(ai) + '/' + fname(ai, slow); }
-function localPath(kind, ai, slow) { return CACHE_ROOT + '/' + relPath(kind, ai, slow); }
+// accent='uk' 且 kind='w' → 英音单词桶 wuk/（v1.1.58 新增，edge-tts en-GB 预生成）；
+// 其余（英音的例句 s/、语法例句 g/）无英音版本 → 由调用方避免走预生成，直接在线有道 type=1
+function relPath(kind, ai, slow, accent) {
+  const pre = (accent === 'uk' && kind === 'w') ? 'wuk' : kind;
+  return pre + '/' + shard(ai) + '/' + fname(ai, slow);
+}
+function localPath(kind, ai, slow, accent) { return CACHE_ROOT + '/' + relPath(kind, ai, slow, accent); }
 
 function fs() { return wx.getFileSystemManager(); }
 function exists(p) { try { fs().accessSync(p); return true; } catch (e) { return false; } }
@@ -113,7 +119,7 @@ function evict() {
   evicting = true;
   try {
     const all = [];
-    ['w', 's'].forEach(kind => {
+    ['w', 's', 'wuk'].forEach(kind => {
       for (let sh = 0; sh <= 8; sh++) {
         const dir = CACHE_ROOT + '/' + kind + '/' + sh;
         let names = [];
@@ -194,8 +200,7 @@ function playSigned(url, lp, rel, onResult, slow) {
   }, 6000, slow ? 1 : state.rate);
 }
 
-function tryPregenRel(rel, lp, onResult) {
-  const slow = state.rate <= SLOW_GATE;
+function tryPregenRel(rel, lp, onResult, slow) {
   if (exists(lp)) { usedSource = '预生成·本地'; playSrc(lp, true, onResult, 5000, slow ? 1 : state.rate); return; }
   if (!cloudCfg.ready()) { onResult(false); return; }
 
@@ -217,10 +222,15 @@ function tryPregenRel(rel, lp, onResult) {
 // 注意：engineMode=pregen（仅预生成）的用户，表内词将无音源 → 朗读失败 toast，属预期取舍。
 const BAD_PREGEN_AI = new Set([15]);   // 15 = come
 
-function tryPregen(kind, ai, onResult) {
-  if (!ai || (kind === 'w' && BAD_PREGEN_AI.has(ai))) { onResult(false); return; }
-  const slow = state.rate <= SLOW_GATE;
-  tryPregenRel(relPath(kind, ai, slow), localPath(kind, ai, slow), onResult);
+function tryPregen(kind, ai, accent, onResult) {
+  const ukWord = (accent === 'uk' && kind === 'w');
+  // BAD_PREGEN_AI 只针对美音 Azure 源音频（如 ai=15 的 come）；英音是 edge-tts 按词文本
+  // 重新合成的独立音频，不继承该缺陷。英音的**非单词**条目（例句/语法例句）无预生成音源。
+  if (!ai || (accent === 'uk' && !ukWord)) { onResult(false); return; }
+  if (!ukWord && kind === 'w' && BAD_PREGEN_AI.has(ai)) { onResult(false); return; }
+  // 英音目前只做了单词正常速（容量权衡）→ 慢速需求用正常速 + playbackRate 变速
+  const slow = ukWord ? false : (state.rate <= SLOW_GATE);
+  tryPregenRel(relPath(kind, ai, slow, accent), localPath(kind, ai, slow, accent), onResult, slow);
 }
 
 // 语法例句预生成：按「文本 djb2 哈希」命名（g/{hash%10}/{hash8}.mp3 + s 慢速），
@@ -241,7 +251,7 @@ function tryPregenG(text, onResult) {
   if (/[^\x20-\x7E]/.test(text)) { onResult(false); return; }
   const slow = state.rate <= SLOW_GATE;
   const rel = gRel(text, slow);
-  tryPregenRel(rel, CACHE_ROOT + '/' + rel, onResult);
+  tryPregenRel(rel, CACHE_ROOT + '/' + rel, onResult, slow);
 }
 
 // ---------- ③ 在线兜底链 ----------
@@ -309,15 +319,17 @@ function playItem(item, onDone) {
   //   auto    → 预生成 → 有道整句 → 百度整句
   //   pregen  → 仅预生成
   //   online  → 有道整句 → 百度整句
-  // ⚠️ 预生成音频**只有美音一套**（Azure en-US）→ 仅 accent='us' 时可用；
-  //    英音一律走在线有道（type=1），因此 accent='uk' 时即使 engineMode=pregen 也放行在线，
-  //    否则「仅预生成」的用户点英音音标会永远无音源。
+  // 预生成音频两套：美音 Azure（w/ s/ g/）、英音 edge-tts（**仅单词** wuk/）。
+  //   → accent='us'：单词/例句/语法例句都有预生成
+  //   → accent='uk'：只有单词有（wuk/）；例句与语法例句无英音版本 → 走在线有道 type=1。
+  //     因此「仅预生成」模式下，英音的非单词条目也必须放行在线，否则永远无音源。
   // 「逐词连播」只保留给单词（kind='w'）——句子逐词蹦体验差，宁可用百度整句兜底。
+  const ukWord = (accent === 'uk' && kind === 'w');
   const chain = [];
-  if (state.engineMode !== 'online' && accent === 'us') {
-    chain.push(useG ? { run: cb => tryPregenG(text, cb) } : { run: cb => tryPregen(kind, ai, cb) });
+  if (state.engineMode !== 'online' && (accent === 'us' || ukWord)) {
+    chain.push(useG ? { run: cb => tryPregenG(text, cb) } : { run: cb => tryPregen(kind, ai, accent, cb) });
   }
-  if (state.engineMode !== 'pregen' || accent === 'uk') {
+  if (state.engineMode !== 'pregen' || (accent === 'uk' && !ukWord)) {
     chain.push({ run: cb => trySentence(text, accent, cb) });
     if (kind === 'w') chain.push({ run: cb => tryWords(text, accent, cb) });
     chain.push({ run: cb => tryBaidu(text, cb) });
@@ -340,14 +352,18 @@ function playItem(item, onDone) {
 // 预热：把某天要用的音频链接提前签好（后台静默执行，失败不影响播放）
 function prefetch(items) {
   if (!cloudCfg.ready()) return;
-  const slow = state.rate <= SLOW_GATE;
   const need = [];
   (items || []).forEach(it => {
     const ai = it && it.ai;
     if (!ai) return;
     const kind = it.kind || 's';
-    const rel = relPath(kind, ai, slow);
-    if (exists(localPath(kind, ai, slow))) return;
+    const accent = (it && it.accent) || state.accent;
+    const ukWord = (accent === 'uk' && kind === 'w');
+    if (accent === 'uk' && !ukWord) return;                        // 英音无例句/语法例句音频
+    if (!ukWord && kind === 'w' && BAD_PREGEN_AI.has(ai)) return;
+    const slow = ukWord ? false : (state.rate <= SLOW_GATE);
+    const rel = relPath(kind, ai, slow, accent);
+    if (exists(localPath(kind, ai, slow, accent))) return;
     if (urlOf(rel)) return;
     if (need.indexOf(rel) < 0) need.push(rel);
   });
