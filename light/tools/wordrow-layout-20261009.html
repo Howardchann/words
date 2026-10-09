@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>今日页词行版式方案 · 2026-10-09</title>
+<style>
+  :root{
+    --bg:#F3F8EF; --card:#FFFFFF; --ink:#24332F; --ink2:#5F6D68; --ink3:#53605B; --ink4:#43504C;
+    --muted2:#82908B; --green:#176B5B; --line:#E9F0EC; --star-off:#C7D0CC; --card-line:#DCE7DF;
+    --us-bg:#EAF6F0; --us-line:#CBE7DA; --us-ink:#176B5B;
+    --uk-bg:#EAF1F9; --uk-line:#CBDDEF; --uk-ink:#2A5C8A;
+  }
+  .dk{ --bg:#0E1618; --card:#162324; --ink:#E4EEEA; --ink2:#A9BBB4; --ink3:#A9BBB4; --ink4:#BCCBC5;
+    --muted2:#7E938B; --green:#7CD6B4; --line:#223430; --star-off:#556964; --card-line:#223430;
+    --us-bg:#16281F; --us-line:#2C4A3C; --us-ink:#7CD6B4;
+    --uk-bg:#16222E; --uk-line:#2B4054; --uk-ink:#7FB3E8; }
+  *{box-sizing:border-box}
+  body{margin:0;background:#EEF2F0;font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Helvetica Neue',Arial,sans-serif;color:#24332F}
+  .wrap{max-width:1000px;margin:0 auto;padding:28px 20px 80px}
+  h1{font-size:22px;margin:0 0 4px}
+  .sub{font-size:13px;color:#69766F;margin-bottom:22px}
+  h2{font-size:16px;margin:30px 0 6px;padding-left:9px;border-left:4px solid #176B5B}
+  .note{font-size:12.5px;color:#5F6D68;margin:6px 0 14px;line-height:1.75}
+  .note b{color:#176B5B}
+  .cols{display:flex;gap:18px;flex-wrap:wrap;align-items:flex-start}
+  .col{flex:1 1 320px;min-width:300px}
+  .colhead{font-size:13px;font-weight:700;margin-bottom:8px;display:flex;gap:8px;align-items:center}
+  .tag{font-size:11px;font-weight:700;padding:2px 7px;border-radius:999px;background:#E3EDE8;color:#176B5B}
+  .tag.now{background:#F0F0F0;color:#7A857F}
+  .tag.rec{background:#176B5B;color:#fff}
+  .tag.alt{background:#E6EEF7;color:#2A5C8A}
+  /* ── 手机框 ── */
+  .phone{width:375px;background:var(--bg);border-radius:16px;padding:10px 0 14px;border:1px solid #D9E2DD;box-shadow:0 6px 20px rgba(23,107,91,.07);transform-origin:top left}
+  .card{background:var(--card);border-radius:12px;padding:14px;margin:10px 12px;box-shadow:0 2px 9px rgba(23,107,91,.06)}
+  .seclabel{font-size:13px;font-weight:700;color:var(--green);margin-bottom:7px;letter-spacing:.5px}
+  /* ── 词行（严格照 app.wxss，rpx→px 取 ×0.5）── */
+  .word-row{display:flex;align-items:baseline;padding:7px 0;border-bottom:.5px solid var(--line)}
+  .word-row:last-child{border-bottom:none}
+  .word-main{flex:1;min-width:0}
+  .word-head{display:flex;align-items:baseline;flex-wrap:wrap}
+  .word-en{font-size:16px;font-weight:700;color:var(--ink)}
+  .word-pos{font-size:11px;font-style:italic;color:var(--green);margin-left:5px}
+  .word-zh{font-size:13px;color:var(--ink2);margin-top:2px}
+  .ipa-row{display:flex;flex-wrap:wrap;align-items:center;margin-top:1px}
+  .ipa-mod{display:inline-flex;align-items:center;height:28px;padding:0 7px;margin:3px 5px 0 0;border-radius:7px;border:.5px solid var(--us-line);background:var(--us-bg)}
+  .ipa-mod.uk{border-color:var(--uk-line);background:var(--uk-bg)}
+  .ipa-mod .spk{width:15px;height:15px;flex-shrink:0;margin-right:3px}
+  .ipa-txt{font-size:12px;line-height:1;color:var(--us-ink);white-space:nowrap}
+  .ipa-mod.uk .ipa-txt{color:var(--uk-ink)}
+  .word-example-row{display:flex;align-items:baseline}
+  .word-example{flex:1;min-width:0;font-size:12.5px;color:var(--muted2);margin-top:3px;padding-left:2px;line-height:1.6}
+  .ex-speak{flex-shrink:0;width:28px;height:28px;margin-left:6px;text-align:center}
+  .ex-speak .spk{width:18px;height:18px;vertical-align:middle}
+  .ex-eye{flex-shrink:0;width:28px;height:28px;margin-left:1px;text-align:center}
+  .ex-eye .eye{width:17px;height:17px;vertical-align:middle}
+  .ex-cn{font-size:12px;color:var(--muted2);line-height:1.6;margin-top:1px;padding-left:2px}
+  .word-star{flex-shrink:0;width:32px;height:32px;text-align:center}
+  .word-star .star{width:17px;height:17px;vertical-align:middle}
+  /* 新增：并入词头行的释义 / 音标 */
+  .word-head .word-zh{font-size:13px;color:var(--ink2);margin-top:0;margin-left:6px}
+  .word-head .ipa-row{margin-top:0;margin-left:4px}
+  /* 左缩进档位 */
+  .ind16 .word-main{padding-left:8px}
+  .ind32 .word-main{padding-left:16px}
+  .meter{font-size:11.5px;color:#8A968F;margin-top:10px;line-height:1.7}
+  .meter code{background:#E9F0EC;padding:1px 5px;border-radius:4px;font-size:11px}
+  .legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:#5F6D68;margin:10px 0 0}
+  .legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:middle}
+  /* 深色对照块 */
+  .dkbox{background:#0E1618;border-radius:12px;padding:16px;display:flex;gap:26px;flex-wrap:wrap;align-items:center}
+  .dkcell{display:flex;flex-direction:column;align-items:center;gap:8px}
+  .dkcell span{font-size:11.5px;color:#7E938B}
+  .badge{font-size:11px;padding:2px 7px;border-radius:999px;font-weight:700}
+  .badge.bad{background:#FDECEA;color:#C0392B}
+  .badge.ok{background:#E6F4EE;color:#176B5B}
+  table{border-collapse:collapse;font-size:12.5px;width:100%;background:#fff;border-radius:8px;overflow:hidden}
+  th,td{border-bottom:1px solid #E7EDEA;padding:7px 10px;text-align:left}
+  th{background:#F4F8F5;font-weight:700}
+  td.c,th.c{text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>今日页 · 词行版式三方案对照</h1>
+  <div class="sub">2026-10-09 · 数据为词库真实词条 · 色值取自 app.wxss 主题 token · 尺寸 1rpx = 0.5px 等比还原（手机框 375px = 750rpx）</div>
+
+  <div class="note">
+    三个方案的差别只有一件事：<b>哪几项内容共用一个「可折行的横排流」</b>。<br>
+    词行容器 <code>.word-head</code> 本来就是 <code>display:flex; flex-wrap:wrap</code> —— 放进它的内容会自动排在一条线上，<b>碰到右侧边线就整体折到下一行</b>。所以「加边线 + 超长自动换行」不用写条件判断，是 flex 的原生行为。
+  </div>
+
+  <h2>方案对照（同一批真实词条）</h2>
+  <div class="legend">
+    <span><i style="background:#EAF6F0;border:1px solid #CBE7DA"></i>美音音标模块</span>
+    <span><i style="background:#EAF1F9;border:1px solid #CBDDEF"></i>英音音标模块</span>
+    <span>🔊 = 点它朗读（音标模块自带）</span>
+  </div>
+  <div class="cols" style="margin-top:14px">
+
+    <!-- 现状 -->
+    <div class="col">
+      <div class="colhead"><span class="tag now">现状 v1.1.55</span>每词 <b>5 行</b></div>
+      <div class="phone">
+        <div class="card">
+          <div class="seclabel">本日词汇（20）</div>
+          <div id="now"></div>
+        </div>
+      </div>
+      <div class="meter">词头 1 行 + 音标 1 行 + 释义 1 行 + 例句 1 行 + 中文例句 1 行</div>
+    </div>
+
+    <!-- 方案 A -->
+    <div class="col">
+      <div class="colhead"><span class="tag alt">方案 A</span>释义并入词头 · 每词 <b>4 行</b></div>
+      <div class="phone ind16">
+        <div class="card">
+          <div class="seclabel">本日词汇（20）</div>
+          <div id="optA"></div>
+        </div>
+      </div>
+      <div class="meter">单词 + 词性 + <b>释义</b> 共一行（超宽自动折行）；音标仍独占一行</div>
+    </div>
+
+    <!-- 方案 B -->
+    <div class="col">
+      <div class="colhead"><span class="tag rec">方案 B · 推荐</span>释义+双音标 同一行流 · 每词 <b>1~3 行</b></div>
+      <div class="phone ind16">
+        <div class="card">
+          <div class="seclabel">本日词汇（20）</div>
+          <div id="optB"></div>
+        </div>
+      </div>
+      <div class="meter">全部并入词头行：短的挤进 1 行，长的自动把音标折到第 2 行 —— 即你说的「超长音标临近边线自动变两行」</div>
+    </div>
+
+  </div>
+
+  <h2>方案 B 在深浅两色下的实际效果</h2>
+  <div class="note">同一段内容，只换主题 token。注意右侧收藏星、播放喇叭、眼睛图标的位置与基线。</div>
+  <div class="cols">
+    <div class="col">
+      <div class="colhead">浅色</div>
+      <div class="phone ind16"><div class="card"><div id="bLight"></div></div></div>
+    </div>
+    <div class="col">
+      <div class="colhead">深色</div>
+      <div class="phone dk ind16" style="border-color:#223430"><div class="card"><div id="bDark"></div></div></div>
+    </div>
+  </div>
+
+  <h2>「单词区域太靠左」——左缩进档位对照</h2>
+  <div class="note">左侧大喇叭在 v1.1.51 被移除后，词区整体左移了约 72rpx（喇叭 56 + 间距 16），所以现在看着贴边。下面是三档左缩进，标出各自等于多少 rpx。</div>
+  <div class="cols">
+    <div class="col"><div class="colhead">0rpx（现状）</div><div class="phone"><div class="card"><div id="ind0"></div></div></div></div>
+    <div class="col"><div class="colhead"><span class="tag rec">16rpx</span></div><div class="phone ind16"><div class="card"><div id="ind16"></div></div></div></div>
+    <div class="col"><div class="colhead">32rpx</div><div class="phone ind32"><div class="card"><div id="ind32"></div></div></div></div>
+  </div>
+
+  <h2>顺带：绿色喇叭的深色变体（本轮已补）</h2>
+  <div class="note">
+    <span class="badge bad">修前</span> <code>#176B5B</code> 的喇叭压在 <code>#162324</code> 卡上，对比度约 <b>2.5:1</b>，深色下发暗。<br>
+    <span class="badge ok">修后</span> 换成 <code>#7CD6B4</code>（＝深色主题的 <code>--green</code>），播放态 <code>#8FE0C0</code>（＝<code>--green-press</code>）。英音蓝喇叭本来就有变体，不受影响。
+  </div>
+  <div class="dkbox" id="dkicons"></div>
+
+  <h2>改动量对照</h2>
+  <table>
+    <tr><th>方案</th><th>today.wxml</th><th>review.wxml</th><th>app.wxss</th><th>每词高度（20 词合计）</th></tr>
+    <tr><td>现状</td><td class="c">—</td><td class="c">—</td><td class="c">—</td><td class="c">5 行 ≈ 100 行</td></tr>
+    <tr><td><b>A</b> 释义并入</td><td class="c">移 1 个 view</td><td class="c">移 1 个 view</td><td class="c">+3 条</td><td class="c">4 行 ≈ 80 行</td></tr>
+    <tr><td><b>B</b> 释义+音标并入</td><td class="c">移 2 个 view</td><td class="c">移 2 个 view</td><td class="c">+5 条</td><td class="c">1~3 行 ≈ 40~60 行</td></tr>
+  </table>
+  <div class="note">两个方案都<b>不动任何 JS</b>，只挪 WXML 里的节点顺序 + 加 CSS 规则。</div>
+
+</div>
+
+<script>
+// ── 图标（与 app.wxss 里的 data-URI 同一套路径）──
+const SPK = c => `<svg class="spk" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3z M16.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z M14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z" fill="${c}"/></svg>`;
+const EYE_CLOSED = c => `<svg class="eye" viewBox="0 0 24 24" fill="none" stroke="${c}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6C8.6 16.7 15.4 16.7 22 6"/><path d="M12 14.2v3.4"/><path d="M7 12l-1.3 2.6"/><path d="M17 12l1.3 2.6"/></svg>`;
+const STAR = c => `<svg class="star" viewBox="0 0 24 24" fill="${c}"><path d="M12 3.6l2.6 5.3 5.8.85-4.2 4.1 1 5.75L12 16.9l-5.2 2.7 1-5.75-4.2-4.1 5.8-.85z"/></svg>`;
+const STAR_OFF = c => `<svg class="star" viewBox="0 0 24 24" fill="none" stroke="${c}" stroke-width="1.7" stroke-linejoin="round"><path d="M12 3.6l2.6 5.3 5.8.85-4.2 4.1 1 5.75L12 16.9l-5.2 2.7 1-5.75-4.2-4.1 5.8-.85z"/></svg>`;
+
+const WORDS = [
+  {w:'hello', p:'int.', m:'你好', us:'/həˈloʊ/', uk:'/həˈləʊ/', e:'Hello! Nice to meet you.', cn:'你好，很高兴认识你！', star:false},
+  {w:'government', p:'n.', m:'政府；内阁', us:'/ˈgʌvərmənt/', uk:'/ˈgʌvənmənt/', e:'What do you do for the government?', cn:'您为政府做些什么？', star:true},
+  {w:'international', p:'adj./n.', m:'国际的；国别设定', us:'/ˌɪntərˈnæʃənəl/', uk:'/ˌɪntəˈnæʃənəl/', e:'We want to be international.', cn:'我们希望成为国际化的企业。', star:false},
+  {w:'cat', p:'n./v.', m:'猫；恶妇；呕吐', us:'/kæt/', uk:'/kæt/', e:'This is the story of a cat.', cn:'', star:false},
+];
+
+function ipaMods(d){
+  return `<div class="ipa-row">`
+    + `<div class="ipa-mod">${SPK('var(--us-ink)')}<span class="ipa-txt">${d.us}</span></div>`
+    + (d.uk ? `<div class="ipa-mod uk">${SPK('var(--uk-ink)')}<span class="ipa-txt">${d.uk}</span></div>` : '')
+    + `</div>`;
+}
+function tail(d){
+  return `<div class="word-example-row">`
+    + `<div class="word-example">${d.e}</div>`
+    + `<div class="ex-speak">${SPK('var(--green)')}</div>`
+    + (d.cn ? `<div class="ex-eye">${EYE_CLOSED('var(--green)')}</div>` : '')
+    + `</div>`
+    + (d.cn ? `<div class="ex-cn">${d.cn}</div>` : '');
+}
+function star(d){
+  return `<div class="word-star">${d.star ? STAR('#FF8A78') : STAR_OFF('var(--star-off)')}</div>`;
+}
+function nowRow(d){
+  return `<div class="word-row"><div class="word-main">`
+    + `<div class="word-head"><span class="word-en">${d.w}</span><span class="word-pos">${d.p}</span></div>`
+    + ipaMods(d) + `<div class="word-zh">${d.m}</div>` + tail(d)
+    + `</div>${star(d)}</div>`;
+}
+function aRow(d){
+  return `<div class="word-row"><div class="word-main">`
+    + `<div class="word-head"><span class="word-en">${d.w}</span><span class="word-pos">${d.p}</span><span class="word-zh">${d.m}</span></div>`
+    + ipaMods(d) + tail(d)
+    + `</div>${star(d)}</div>`;
+}
+function bRow(d){
+  return `<div class="word-row"><div class="word-main">`
+    + `<div class="word-head"><span class="word-en">${d.w}</span><span class="word-pos">${d.p}</span><span class="word-zh">${d.m}</span>${ipaMods(d)}</div>`
+    + tail(d)
+    + `</div>${star(d)}</div>`;
+}
+const html = (fn, ds) => (ds||WORDS).map(fn).join('');
+
+document.getElementById('now').innerHTML   = html(nowRow);
+document.getElementById('optA').innerHTML  = html(aRow);
+document.getElementById('optB').innerHTML  = html(bRow);
+document.getElementById('bLight').innerHTML= html(bRow, [WORDS[0], WORDS[2]]);
+document.getElementById('bDark').innerHTML = html(bRow, [WORDS[0], WORDS[2]]);
+document.getElementById('ind0').innerHTML  = html(bRow, [WORDS[0]]);
+document.getElementById('ind16').innerHTML = html(bRow, [WORDS[0]]);
+document.getElementById('ind32').innerHTML = html(bRow, [WORDS[0]]);
+
+// 深色喇叭变体对照
+document.getElementById('dkicons').innerHTML =
+  [['修前 #176B5B', '#176B5B', 'bad'], ['修后 #7CD6B4', '#7CD6B4', 'ok'], ['播放态 #8FE0C0', '#8FE0C0', 'ok']]
+  .map(([label,c]) => `<div class="dkcell"><div style="width:34px;height:34px">${SPK(c).replace('class="spk"','class="spk" style="width:34px;height:34px"')}</div><span>${label}</span></div>`).join('')
+  + `<div class="dkcell" style="margin-left:22px"><div style="display:flex;flex-direction:column;gap:9px">`
+  + `<div style="display:flex;align-items:center;gap:9px;background:#16281F;border:.5px solid #2C4A3C;border-radius:7px;padding:5px 10px">${SPK('#7CD6B4')}<span style="font-size:12px;color:#7CD6B4">/həˈloʊ/</span></div>`
+  + `<div style="display:flex;align-items:center;gap:9px;background:#16222E;border:.5px solid #2B4054;border-radius:7px;padding:5px 10px">${SPK('#7FB3E8')}<span style="font-size:12px;color:#7FB3E8">/həˈləʊ/</span></div>`
+  + `</div><span>深色下两个音标模块</span></div>`;
+</script>
+</body>
+</html>

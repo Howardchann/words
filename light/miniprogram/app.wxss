@@ -217,6 +217,15 @@ page {
 /* 例句喇叭图标 0.85em(≈23.8rpx)→36rpx（v1.1.55 用户反馈「播放按钮没放大」）：
    显式 rpx 定值不再随 em 漂移，略大于眼睛 34rpx（播放是主行为，眼睛只作显示开关） */
 .ex-speak .spk-ico{width:36rpx;height:36rpx;}
+/* 绿色喇叭的深色变体（v1.1.56）：.spk-ico 源规则含尺寸声明，tools/darkicons.js 的正则
+   只认「只含 background-image 一条声明」的规则 → 扫不到 → 深色下 #176B5B 压 #162324 卡片
+   对比度仅约 2.5:1，偏暗。手工补两条：浅色 #176B5B / 播放态 #0E4C41 → 深色 #7CD6B4 / #8FE0C0
+   （= --green / --green-press，与主题 token 一致）。
+   ⚠️ 这两条故意把 background-repeat 写在 background-image 之前，避免被 darkicons.js 的正则
+   二次匹配后重复写进文件末尾的 auto 块。
+   英音蓝喇叭另有 .theme-dark .ipa-mod--uk .spk-ico（3 类，特异性更高）覆盖，不受影响。 */
+.theme-dark .spk-ico{background-repeat:no-repeat;background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Cpath%20d='M3%209v6h4l5%205V4L7%209H3z%20M16.5%2012c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73%202.5-2.25%202.5-4.02z%20M14%203.23v2.06c2.89.86%205%203.54%205%206.71s-2.11%205.85-5%206.71v2.06c4.01-.91%207-4.49%207-8.77s-2.99-7.86-7-8.77z'%20fill='%237CD6B4'/%3E%3C/svg%3E");}
+.theme-dark .spk-ico--on{background-repeat:no-repeat;background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Cpath%20d='M3%209v6h4l5%205V4L7%209H3z%20M16.5%2012c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73%202.5-2.25%202.5-4.02z%20M14%203.23v2.06c2.89.86%205%203.54%205%206.71s-2.11%205.85-5%206.71v2.06c4.01-.91%207-4.49%207-8.77s-2.99-7.86-7-8.77z'%20fill='%238FE0C0'/%3E%3C/svg%3E");}
 
 /* 歌词式朗读进度：已读部分品牌绿，未读保持原色（kara-lit 放在词首 text 上） */
 .kara-lit{color:var(--green)}
@@ -299,5 +308,6 @@ page {
 .theme-dark .eye-ico{background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='%237CD6B4'%20stroke-width='1.8'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpath%20d='M2%206C8.6%2016.7%2015.4%2016.7%2022%206'/%3E%3Cpath%20d='M12%2014.2v3.4'/%3E%3Cpath%20d='M7%2012l-1.3%202.6'/%3E%3Cpath%20d='M17%2012l1.3%202.6'/%3E%3C/svg%3E")}
 .theme-dark .eye-ico--on{background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='%237CD6B4'%20stroke-width='1.8'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpath%20d='M2%2012s3.5-6%2010-6%2010%206%2010%206-3.5%206-10%206-10-6-10-6z'/%3E%3Ccircle%20cx='12'%20cy='12'%20r='2.4'%20fill='%237CD6B4'%20stroke='none'/%3E%3C/svg%3E")}
 /* ==== darkicons:auto-end ==== */
+
 
 
