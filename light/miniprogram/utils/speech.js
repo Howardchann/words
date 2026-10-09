@@ -4,13 +4,18 @@
 // ──────────
 //   ① 预生成音频（本地缓存）—— 微软 Azure 语音，音色自然，零延迟
 //   ② 预生成音频（云函数签名临时链接 → 播放 + 后台落本地缓存）
-//   ③ 在线兜底：有道整句 → 有道逐词连播 → 百度整句
+//   ③ 在线兜底：有道整句 → 有道逐词连播 → 百度整句（百度只给美音，见下）
 //
 // 音频文件命名（预生成时用「词表序号」而非文本哈希 —— 8000 词的哈希映射表会
 // 膨胀到 1MB+ 直接吃掉 2MB 主包，序号命名让运行时靠 ai 字段直接拼路径，零映射表）：
-//   w/0001.mp3    单词 正常速        s/0001.mp3    例句 正常速
-//   w/0001s.mp3   单词 慢速(-30%)    s/0001s.mp3   例句 慢速
+//   w/0001.mp3    美音单词 正常速      s/0001.mp3    美音例句 正常速
+//   w/0001s.mp3   美音单词 慢速(-30%)  s/0001s.mp3   美音例句 慢速
+//   wuk/0001.mp3  英音单词 正常速      wuk/0001s.mp3 英音单词 慢速(-33%)
 // 每 1000 个分一个子目录，避免单目录上万文件。
+//
+// ⚠️ 英音只有**单词**两套（正常速 + 慢速）；英音的例句与语法例句无预生成版本 → 走在线有道 type=1。
+//    因此英音链里**不能**挂百度兜底：fanyi.baidu.com/gettts 的 lan=en 读的是美音，
+//    挂在英音链上会让用户听起来仍是美音 —— 对零基础用户是错误示范，宁可不发声。
 //
 // 为什么走云函数签名而不是 wx.cloud.downloadFile：见 utils/cloud.js 顶部注释
 // （免费期存储权限锁定为「仅创建者可读写」，客户端云 API 被安全规则拒绝）。
@@ -54,7 +59,7 @@ function notify(text, playing, mode, progress) {
 // 词表序号 shard(0~9) → 例：w/0/0001.mp3（美音单词） wuk/0/0001.mp3（英音单词）
 function shard(n) { return Math.floor(n / 1000); }
 function fname(ai, slow) { return ('0000' + ai).slice(-4) + (slow ? 's' : '') + '.mp3'; }
-// accent='uk' 且 kind='w' → 英音单词桶 wuk/（v1.1.58 新增，edge-tts en-GB 预生成）；
+// accent='uk' 且 kind='w' → 英音单词桶 wuk/（v1.1.58 新增，edge-tts en-GB 预生成，正常速+慢速齐）；
 // 其余（英音的例句 s/、语法例句 g/）无英音版本 → 由调用方避免走预生成，直接在线有道 type=1
 function relPath(kind, ai, slow, accent) {
   const pre = (accent === 'uk' && kind === 'w') ? 'wuk' : kind;
@@ -228,8 +233,8 @@ function tryPregen(kind, ai, accent, onResult) {
   // 重新合成的独立音频，不继承该缺陷。英音的**非单词**条目（例句/语法例句）无预生成音源。
   if (!ai || (accent === 'uk' && !ukWord)) { onResult(false); return; }
   if (!ukWord && kind === 'w' && BAD_PREGEN_AI.has(ai)) { onResult(false); return; }
-  // 英音目前只做了单词正常速（容量权衡）→ 慢速需求用正常速 + playbackRate 变速
-  const slow = ukWord ? false : (state.rate <= SLOW_GATE);
+  // 慢速文件两套口音都有了（美音 w/ s/、英音 wuk/）→ 直接按 rate 门槛选慢速文件，音高不变
+  const slow = state.rate <= SLOW_GATE;
   tryPregenRel(relPath(kind, ai, slow, accent), localPath(kind, ai, slow, accent), onResult, slow);
 }
 
@@ -316,14 +321,15 @@ function playItem(item, onDone) {
   const useG = (kind === 'g') || (kind === 's' && !ai);   // 无编号的句子 = 语法例句（文本哈希预生成）
 
   // 朗读链按 engineMode 组装：
-  //   auto    → 预生成 → 有道整句 → 百度整句
+  //   auto    → 预生成 → 有道整句 → [美音] 百度整句
   //   pregen  → 仅预生成
-  //   online  → 有道整句 → 百度整句
+  //   online  → 有道整句 → [美音] 百度整句
   // 预生成音频两套：美音 Azure（w/ s/ g/）、英音 edge-tts（**仅单词** wuk/）。
   //   → accent='us'：单词/例句/语法例句都有预生成
   //   → accent='uk'：只有单词有（wuk/）；例句与语法例句无英音版本 → 走在线有道 type=1。
   //     因此「仅预生成」模式下，英音的非单词条目也必须放行在线，否则永远无音源。
   // 「逐词连播」只保留给单词（kind='w'）——句子逐词蹦体验差，宁可用百度整句兜底。
+  // ⚠️ 百度兜底只挂美音链：它的 TTS 是美音，挂英音链会让「英音」听起来还是美音。
   const ukWord = (accent === 'uk' && kind === 'w');
   const chain = [];
   if (state.engineMode !== 'online' && (accent === 'us' || ukWord)) {
@@ -332,7 +338,7 @@ function playItem(item, onDone) {
   if (state.engineMode !== 'pregen' || (accent === 'uk' && !ukWord)) {
     chain.push({ run: cb => trySentence(text, accent, cb) });
     if (kind === 'w') chain.push({ run: cb => tryWords(text, accent, cb) });
-    chain.push({ run: cb => tryBaidu(text, cb) });
+    if (accent === 'us') chain.push({ run: cb => tryBaidu(text, cb) });
   }
   if (!chain.length) chain.push({ run: cb => cb(false) });   // 兜底：链为空时别让 chain[0] 崩
   let i = 0;
@@ -342,8 +348,10 @@ function playItem(item, onDone) {
     if (i < chain.length) { chain[i].run(step); return; }
     const detail = [...new Set(failNotes)].join('\n');
     console.warn('[speech] 朗读失败：\n' + detail);
-    if (DEBUG_FAIL && detail) wx.showModal({ title: '朗读失败（诊断）', content: detail, showCancel: false, confirmText: '知道了' });
-    else wx.showToast({ title: '朗读失败，请检查网络', icon: 'none' });
+    // 英音链刻意不挂美音兜底 → 失败时要说清「为什么没声」，否则用户会以为是重音没点对
+    const tip = accent === 'uk' ? '（英音音源暂不可用；未降级为美音，以免口音混淆）\n' : '';
+    if (DEBUG_FAIL && detail) wx.showModal({ title: '朗读失败（诊断）', content: tip + detail, showCancel: false, confirmText: '知道了' });
+    else wx.showToast({ title: accent === 'uk' ? '英音音源暂不可用' : '朗读失败，请检查网络', icon: 'none' });
     if (onDone) onDone(false);
   };
   chain[0].run(step);
@@ -361,7 +369,7 @@ function prefetch(items) {
     const ukWord = (accent === 'uk' && kind === 'w');
     if (accent === 'uk' && !ukWord) return;                        // 英音无例句/语法例句音频
     if (!ukWord && kind === 'w' && BAD_PREGEN_AI.has(ai)) return;
-    const slow = ukWord ? false : (state.rate <= SLOW_GATE);
+    const slow = state.rate <= SLOW_GATE;
     const rel = relPath(kind, ai, slow, accent);
     if (exists(localPath(kind, ai, slow, accent))) return;
     if (urlOf(rel)) return;
