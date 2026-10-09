@@ -27,7 +27,7 @@
       },
       {
         "pagePath": "pages/weeks/weeks",
-        "text": "周计划",
+        "text": "词表",
         "iconPath": "images/weeks.png",
         "selectedIconPath": "images/weeks-active.png"
       },

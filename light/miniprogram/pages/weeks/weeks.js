@@ -9,7 +9,7 @@ Page({
     dark: theme.isDark(),
     pageStyle: theme.isDark() ? 'background-color:#0E1618;' : '',
     // 自定义导航栏（v1.1.34）：标题走 data 绑定 <nav-bar title>
-    navTitle: '18个月计划总览',
+    navTitle: '词表总览',
     pressed: '',   // 手动按压态：当前按下的磁贴 pk（见 onTileDown）
     phases: [],       // [{p, name, shortName, range, doneCount, totalWeeks, percent, isCurrentPhase, weeks:[...]}]
     todayNum: 0,

@@ -25,7 +25,9 @@ const WORD_PARTS = require('./words.js');
 
 const WEEKS = [].concat(p1, p2, p3, p4, p5, p6);
 const TOTAL_DAYS = 546;
-const PHASE_NAMES = ['', '阶段一：基础起步', '阶段二：稳步成长', '阶段三：能力强化', '阶段四：雅思冲刺'];
+// 阶段名（v1.1.52 L3 去雅思化）：只描述「词量与难度递进」，不再提考试/冲刺。
+// shortName 由 '：' 之后的部分截取（见 weeks.js），改格式务必同步。
+const PHASE_NAMES = ['', '阶段一：入门词', '阶段二：常用词', '阶段三：进阶词', '阶段四：高阶词'];
 const DOW = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
 // 默认开始日期：动态取「下一个周一」（今天恰为周一则取今天）。
 // 上线后新用户进「准备期」，从最近的整周开始；老用户已存有 startDate，不受影响。
@@ -84,7 +86,7 @@ function allWords() {
   const out = new Array(lines.length);
   for (let i = 0; i < lines.length; i++) {
     const c = lines[i].split('\t');
-    out[i] = { w: c[0], p: c[1], m: c[2], e: c[3], ai: c[4] | 0, ipa: c[5] || '', uk: c[6] || '' };
+    out[i] = { w: c[0], p: c[1], m: c[2], e: c[3], ai: c[4] | 0, ipa: c[5] || '', uk: c[6] || '', cn: c[7] || '' };
   }
   _words = out;
   return out;
@@ -126,7 +128,7 @@ function wordsOfStudyDay(di, perDay) {
   const ws = allWords().slice(start, start + perDay);
   const cn = CORE_CNT[di] || 0;
   for (let i = 0; i < ws.length; i++) {
-    ws[i] = { w: ws[i].w, m: ws[i].m, p: ws[i].p, e: ws[i].e, ai: ws[i].ai, ipa: ws[i].ipa || '', uk: ws[i].uk || '', core: i < cn };
+    ws[i] = { w: ws[i].w, m: ws[i].m, p: ws[i].p, e: ws[i].e, ai: ws[i].ai, ipa: ws[i].ipa || '', uk: ws[i].uk || '', cn: ws[i].cn || '', core: i < cn };
   }
   return ws;
 }
@@ -238,16 +240,52 @@ function searchWords(kw, limit) {
     const day = dayOfWordIndex(i);
     const info = dayInfo(day);
     return {
-      w: it.w, p: it.p, m: it.m, e: it.e, ai: it.ai, ipa: it.ipa || '', uk: it.uk || '',
+      w: it.w, p: it.p, m: it.m, e: it.e, ai: it.ai, ipa: it.ipa || '', uk: it.uk || '', cn: it.cn || '',
       day: day, dow: DOW[info.k - 1], wn: info.wIdx + 1,
     };
   });
   return { total: total, list: list };
 }
 
+// 英文例句挖空：把目标词（含常见词形变化）替换成 ____，其余部分保留作上下文。
+// 匹配不到（无例句 / 词形变化超出 4 字号范围）返回 ''，该词不参与填空练习。
+function clozeSentence(it) {
+  const s = String((it && it.e) || '');
+  const w = String((it && it.w) || '');
+  if (!s || !w) return '';
+  const esc = w.replace(/[.*+?^${}()|[\]\\]/g, '\\// 中文例句挖空练习：为 target 生成 n 个选项（含正确答案），返回打乱后的英文单词数组。');
+  let re = new RegExp('\\b' + esc + '\\b', 'i');
+  if (re.test(s)) return s.replace(re, '____');
+  const stem = esc.replace(/e$/, '');
+  re = new RegExp('\\b' + stem + '[a-z]{0,4}\\b', 'i');
+  if (re.test(s)) return s.replace(re, '____');
+  return '';
+}
+
+// 中文例句挖空练习：为 target 生成 n 个选项（含正确答案），返回打乱后的英文单词数组。
+// 干扰项优先「同词性」（词性首段相同），不足再用整个词库补。刻意不返回释义——练习要求不显示释义。
+function clozeOptions(target, pool, n) {
+  const N = Math.max(2, n || 4);
+  const src = (pool && pool.length ? pool : allWords());
+  const pos = String(target.p || '').split('/')[0];
+  const cand = [];
+  const shuffled = a => { const b = a.slice(); for (let i = b.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); const t = b[i]; b[i] = b[j]; b[j] = t; } return b; };
+  const take = arr => {
+    for (let i = 0; i < arr.length && cand.length < N - 1; i++) {
+      const it = arr[i];
+      if (!it || it.w === target.w) continue;
+      if (cand.indexOf(it.w) >= 0) continue;
+      cand.push(it.w);
+    }
+  };
+  take(shuffled(src.filter(x => pos && String(x.p || '').split('/')[0] === pos)));
+  take(shuffled(src));
+  return shuffled(cand.concat([target.w]));
+}
+
 module.exports = {
   WEEKS, TOTAL_DAYS, PHASE_NAMES, DOW, DEFAULT_START, SATURDAY,
   RAMP, CORE_CNT, WORD_TOTAL, WEEK_COUNT, P1_TOTAL, SEARCH_LIMIT,
-  dayInfo, getDay, currentDayFromStart, learnedWords, allWords, demo,
+  dayInfo, getDay, currentDayFromStart, learnedWords, allWords, demo, clozeOptions, clozeSentence,
   searchWords, dayOfWordIndex,
 };

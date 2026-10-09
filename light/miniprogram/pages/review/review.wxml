@@ -6,6 +6,7 @@
 <view class="tab-row">
   <view class="tab {{tab === 'random' ? 'tab--on' : ''}}" data-tab="random" hover-class="hover-dim" hover-stay-time="120" bindtap="onTab">随机抽查</view>
   <view class="tab {{tab === 'due' ? 'tab--on' : ''}}" data-tab="due" hover-class="hover-dim" hover-stay-time="120" bindtap="onTab">到期复习</view>
+  <view class="tab {{tab === 'cloze' ? 'tab--on' : ''}}" data-tab="cloze" hover-class="hover-dim" hover-stay-time="120" bindtap="onTab">填空</view>
   <view class="tab {{tab === 'starred' ? 'tab--on' : ''}}" data-tab="starred" hover-class="hover-dim" hover-stay-time="120" bindtap="onTab">重点词（{{starred.length}}）</view>
 </view>
 <block wx:if="{{tab === 'random'}}">
@@ -34,9 +35,33 @@
     </view>
     <view class="random-zh" wx:if="{{showZh}}"><view class="random-zh-main">{{currentDue.m}}</view><view class="random-zh-ex"><text class="random-zh-text"><text wx:if="{{playingWord === currentDue.e}}" class="kara-lit">{{karaLit}}</text>{{playingWord === currentDue.e ? karaRest : currentDue.e}}</text><view class="ex-speak {{playingWord === currentDue.e ? 'playing' : ''}}" hover-class="speak-hover" hover-stay-time="0" bindtap="onSpeakExample"><view class="spk-ico {{playingWord === currentDue.e ? 'spk-ico--on' : ''}}"></view></view></view></view>
     <button class="btn-ghost btn-c btn-fit" wx:else hover-class="btn-press" hover-stay-time="0" bindtap="onShowZh"><view class="ico ico-eye"></view>显示释义</button>
-    <view class="review-result-row"><button class="btn-ghost btn-c review-result-btn" data-result="wrong" hover-class="btn-press" hover-stay-time="0" bindtap="onReviewResult"><view class="ico ico-ask"></view>不太会</button><button class="btn-primary review-result-btn" data-result="remember" hover-class="btn-press" hover-stay-time="0" bindtap="onReviewResult">记得了</button></view>
+    <view class="review-result-row review-result-row--4">
+      <view class="grade-btn grade-btn--again" data-grade="again" hover-class="btn-press" hover-stay-time="0" bindtap="onReviewResult"><text class="grade-name">忘记</text><text class="grade-hint">{{dueHint.again}}</text></view>
+      <view class="grade-btn grade-btn--hard" data-grade="hard" hover-class="btn-press" hover-stay-time="0" bindtap="onReviewResult"><text class="grade-name">困难</text><text class="grade-hint">{{dueHint.hard}}</text></view>
+      <view class="grade-btn grade-btn--good" data-grade="good" hover-class="btn-press" hover-stay-time="0" bindtap="onReviewResult"><text class="grade-name">一般</text><text class="grade-hint">{{dueHint.good}}</text></view>
+      <view class="grade-btn grade-btn--easy" data-grade="easy" hover-class="btn-press" hover-stay-time="0" bindtap="onReviewResult"><text class="grade-name">简单</text><text class="grade-hint">{{dueHint.easy}}</text></view>
+    </view>
   </view>
   <view class="card" wx:else><view class="empty-text">暂无到期词汇——学过的词到复习周期后会自动出现在这里</view></view>
+</block>
+<block wx:if="{{tab === 'cloze'}}">
+  <view class="card pool-info"><text class="muted">看中文例句，选出「____」处该填的单词（{{clozePoolSize}} 词可出题）</text></view>
+  <view class="card cloze-card" wx:if="{{cloze}}">
+    <view class="cloze-zh">{{cloze.zh}}</view>
+    <view class="cloze-blank">{{cloze.blank}}</view>
+    <view class="cloze-opts">
+      <view class="cloze-opt {{item.state ? 'cloze-opt--' + item.state : ''}}"
+            wx:for="{{cloze.options}}" wx:key="w"
+            hover-class="{{cloze.done ? 'none' : 'btn-press'}}" hover-stay-time="0"
+            data-w="{{item.w}}" bindtap="onClozePick"><text>{{item.w}}</text></view>
+    </view>
+    <view class="cloze-en" wx:if="{{cloze.done}}">{{cloze.en}}</view>
+    <view class="cloze-foot" wx:if="{{cloze.done}}">
+      <view class="cloze-verdict {{cloze.right ? 'cloze-verdict--ok' : 'cloze-verdict--bad'}}">{{cloze.right ? '答对了' : '正确答案：' + cloze.answer}}</view>
+      <button class="btn-primary btn-fit" hover-class="btn-press" hover-stay-time="0" bindtap="onClozeNext">下一题</button>
+    </view>
+  </view>
+  <view class="card" wx:else><view class="empty-text">暂无可出题词汇——等例句中文准备好后，这里会跟着你的学习进度出题</view></view>
 </block>
 <block wx:if="{{tab === 'starred'}}">
   <view class="card" wx:if="{{!starred.length}}"><view class="empty-text">还没有重点词——在学习页点词右侧的<view class="ico-inline ico-heart"></view>即可收藏，随机抽查会优先复习它们</view></view>

@@ -6,16 +6,16 @@
 <view class="card prestart-card" wx:if="{{preStart}}">
   <view class="prestart-title">准备期</view>
   <view class="prestart-sub">计划开始日前，可先熟悉操作</view>
-  <view class="prestart-days">还有 {{daysToStart}} 天正式开学</view>
+  <view class="prestart-days">还有 {{daysToStart}} 天开始学单词</view>
   <view class="tip-box">
-    <view class="tip-text">可以提前浏览 Day 1 的内容，先熟悉操作：点<view class="ico-inline ico-spk"></view>听发音，点<view class="ico-inline ico-heart"></view>收藏重点词</view>
+    <view class="tip-text">可以先看看 Day 1 的单词，熟悉一下操作：点音标模块听发音（美音 / 英音各读各的），点<view class="ico-inline ico-heart"></view>收藏重点词</view>
   </view>
   <button class="btn-primary btn-fit" hover-class="btn-press" bindtap="backToToday" style="margin-top:24rpx;">先看看 Day 1</button>
 </view>
 
 <block wx:else>
 <!-- 准备期预览提示条：替代原「回到准备期」纯文字链接，常驻顶部一眼可见 -->
-<view class="prep-back" wx:if="{{todayNum === 0}}" hover-class="hover-dim" hover-stay-time="120" bindtap="backToPrep">‹ 返回准备期（还有 {{daysToStart}} 天开学）</view>
+<view class="prep-back" wx:if="{{todayNum === 0}}" hover-class="hover-dim" hover-stay-time="120" bindtap="backToPrep">‹ 返回准备期（还有 {{daysToStart}} 天开始）</view>
 
   <!-- 日期导航 -->
   <view class="card day-head">
@@ -82,9 +82,9 @@
     </block>
   </view>
 
-  <!-- 学习日：语法 -->
+  <!-- 学习日：例句精读（语法内容保留，仅换标题口径） -->
   <view class="card" wx:if="{{dayData.type === 'study' && dayData.g}}">
-    <view class="section-label">语法 · {{dayData.g.t}}</view>
+    <view class="section-label">例句精读 · {{dayData.g.t}}</view>
     <view class="grammar-exp">{{dayData.g.exp}}</view>
     <view class="grammar-ex" wx:for="{{dayData.g.ex}}" wx:key="*this">
       <view class="ex-no">{{index + 1}}.</view>

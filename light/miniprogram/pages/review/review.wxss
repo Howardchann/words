@@ -47,3 +47,41 @@
 /* deep-link 盖罩（v1.1.31）：设置页跨栈预切换期间罩住整页，保证切换瞬间的任何合成帧
    都只是纯页面底色而非旧 tab 内容；review.onShow 第一行撤罩。跟随主题变量明暗自适应 */
 .page-veil{position:fixed;left:0;top:0;right:0;bottom:0;background:var(--bg);z-index:999}
+
+/* ── SM-2 四档按钮（v1.1.52）：忘记 / 困难 / 一般 / 简单，副标题是各自的下次间隔 ── */
+.review-result-row--4{display:flex;gap:12rpx;margin-top:30rpx}
+.grade-btn{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;height:96rpx;border-radius:18rpx;border:1rpx solid var(--line);background:var(--soft)}
+.grade-name{font-size:28rpx;font-weight:700;color:var(--green);line-height:1.25}
+.grade-hint{font-size:20rpx;color:var(--muted2);line-height:1.25}
+.grade-btn--again .grade-name{color:var(--red)}
+.grade-btn--hard .grade-name{color:#B4713A}
+.grade-btn--easy .grade-name{color:var(--green-mid)}
+.grade-btn--good{background:var(--soft2);border-color:var(--cur-line)}
+
+/* ── 中文例句挖空（v1.1.52）── */
+.cloze-card{padding:44rpx 30rpx;text-align:center}
+.cloze-zh{font-size:34rpx;line-height:1.75;color:var(--ink);font-weight:700}
+.cloze-opts{display:flex;flex-wrap:wrap;gap:16rpx;margin-top:36rpx}
+.cloze-opt{flex:1 1 44%;min-width:0;height:88rpx;display:flex;align-items:center;justify-content:center;border-radius:16rpx;border:1rpx solid var(--card-line);background:var(--field);font-size:30rpx;color:var(--ink2)}
+.cloze-opt--ok,.cloze-opt--reveal{border-color:var(--green);background:var(--soft2);color:var(--green);font-weight:700}
+.cloze-opt--bad{border-color:var(--red);background:var(--red-soft);color:var(--red)}
+.cloze-blank{margin-top:16rpx;font-size:30rpx;line-height:1.6;color:var(--muted2)}
+.cloze-en{margin-top:30rpx;font-size:26rpx;color:var(--muted2);line-height:1.6}
+.cloze-foot{margin-top:30rpx}
+.cloze-verdict{font-size:28rpx;margin-bottom:20rpx}
+.cloze-verdict--ok{color:var(--green)}
+.cloze-verdict--bad{color:var(--red)}
+
+@media (min-width:700px){
+  .review-result-row--4{gap:6px;margin-top:15px}
+  .grade-btn{height:48px;border-radius:9px}
+  .grade-name{font-size:14px}
+  .grade-hint{font-size:10px}
+  .cloze-card{padding:22px 15px}
+  .cloze-zh{font-size:17px}
+  .cloze-blank{font-size:15px;margin-top:8px}
+  .cloze-opts{gap:8px;margin-top:18px}
+  .cloze-opt{height:44px;border-radius:8px;font-size:15px}
+  .cloze-en{font-size:13px;margin-top:15px}
+  .cloze-verdict{font-size:14px;margin-bottom:10px}
+}

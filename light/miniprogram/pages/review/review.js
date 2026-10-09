@@ -28,7 +28,10 @@ Page({
     starred: [],
     playingWord: '',
     playingAccent: '',
-    tab: 'random',      // random | due | starred
+    dueHint: null,      // 四档各自的下次间隔提示（Anki 式按钮副标题）
+    cloze: null,        // 中文例句挖空：当前题 {zh, en, answer, options, done, right}
+    clozePoolSize: 0,   // 可出填空题的词数（词库有中文例句的）
+    tab: 'random',      // random | due | cloze | starred
   },
 
   onLoad() {
@@ -72,6 +75,7 @@ Page({
     if (flag && flag !== this.data.tab) {
       this.setData({ tab: flag, veil: false });
       if (flag === 'due' && !this.data.currentDue) this.onNextDue();
+      if (flag === 'cloze' && !this.data.cloze) this.onNextCloze();
     } else if (this.data.veil) {
       this.setData({ veil: false });
     }
@@ -95,7 +99,10 @@ Page({
     if (!this._pool) this._pool = plan.learnedWords(store.get('checkedDays'));
     // 同值不 setData（setData 无 diff，同值也整树重渲染 → 切 tab 闪屏）
     const p = this._pool.length, d = store.dueWords(this._pool).length;
-    if (p !== this.data.poolSize || d !== this.data.dueCount) this.setData({ poolSize: p, dueCount: d });
+    const z = this._pool.filter(x => x.cn && plan.clozeSentence(x)).length;   // 有中文例句且能挖空 → 可出题
+    if (p !== this.data.poolSize || d !== this.data.dueCount || z !== this.data.clozePoolSize) {
+      this.setData({ poolSize: p, dueCount: d, clozePoolSize: z });
+    }
     return this._pool;
   },
 
@@ -104,6 +111,17 @@ Page({
     this.setData({ tab: t });
     // v1.1.38：首次进到期页抽一个词（不自动朗读）；已在到期页再点不再换词（保持当前词）
     if (t === 'due' && !this.data.currentDue) this.onNextDue();
+    if (t === 'cloze' && !this.data.cloze) this.onNextCloze();
+  },
+
+  // 四档下次间隔提示（<=0 天 = 仍在 10 分钟学习步）
+  _hints(w) {
+    const p = store.gradePreview(w);
+    const f = d => d <= 0 ? '10 分钟'
+      : (d === 1 ? '1 天'
+      : (d < 30 ? d + ' 天'
+      : (d < 365 ? Math.round(d / 30) + ' 个月' : (d / 365).toFixed(1) + ' 年')));
+    return { again: f(p.again), hard: f(p.hard), good: f(p.good), easy: f(p.easy) };
   },
 
   fb() { return this.selectComponent('#fb'); },
@@ -117,16 +135,16 @@ Page({
     }
     const item = pool[Math.floor(Math.random() * pool.length)];
     // v1.1.38：去掉自动朗读 —— 朗读统一走卡片上的喇叭（onSpeakCurrent），点进卡片是静默的
-    this.setData({ currentDue: Object.assign({}, item, { starred: store.isStarred(item.w) }), showZh: false });
+    this.setData({ currentDue: Object.assign({}, item, { starred: store.isStarred(item.w) }), showZh: false, dueHint: this._hints(item.w) });
   },
 
   onReviewResult(e) {
-    const remembered = e.currentTarget.dataset.result === 'remember';
+    const grade = e.currentTarget.dataset.grade || 'good';
     const c = this.data.currentDue;
     if (!c) return;
-    store.reviewWord(c.w, remembered);
+    store.reviewWord(c.w, grade);
     // 长文字 toast 在快速连按时反复弹出，像整个模块在闪 —— 改短文案+短时长
-    this.fb().toast(remembered ? '已记住' : '稍后再来', 800);
+    this.fb().toast(grade === 'again' ? '10 分钟后再考你一次' : '已记录', 800);
     // 到期 tab：先算好下一词、一次 setData 直接切换。
     // 旧写法先 setData({current:null}) 再 onNextDue()，中间会渲染一帧
     // 「目前没有到期复习词」空状态 —— 连按闪现整个模块的真凶就是它。
@@ -134,11 +152,42 @@ Page({
     if (pool.length) {
       const item = pool[Math.floor(Math.random() * pool.length)];
       const next = Object.assign({}, item, { starred: store.isStarred(item.w) });
-      this.setData({ currentDue: next, showZh: false }); // v1.1.38：下一词同样不自动朗读
+      this.setData({ currentDue: next, showZh: false, dueHint: this._hints(next.w) }); // v1.1.38：下一词同样不自动朗读
       return;
     }
     // 真正没有下一词（到期答完）才显示空状态卡片
     this.setData({ currentDue: null, showZh: false });
+  },
+
+  // ---- 中文例句挖空（看中文例句 → 选英文单词；对错直接进 SM-2）----
+  onNextCloze() {
+    const pool = this.refreshPool();
+    const cand = pool.filter(x => x.cn && plan.clozeSentence(x));
+    if (!cand.length) {
+      this.setData({ cloze: null });
+      this.fb().toast('中文例句数据还没准备好', 1400);
+      return;
+    }
+    const it = cand[Math.floor(Math.random() * cand.length)];
+    const opts = plan.clozeOptions(it, pool, 4).map(w => ({ w: w, state: '' }));
+    this.setData({
+      cloze: { zh: it.cn, blank: plan.clozeSentence(it), en: it.e, answer: it.w, options: opts, done: false, right: false }
+    });
+  },
+
+  onClozePick(e) {
+    const c = this.data.cloze;
+    if (!c || c.done) return;
+    const w = e.currentTarget.dataset.w;
+    const right = w === c.answer;
+    store.reviewWord(c.answer, right ? 'good' : 'again');
+    const options = c.options.map(o => ({
+      w: o.w,
+      state: o.w === w ? (right ? 'ok' : 'bad') : (o.w === c.answer ? 'reveal' : ''),
+    }));
+    this.setData({ cloze: Object.assign({}, c, { options: options, done: true, right: right }) });
+    this.fb().toast(right ? '答对了' : '正确答案：' + c.answer, right ? 800 : 1500);
+    this.refreshPool();
   },
 
   // 抽一个词：优先重点词（30%），并尽量避开上一次抽到的词

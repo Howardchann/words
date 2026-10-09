@@ -11,7 +11,7 @@ Page({
     dark: theme.isDark(),
     pageStyle: theme.isDark() ? 'background-color:#0E1618;' : '',
     // 自定义导航栏（v1.1.33）：标题走 data 绑定 <nav-bar title>，不再调 setNavigationBarTitle
-    navTitle: '今日计划',
+    navTitle: '今日单词',
     // ⚠️ 必须初始化为 0（falsy）：首次 onShow 才会走「默认落点」分支（准备期倒计时卡/
     // 第一个未完成日）。若是 1，冷启动直接命中「保持浏览位置」分支，准备期用户永远
     // 看到 Day 1——09-26 用户实测清除记录/改日期后仍显示 Day 1 的根因之一
@@ -88,7 +88,7 @@ Page({
     const preStart = todayNum === 0 && !jump;
     theme.sameSet(this, { todayNum, preStart, daysToStart: this._daysToStart() });
     // 准备期不渲染日内容：renderDay 会把标题改成「Day N · 周X」，
-    // 准备期标题应保持「今日计划」；日数据由「先看看 Day 1」入口按需渲染
+    // 准备期标题应保持「今日单词」；日数据由「先看看 Day 1」入口按需渲染
     if (preStart) { this._setTitle(null); return; }
     let viewDay = jump || store.firstUnfinishedDay() || todayNum || 1;
     if (viewDay < 1) viewDay = 1;
@@ -135,11 +135,11 @@ Page({
 
   _clearHl() { if (this._hlTimer) { clearTimeout(this._hlTimer); this._hlTimer = null; } },
 
-  // 导航标题统一出口（v1.1.33 起为自定义导航栏）：day=null → 「今日计划」（准备期）；
+  // 导航标题统一出口（v1.1.33 起为自定义导航栏）：day=null → 「今日单词」（准备期）；
   // 否则「Day N · 周X」。标题是 data 字段，经 sameSet 同值守卫绑定到 <nav-bar>，
   // 换 tab 不会串（旧「原生标题为空」防御只对仍在用原生栏的 weeks/review 有意义）。
   _setTitle(day) {
-    const t = day ? 'Day ' + day + ' · ' + plan.DOW[plan.dayInfo(day).k - 1] : '今日计划';
+    const t = day ? 'Day ' + day + ' · ' + plan.DOW[plan.dayInfo(day).k - 1] : '今日单词';
     theme.sameSet(this, { navTitle: t });
   },
 
@@ -224,7 +224,7 @@ Page({
 
   onCheckin() {
     // 准备期只预览不打卡：打卡会把「还没开学的日子」记成已完成，进度与云同步全乱
-    if (this.data.todayNum === 0) { this.fb().toast('开学后才能打卡', 1200); return; }
+    if (this.data.todayNum === 0) { this.fb().toast('开始后才能打卡', 1200); return; }
     const info = plan.dayInfo(this.data.viewDay);
     const now = store.toggleCheck(info.wIdx + 1, info.k);
     this.setData({ checked: now });

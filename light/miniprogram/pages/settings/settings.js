@@ -9,7 +9,7 @@ const ACCENTS=['us','uk'];
 // ① 卡片标题：设置页里那一小块的标题
 const ABOUT_CARD_LABEL = '关于';
 // ② 卡片里那行文字，版本号会自动拼在后面 → 屏幕显示「关于本计划 v1.0」
-const ABOUT_TITLE = '和好友一起来学雅思';
+const ABOUT_TITLE = '和好友一起来背单词';
 // ③ 版本显示：全自动，无需手动维护。
 //    屏幕实际显示 = 环境 + 构建标识，如「体验版 · 3a96f2d · 09-25 22:11」
 //    构建标识由 tools/stamp-build.js 生成（上传 / 预览前跑一次），用来确认手机上跑的是哪次提交
@@ -17,7 +17,7 @@ const ABOUT_TITLE = '和好友一起来学雅思';
 const ABOUT_MODAL_TITLE = '关于开溜';
 // ⑤ 弹窗正文：\n 表示换行。行首不要留空格，否则手机弹窗里会出现空档
 const ABOUT_TEXT =
-  '2026 年 9 月 21 日开始开发。初衷：给自己一套能坚持下来的零基础雅思自学节奏——每天 30 分钟左右，先养习惯，再上强度。\n' +
+  '2026 年 9 月 21 日开始开发。初衷：给自己一套能坚持下来的零基础单词学习节奏——每天 30 分钟左右，先养习惯，再上强度。\n' +
   '计划共 4 个阶段、78 周、546 天、8000 词：1125 个主题核心词 + 6875 个词频扩展词，每 2 周安排 1 个巩固周。\n' +
   '进度自动云同步，也可在「备份与重置」导出文本存档；语音预生成，播过即缓存，离线可听。';
 // ========================================================================================
@@ -79,7 +79,7 @@ Page({
       engineLabel:m[0],
       engineHint:(pre?'':'⚠️ 云端音频不可用，预生成将自动降级在线。')+m[1]});this.refreshCloud();},
   openEngineSheet(){this.setData({sheet:{show:true,title:'朗读方式',options:this.data.engineOptions,index:this.data.engineIndex,key:'engine'}});},
-  openAccentSheet(){this.setData({sheet:{show:true,title:'发音口音',options:this.data.accentOptions,index:this.data.accentIndex,key:'accent'}});},
+  openAccentSheet(){this.setData({sheet:{show:true,title:'默认口音',options:this.data.accentOptions,index:this.data.accentIndex,key:'accent'}});},
   closeSheet(){this.setData({'sheet.show':false});},noop(){},
   onSheetPick(e){const i=Number(e.currentTarget.dataset.i),k=this.data.sheet.key;this.setData({'sheet.show':false});if(k==='engine'){const m=this.data.engineOptions[i].value;store.set('engineMode',m);speech.setEngineMode(m);this.refresh();}else{const accent=this.data.accentOptions[i].value;store.set('accent',accent);speech.setAccent(accent);this.setData({accent,accentIndex:i});}},
   onStartDate(){this.openCal();},
