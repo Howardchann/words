@@ -222,7 +222,8 @@
 - **两个必须记住的样式约束**：①图标类只能写「只含 background-image 一条声明」，否则 `tools/darkicons.js` 的正则扫不到、深色模式不会自动出变体；②`.ex-eye .eye-ico` **禁用 `background` 简写**（会把上一条的 background-image 重置为 none，`.ico-inline` 踩过同坑），只能用 position/size/repeat 长手属性。
 - **收藏快照没有 cn**：`store.toggleStar` 只存 `{w,m,p,e,ai,ts}` → `review.js` 新增 `cnOf(w)` 在渲染时按词反查补全（与 v1.1.50 补 `ipa` 同套路）。**别去改 store 的快照**，那会把 cn 塞进云同步载荷。
 - **无中文不出眼睛**：`wx:if="{{item.cn}}"`。当前 1169/8000 有 cn，随每日翻译自动长出，代码无需再动。
-- 验收 `_ipa_build/t_ex_eye.js` 36/36；效果图 `tools/exzh-eye-20261009.html`。
+- **闭眼图形改版（v1.1.54）**：v1.1.53 的「眼睛+斜杠」被用户否决（斜杠=禁用语义，不是隐藏）→ 改为「**闭合的上眼皮弧线 + 三根睫毛**」；睁眼（瞳孔填实）不变。**位置方案未定**：A 现状（例句行右端喇叭右侧）/ B 中文行右端常驻（每词 +28px 行高，20 词/天 ≈ 多滚 0.85 屏）/ C 图标组（眼睛+喇叭并排）/ D 「👁中文」文字胶囊 —— 效果图 `tools/eye-icon-v2-20261009.html`（4 方案整行还原 + 深色），**等用户拍板后才改 WXML**。
+- 验收 `_ipa_build/t_ex_eye.js` 36/36；效果图 `tools/exzh-eye-20261009.html`（v1.1.53）、`tools/eye-icon-v2-20261009.html`（v1.1.54）。**效果图改图标类时先用无头 Edge 截图自验再给用户看**（`msedge --headless=new --screenshot=… --window-size=1100,1000 file:///…`），第一版「上眼皮填实」渲染出来是实心半圆、当场发现改掉。
 
 ## 交互定稿（继承 cloud v1.1.38）
 

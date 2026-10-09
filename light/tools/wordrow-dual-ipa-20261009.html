@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>词行方案A（双音标模块化）版式效果图 · v1.1.51</title>
+<style>
+  :root{
+    --bg:#F3F8EF; --card:#FFFFFF; --ink:#24332F; --ink2:#5F6D68; --ink3:#53605B; --ink4:#43504C;
+    --muted2:#82908B; --green:#176B5B; --line:#E9F0EC; --star-off:#C7D0CC; --red:#C0392B;
+    --us-bg:#EAF6F0; --us-line:#CBE7DA; --us-ink:#176B5B;
+    --uk-bg:#EAF1F9; --uk-line:#CBDDEF; --uk-ink:#2A5C8A;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:#EDF1EE;color:#24332F;
+    font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Helvetica Neue',sans-serif;
+    font-size:14px;line-height:1.6;padding:28px 20px 60px}
+  .wrap{max-width:1120px;margin:0 auto}
+  h1{font-size:21px;margin:0 0 6px;letter-spacing:.2px}
+  .sub{color:#5F6D68;font-size:13px;margin:0 0 18px}
+  .facts{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 24px}
+  .facts span{background:#fff;border:1px solid #DCE7DF;border-radius:999px;padding:5px 13px;font-size:12.5px;color:#3E4B47}
+  .facts b{color:#176B5B}
+  .cols{display:flex;gap:26px;flex-wrap:wrap;align-items:flex-start}
+  .col{flex:0 0 auto}
+  .colhd{font-size:13px;font-weight:700;color:#3E4B47;margin:0 0 9px;display:flex;align-items:center;gap:8px}
+  .tag{font-size:11px;font-weight:600;padding:2px 8px;border-radius:999px;background:#E4EAE7;color:#5F6D68}
+  .tag.new{background:#E4F2EA;color:#176B5B}
+  .phone{width:375px;background:var(--bg);border-radius:18px;border:1px solid #D8E2DB;
+    padding:14px 12px 18px;box-shadow:0 2px 10px rgba(36,51,47,.06)}
+  .seclabel{font-size:11.5px;font-weight:700;color:#176B5B;margin:6px 0 8px}
+  .card{background:var(--card);border-radius:12px;padding:8px 14px;box-shadow:0 1px 3px rgba(36,51,47,.05)}
+
+  /* ── 词行（数值 = app.wxss 的 rpx ÷ 2，与真机等比）── */
+  .word-row{display:flex;align-items:baseline;padding:7px 0;border-bottom:1px solid var(--line)}
+  .word-row:last-child{border-bottom:none}
+  .word-main{flex:1;min-width:0}
+  .word-head{display:flex;align-items:baseline;flex-wrap:wrap}
+  .word-en{font-size:16px;font-weight:700;color:var(--ink)}
+  .word-en.playing{color:var(--green)}
+  .word-pos{font-size:11px;color:var(--green);font-style:italic;margin-left:5px}
+  .ipa-row{display:flex;flex-wrap:wrap;align-items:center;margin-top:1px}
+  .ipa-mod{display:inline-flex;align-items:center;height:28px;padding:0 7px;margin:3px 5px 0 0;
+    border-radius:7px;border:1px solid var(--us-line);background:var(--us-bg)}
+  .ipa-mod--uk{border-color:var(--uk-line);background:var(--uk-bg)}
+  .ipa-mod.on{border-color:var(--us-ink)}
+  .ipa-mod--uk.on{border-color:var(--uk-ink)}
+  .ipa-mod svg{width:15px;height:15px;flex-shrink:0;margin-right:3px}
+  .ipa-txt{font-size:12px;line-height:1;color:var(--us-ink)}
+  .ipa-mod--uk .ipa-txt{color:var(--uk-ink)}
+  .word-zh{font-size:13px;color:var(--ink2);margin-top:2px}
+  .word-example-row{display:flex;align-items:baseline}
+  .word-example{flex:1;min-width:0;font-size:12.5px;color:var(--muted2);margin-top:3px;padding-left:2px}
+  .ex-speak{flex-shrink:0;width:28px;height:28px;text-align:center;margin-left:6px}
+  .ex-speak svg{width:13px;height:13px;margin-top:7px}
+  .word-star{flex-shrink:0;width:32px;height:32px;font-size:16px;text-align:center;color:var(--star-off)}
+
+  /* 旧版（v1.1.50）对照：左侧大喇叭 + 单音标纯文本 */
+  .word-row.old .lspeaker{flex-shrink:0;width:28px;height:28px;text-align:center;margin-right:8px}
+  .word-row.old .lspeaker svg{width:15px;height:15px;margin-top:6px}
+  .word-row.old .word-ipa{font-size:12px;color:var(--ink3);margin-left:6px}
+
+  .note{margin:26px 0 0}
+  .note h2{font-size:14px;margin:0 0 8px;color:#24332F}
+  .note ul{margin:0;padding-left:20px;color:#3E4B47;font-size:13px}
+  .note li{margin:4px 0}
+  .warn{background:#FDF3F1;border:1px solid #F2D5CF;border-radius:10px;padding:11px 14px;margin-top:10px}
+  .warn .t{font-weight:700;color:#A93226;font-size:13px;margin-bottom:5px}
+  .mono{font-family:ui-monospace,Consolas,monospace;background:#EEF3F0;padding:1px 5px;border-radius:4px;font-size:12px;color:#2F3D39}
+  .darkbox{background:#0E1618;border-radius:14px;padding:12px 14px;margin-top:12px}
+  .darkbox .seclabel{color:#7CD6B4}
+  .darkbox .card{background:#162324;box-shadow:none}
+  .darkbox .word-en{color:#E4EEEA}
+  .darkbox .word-pos{color:#7CD6B4}
+  .darkbox .word-zh{color:#A9BBB4}
+  .darkbox .word-example{color:#7E938B}
+  .darkbox .word-row{border-bottom-color:#22322F}
+  .dk-us{--us-bg:#16281F;--us-line:#2C4A3C;--us-ink:#7CD6B4}
+  .dk-uk{--uk-bg:#16222E;--uk-line:#2B4054;--uk-ink:#7FB3E8}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>词行方案 A（双音标模块化）版式效果图</h1>
+  <p class="sub">v1.1.51 · light 实例 · 尺寸按 <span class="mono">app.wxss</span> 实际 rpx ÷ 2 复刻（375px 等比），数据取自词库真实音标</p>
+
+  <div class="facts">
+    <span>word-main 可用 <b>510 → 582rpx</b></span>
+    <span>双音标单行容纳率 <b>99.3%</b>（原估 88.5%）</span>
+    <span>英音覆盖 <b>7525/8000 = 94.1%</b></span>
+    <span>音标模块固定成本 <b>66rpx</b></span>
+    <span>仅 <b>58 词</b> 需折行</span>
+  </div>
+
+  <div class="cols">
+    <!-- 旧 -->
+    <div class="col">
+      <div class="colhd">旧版 v1.1.50 <span class="tag">左侧大喇叭 + 单音标纯文本</span></div>
+      <div class="phone">
+        <div class="seclabel">本日词汇（4）</div>
+        <div class="card">
+          <div class="word-row old">
+            <div class="lspeaker"><svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3z M16.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z M14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z" fill="#176B5B"/></svg></div>
+            <div class="word-main">
+              <div class="word-head"><span class="word-en">computer</span><span class="word-pos">n.</span></div>
+              <div class="word-zh">电脑；电子计算机</div>
+              <div class="word-example-row"><div class="word-example">I have to get a new computer.</div><div class="ex-speak"><svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3z M16.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z M14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z" fill="#176B5B"/></svg></div></div>
+            </div>
+            <div class="word-star">☆</div>
+          </div>
+          <div class="word-row old">
+            <div class="lspeaker"><svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3z M16.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z M14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z" fill="#176B5B"/></svg></div>
+            <div class="word-main">
+              <div class="word-head"><span class="word-en">mother</span><span class="word-pos">n.</span></div>
+              <div class="word-zh">母亲</div>
+              <div class="word-example-row"><div class="word-example">My mother cooks very well.</div><div class="ex-speak"><svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3z M16.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z M14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z" fill="#176B5B"/></svg></div></div>
+            </div>
+            <div class="word-star">☆</div>
+          </div>
+          <div class="word-row old">
+            <div class="lspeaker"><svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3z M16.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z M14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z" fill="#176B5B"/></svg></div>
+            <div class="word-main">
+              <div class="word-head"><span class="word-en">get up</span><span class="word-pos">phr.v.</span></div>
+              <div class="word-zh">起床</div>
+              <div class="word-example-row"><div class="word-example">I get up quickly after waking up.</div><div class="ex-speak"><svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3z M16.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z M14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z" fill="#176B5B"/></svg></div></div>
+            </div>
+            <div class="word-star">☆</div>
+          </div>
+        </div>
+        <p class="sub" style="margin:9px 0 0;font-size:11.5px">音标未上屏（旧版把音标挤在词义行、且只有美音一套）。</p>
+      </div>
+    </div>
+
+    <!-- 新 -->
+    <div class="col">
+      <div class="colhd">新版 v1.1.51（方案 A） <span class="tag new">音标模块化 · 点即读 · 双口音</span></div>
+      <div class="phone">
+        <div class="seclabel">本日词汇（4）</div>
+        <div class="card">
+          <!-- 常规：双音标 -->
+          <div class="word-row">
+            <div class="word-main">
+              <div class="word-head"><span class="word-en playing">computer</span><span class="word-pos">n.</span></div>
+              <div class="ipa-row">
+                <span class="ipa-mod"><svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3z M16.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z M14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z" fill="#176B5B"/></svg><span class="ipa-txt">/kəmˈpjutər/</span></span>
+                <span class="ipa-mod ipa-mod--uk on"><svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3z M16.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z M14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z" fill="#1E4468"/></svg><span class="ipa-txt">/kəmˈpjuːtə/</span></span>
+              </div>
+              <div class="word-zh">电脑；电子计算机</div>
+              <div class="word-example-row"><div class="word-example">I have to get a new computer.</div><div class="ex-speak"><svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3z M16.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z M14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z" fill="#176B5B"/></svg></div></div>
+            </div>
+            <div class="word-star">☆</div>
+          </div>
+
+          <!-- 缺英音：只渲染美音模块 -->
+          <div class="word-row">
+            <div class="word-main">
+              <div class="word-head"><span class="word-en">mother</span><span class="word-pos">n.</span></div>
+              <div class="ipa-row">
+                <span class="ipa-mod"><svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3z M16.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z M14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z" fill="#176B5B"/></svg><span class="ipa-txt">/ˈmʌðər/</span></span>
+              </div>
+              <div class="word-zh">母亲</div>
+              <div class="word-example-row"><div class="word-example">My mother cooks very well.</div><div class="ex-speak"><svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3z M16.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z M14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z" fill="#176B5B"/></svg></div></div>
+            </div>
+            <div class="word-star">☆</div>
+          </div>
+
+          <!-- 超长：折行兜底（58 词之一） -->
+          <div class="word-row">
+            <div class="word-main">
+              <div class="word-head"><span class="word-en">nanotechnology</span><span class="word-pos">n.</span></div>
+              <div class="ipa-row">
+                <span class="ipa-mod"><svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3z M16.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z M14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z" fill="#176B5B"/></svg><span class="ipa-txt">/ˌnænoʊˌtɛkˈnɑləˌdʒi/</span></span>
+                <span class="ipa-mod ipa-mod--uk"><svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3z M16.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z M14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z" fill="#2A5C8A"/></svg><span class="ipa-txt">/ˌnænəʊtɛkˈnɒlədʒi/</span></span>
+              </div>
+              <div class="word-zh">纳米技术</div>
+              <div class="word-example-row"><div class="word-example">Nanotechnology treats disease.</div><div class="ex-speak"><svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3z M16.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z M14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z" fill="#176B5B"/></svg></div></div>
+            </div>
+            <div class="word-star">☆</div>
+          </div>
+
+          <!-- 短语无音标：只留喇叭 -->
+          <div class="word-row">
+            <div class="word-main">
+              <div class="word-head"><span class="word-en">get up</span><span class="word-pos">phr.v.</span></div>
+              <div class="ipa-row">
+                <span class="ipa-mod"><svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3z M16.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z M14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z" fill="#176B5B"/></svg></span>
+              </div>
+              <div class="word-zh">起床</div>
+              <div class="word-example-row"><div class="word-example">I get up quickly after waking up.</div><div class="ex-speak"><svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3z M16.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z M14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z" fill="#176B5B"/></svg></div></div>
+            </div>
+            <div class="word-star">☆</div>
+          </div>
+        </div>
+        <p class="sub" style="margin:9px 0 0;font-size:11.5px">第 1 行演示播放态：单词变绿 + <b>英音</b>模块描边加深（点英音模块即读英音）。第 3 行是仅 58 个超长词之一，自动折到第二行。</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 深色预览（cloud/dark 将来同步后的样子） -->
+  <div class="note">
+    <h2>深色形态预览（token 已就位，待 cloud / dark 同步方案 A）</h2>
+    <div class="darkbox">
+      <div class="seclabel" style="margin-left:2px">本日词汇</div>
+      <div class="card">
+        <div class="word-row">
+          <div class="word-main">
+            <div class="word-head"><span class="word-en">vocabulary</span><span class="word-pos">n.</span></div>
+            <div class="ipa-row">
+              <span class="ipa-mod dk-us"><svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3z M16.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z M14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z" fill="#7CD6B4"/></svg><span class="ipa-txt" style="color:#7CD6B4">/voʊˈkæbjəˌlɛri/</span></span>
+              <span class="ipa-mod ipa-mod--uk dk-uk"><svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3z M16.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z M14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z" fill="#7FB3E8"/></svg><span class="ipa-txt" style="color:#7FB3E8">/vəʊˈkæbjʊləri/</span></span>
+            </div>
+            <div class="word-zh">词汇；词汇表</div>
+          </div>
+          <div class="word-star">☆</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 说明 -->
+  <div class="note">
+    <h2>这一版做了什么</h2>
+    <ul>
+      <li><b>左侧大喇叭整块删除</b> → 词区左移，词义不再是「排第二行、还在音标下面」，而是跟单词紧邻。</li>
+      <li><b>词性上移</b>到单词同行（右侧小斜体），腾出整行给音标。</li>
+      <li><b>音标变模块</b>：美音（绿）= 点读美音，英音（蓝）= 点读英音；<b>播放时点亮的是对应口音那一块</b>，不会再「两个一眼看不出在放哪个」。</li>
+      <li>三个页面同步改造：今日页 / 搜索页 / 复习页（随机抽查、到期复习、重点词列表，共 6 个模块）。</li>
+    </ul>
+
+    <div class="warn">
+      <div class="t">已知残余（诚实标注，等你真机决定要不要修）</div>
+      <p style="margin:0 0 6px;font-size:13px">数据源（ipa-dict）本身有约 2% 的重音错位，例如 <span class="mono">contribute</span>：</p>
+      <p style="margin:0;font-size:13px">
+        本版显示 英音 <span class="mono" style="color:#2A5C8A">/ˈkɒntrɪˌbjuːt/</span>，OALD 标准是 <span class="mono">/kənˈtrɪbjuːt/</span>（美音侧是对的：<span class="mono">/kənˈtrɪbjut/</span>）。
+      </p>
+      <p style="margin:6px 0 0;font-size:13px">全库共 <b>127/5723 = 2.2%</b> 的词美英重音位置不一致，其中约 25 条是<b>英美固有差异（两边都对）</b>（weekend、garage、laboratory、donate 等），其余是源错。已留人工修正表接口，可按你实际看到的词单点修。</p>
+    </div>
+
+    <ul style="margin-top:14px">
+      <li>英音覆盖 <b>94.1%</b>（7525/8000）。缺的 415 个是 <span class="mono">mother / use / job / number / put</span> 这类源词典没收录的高频词 —— 这些词只显示美音模块（不影响朗读）。</li>
+      <li>英音目前<b>全走在线音源</b>（有道 type=1，免费、无延迟抖动）；离线英音音频需另补整套（约 +400MB），已列为待立项。</li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>

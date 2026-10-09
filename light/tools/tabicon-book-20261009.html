@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>开溜 · tabBar 第 2 项图标改动对照（v1.1.52）</title>
+<style>
+  :root{
+    --green:#176B5B; --accent:#D85A30; --ink:#24332F; --muted:#8B9893;
+    --page:#F3F8EF; --card:#FFFFFF; --line:#E9F0EC;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;padding:28px 20px 60px;background:var(--page);color:var(--ink);
+       font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Helvetica Neue',sans-serif}
+  h1{font-size:19px;margin:0 0 6px;font-weight:700}
+  .sub{font-size:13px;color:#66736E;line-height:1.7;margin:0 0 26px}
+  h2{font-size:14px;margin:30px 0 12px;font-weight:700;color:#3B4A45}
+  .note{font-size:12.5px;color:#66736E;line-height:1.75;background:#fff;border:1px solid var(--line);
+        border-radius:12px;padding:14px 16px;margin:0 0 20px}
+  .note b{color:#24332F}
+  /* 手机框 */
+  .phone{width:375px;max-width:100%;border-radius:14px;overflow:hidden;border:1px solid var(--line);
+         box-shadow:0 1px 0 rgba(0,0,0,.03)}
+  .phone.dark{border-color:#223430}
+  /* tabBar 复刻 */
+  .tabbar{display:flex;background:#fff;border-top:1px solid var(--line);padding:8px 0 10px}
+  .tabbar.dark{background:#162324;border-top-color:#223430}
+  .item{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
+  .t{font-size:11px;color:#8B9893;line-height:1}
+  .tabbar.dark .t{color:#7E938B}
+  .item.on .t{color:var(--green);font-weight:700}
+  .tabbar.dark .item.on .t{color:#7CD6B4}
+  .ico{width:26px;height:26px;display:block}
+  /* 放大对照 */
+  .grid{display:flex;gap:16px;flex-wrap:wrap}
+  .cell{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px 18px;text-align:center;min-width:132px}
+  .cell .ico{width:56px;height:56px;margin:0 auto 8px}
+  .cell .cap{font-size:12px;color:#66736E}
+  .cell .cap b{display:block;color:#24332F;font-size:12.5px;margin-bottom:2px}
+  .cell.old{background:#FBFBF9}
+  .bad{color:#B4472F}
+  .good{color:#176B5B}
+  table{border-collapse:collapse;width:100%;font-size:13px;background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+  th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--line)}
+  th{background:#F7FAF8;font-weight:700;font-size:12.5px;color:#3B4A45}
+  tr:last-child td{border-bottom:none}
+  code{background:#F0F7F3;border-radius:5px;padding:1px 6px;font-size:12px}
+</style>
+</head>
+<body>
+
+<h1>tabBar 第 2 项图标：日历 → 书本</h1>
+<p class="sub">
+  L3 把「周计划」改成「词表」，图标也一并从日历换成书本。四页 tab 里只有第 2 项有变化，
+  另外三项（今日 / 复习 / 设置）原样不动。<b>上传体验版前请先看这张图确认。</b>
+</p>
+
+<div class="note">
+  <b>改动清单</b>：<code>custom-tab-bar/index.wxss</code> 的 <code>.i-cal</code> → <code>.i-book</code>（共 4 条规则：浅色/深色 × 常态/选中）；
+  <code>custom-tab-bar/index.js</code> 与 <code>app.json</code> 里 <code>key</code> 由 <code>cal</code> 改 <code>book</code>、文案「周计划」改「词表」。
+  图标仍是同语言的内联 SVG（1.8px 线条、无填充），配色沿用现有 token：常态灰、选中品牌绿、点缀珊瑚色。
+</div>
+
+<h2>① 现状（改之前）</h2>
+<div class="phone">
+  <div class="tabbar">
+    <div class="item">
+      <svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="13" r="8" fill="none" stroke="#8B9893" stroke-width="1.8"/><path d="M12,13V8.5M12,13l3,2" fill="none" stroke="#8B9893" stroke-width="1.8" stroke-linecap="round"/><path d="M9,3h6" fill="none" stroke="#8B9893" stroke-width="1.8" stroke-linecap="round"/></svg>
+      <div class="t">今日</div>
+    </div>
+    <div class="item">
+      <svg class="ico" viewBox="0 0 24 24"><rect x="4" y="5.5" width="16" height="15" rx="2.5" fill="none" stroke="#8B9893" stroke-width="1.8"/><path d="M8,3.5v4M16,3.5v4" fill="none" stroke="#8B9893" stroke-width="1.8" stroke-linecap="round"/><path d="M9,12.5l2,2 4,-4" fill="none" stroke="#8B9893" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <div class="t">周计划</div>
+    </div>
+    <div class="item">
+      <svg class="ico" viewBox="0 0 24 24"><path d="M15.9,5.25A7.8,7.8 0 1 0 19.8,12" fill="none" stroke="#8B9893" stroke-width="1.8" stroke-linecap="round"/><path d="M18.4,14L19.8,12L21.2,14" fill="none" stroke="#8B9893" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <div class="t">复习</div>
+    </div>
+    <div class="item">
+      <svg class="ico" viewBox="0 0 24 24"><path d="M5,8h2.6M12.4,8H19M5,16h7.6M17.4,16H19" fill="none" stroke="#8B9893" stroke-width="1.8" stroke-linecap="round"/><circle cx="10" cy="8" r="2.4" fill="none" stroke="#8B9893" stroke-width="1.8"/><circle cx="15" cy="16" r="2.4" fill="none" stroke="#8B9893" stroke-width="1.8"/></svg>
+      <div class="t">设置</div>
+    </div>
+  </div>
+</div>
+
+<h2>② 改造后 · 浅色（默认主题）</h2>
+<div class="phone">
+  <div class="tabbar">
+    <div class="item">
+      <svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="13" r="8" fill="none" stroke="#176B5B" stroke-width="1.8"/><path d="M12,13V8.5" fill="none" stroke="#D85A30" stroke-width="1.8" stroke-linecap="round"/><path d="M12,13l3,2" fill="none" stroke="#176B5B" stroke-width="1.8" stroke-linecap="round"/><path d="M9,3h6" fill="none" stroke="#176B5B" stroke-width="1.8" stroke-linecap="round"/></svg>
+      <div class="t">今日</div>
+    </div>
+    <div class="item on">
+      <svg class="ico" viewBox="0 0 24 24"><path d="M12,6.6C10.2,5.1 7.6,4.4 4.6,4.7V17.4C7.6,17.1 10.2,17.8 12,19.3C13.8,17.8 16.4,17.1 19.4,17.4V4.7C16.4,4.4 13.8,5.1 12,6.6Z" fill="none" stroke="#176B5B" stroke-width="1.8" stroke-linejoin="round"/><path d="M12,6.6V19.3" fill="none" stroke="#D85A30" stroke-width="1.8" stroke-linecap="round"/></svg>
+      <div class="t">词表</div>
+    </div>
+    <div class="item">
+      <svg class="ico" viewBox="0 0 24 24"><path d="M15.9,5.25A7.8,7.8 0 1 0 19.8,12" fill="none" stroke="#8B9893" stroke-width="1.8" stroke-linecap="round"/><path d="M18.4,14L19.8,12L21.2,14" fill="none" stroke="#8B9893" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <div class="t">复习</div>
+    </div>
+    <div class="item">
+      <svg class="ico" viewBox="0 0 24 24"><path d="M5,8h2.6M12.4,8H19M5,16h7.6M17.4,16H19" fill="none" stroke="#8B9893" stroke-width="1.8" stroke-linecap="round"/><circle cx="10" cy="8" r="2.4" fill="none" stroke="#8B9893" stroke-width="1.8"/><circle cx="15" cy="16" r="2.4" fill="none" stroke="#8B9893" stroke-width="1.8"/></svg>
+      <div class="t">设置</div>
+    </div>
+  </div>
+</div>
+
+<h2>③ 改造后 · 深色主题</h2>
+<div class="phone dark">
+  <div class="tabbar dark">
+    <div class="item">
+      <svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="13" r="8" fill="none" stroke="#8FA39C" stroke-width="1.8"/><path d="M12,13V8.5M12,13l3,2" fill="none" stroke="#8FA39C" stroke-width="1.8" stroke-linecap="round"/><path d="M9,3h6" fill="none" stroke="#8FA39C" stroke-width="1.8" stroke-linecap="round"/></svg>
+      <div class="t">今日</div>
+    </div>
+    <div class="item on">
+      <svg class="ico" viewBox="0 0 24 24"><path d="M12,6.6C10.2,5.1 7.6,4.4 4.6,4.7V17.4C7.6,17.1 10.2,17.8 12,19.3C13.8,17.8 16.4,17.1 19.4,17.4V4.7C16.4,4.4 13.8,5.1 12,6.6Z" fill="none" stroke="#7CD6B4" stroke-width="1.8" stroke-linejoin="round"/><path d="M12,6.6V19.3" fill="none" stroke="#E8795F" stroke-width="1.8" stroke-linecap="round"/></svg>
+      <div class="t">词表</div>
+    </div>
+    <div class="item">
+      <svg class="ico" viewBox="0 0 24 24"><path d="M15.9,5.25A7.8,7.8 0 1 0 19.8,12" fill="none" stroke="#8FA39C" stroke-width="1.8" stroke-linecap="round"/><path d="M18.4,14L19.8,12L21.2,14" fill="none" stroke="#8FA39C" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <div class="t">复习</div>
+    </div>
+    <div class="item">
+      <svg class="ico" viewBox="0 0 24 24"><path d="M5,8h2.6M12.4,8H19M5,16h7.6M17.4,16H19" fill="none" stroke="#8FA39C" stroke-width="1.8" stroke-linecap="round"/><circle cx="10" cy="8" r="2.4" fill="none" stroke="#8FA39C" stroke-width="1.8"/><circle cx="15" cy="16" r="2.4" fill="none" stroke="#8FA39C" stroke-width="1.8"/></svg>
+      <div class="t">设置</div>
+    </div>
+  </div>
+</div>
+
+<h2>④ 图标放大对照</h2>
+<div class="grid">
+  <div class="cell old">
+    <svg class="ico" viewBox="0 0 24 24"><rect x="4" y="5.5" width="16" height="15" rx="2.5" fill="none" stroke="#8B9893" stroke-width="1.8"/><path d="M8,3.5v4M16,3.5v4" fill="none" stroke="#8B9893" stroke-width="1.8" stroke-linecap="round"/><path d="M9,12.5l2,2 4,-4" fill="none" stroke="#8B9893" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <div class="cap"><b>旧 · 日历</b><span class="bad">与「词表」语义不符</span></div>
+  </div>
+  <div class="cell">
+    <svg class="ico" viewBox="0 0 24 24"><path d="M12,6.6C10.2,5.1 7.6,4.4 4.6,4.7V17.4C7.6,17.1 10.2,17.8 12,19.3C13.8,17.8 16.4,17.1 19.4,17.4V4.7C16.4,4.4 13.8,5.1 12,6.6Z" fill="none" stroke="#8B9893" stroke-width="1.8" stroke-linejoin="round"/><path d="M12,6.6V19.3" fill="none" stroke="#8B9893" stroke-width="1.8" stroke-linecap="round"/></svg>
+    <div class="cap"><b>新 · 书本（常态）</b><span>灰 #8B9893</span></div>
+  </div>
+  <div class="cell">
+    <svg class="ico" viewBox="0 0 24 24"><path d="M12,6.6C10.2,5.1 7.6,4.4 4.6,4.7V17.4C7.6,17.1 10.2,17.8 12,19.3C13.8,17.8 16.4,17.1 19.4,17.4V4.7C16.4,4.4 13.8,5.1 12,6.6Z" fill="none" stroke="#176B5B" stroke-width="1.8" stroke-linejoin="round"/><path d="M12,6.6V19.3" fill="none" stroke="#D85A30" stroke-width="1.8" stroke-linecap="round"/></svg>
+    <div class="cap"><b>新 · 书本（选中）</b><span class="good">绿 #176B5B + 珊瑚中缝</span></div>
+  </div>
+</div>
+
+<h2>⑤ 一句话核对表</h2>
+<table>
+  <tr><th>项</th><th>内容</th></tr>
+  <tr><td>tabBar 文案</td><td>周计划 → <b>词表</b></td></tr>
+  <tr><td>图标形状</td><td>日历（含对勾）→ <b>摊开的书本（含中缝）</b></td></tr>
+  <tr><td>改动范围</td><td>第 2 项；其余三项不动</td></tr>
+  <tr><td>是否影响其他实例</td><td>否，只改了 light</td></tr>
+  <tr><td>待你确认</td><td>确认后我再上传体验版 / 推送 GitHub</td></tr>
+</table>
+
+</body>
+</html>

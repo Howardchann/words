@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>例句中文「眼睛」开关 · 效果图（v1.1.53）</title>
+<style>
+  *{box-sizing:border-box}
+  body{margin:0;padding:32px 24px 64px;background:#EFF2F5;font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;color:#1F2A33;line-height:1.65}
+  .wrap{max-width:1080px;margin:0 auto}
+  h1{font-size:24px;margin:0 0 6px;font-weight:800;letter-spacing:.3px}
+  .sub{color:#5B6B78;font-size:14px;margin:0 0 4px}
+  .rule{height:1px;background:#D8DFE5;margin:26px 0 22px;border:0}
+  h2{font-size:17px;margin:34px 0 14px;font-weight:700;display:flex;align-items:center;gap:9px}
+  h2 .n{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:7px;background:#176B5B;color:#fff;font-size:13px;font-weight:800}
+  h3{font-size:14px;margin:0 0 10px;font-weight:700;color:#2C3B45}
+  .hint{font-size:13px;color:#66757F;background:#fff;border-left:3px solid #176B5B;border-radius:0 8px 8px 0;padding:11px 15px;margin:0 0 18px}
+  .hint b{color:#176B5B}
+  .warn{border-left-color:#D9822B}
+  .warn b{color:#B4671A}
+
+  .row{display:flex;gap:26px;flex-wrap:wrap;align-items:flex-start}
+  .col{flex:1 1 380px;min-width:340px}
+  .cap{font-size:13px;font-weight:700;color:#41525E;margin:0 0 8px;display:flex;align-items:center;gap:7px}
+  .cap .dot{width:8px;height:8px;border-radius:50%;background:#C3CDD5}
+  .cap .dot.on{background:#176B5B}
+
+  /* ── 手机画布：1rpx = 0.5px，token 与 app.wxss 一一对应 ── */
+  .ph{width:375px;border-radius:20px;overflow:hidden;padding:12px 0 20px;box-shadow:0 8px 26px rgba(20,40,50,.13)}
+  .ph.lt{--bg:#F3F8EF;--card:#FFFFFF;--ink:#24332F;--ink2:#5F6D68;--ink4:#43504C;--muted2:#82908B;--green:#176B5B;--line:#E9F0EC;--star-off:#C7D0CC;
+         --us-bg:#EAF6F0;--us-line:#CBE7DA;--us-ink:#176B5B;--uk-bg:#EAF1F9;--uk-line:#CBDDEF;--uk-ink:#2A5C8A;
+         background:#F3F8EF}
+  .ph.dk{--bg:#0E1618;--card:#162324;--ink:#E4EEEA;--ink2:#A9BBB4;--ink4:#BCCBC5;--muted2:#7E938B;--green:#7CD6B4;--line:#223430;--star-off:#556964;
+         --us-bg:#16281F;--us-line:#2C4A3C;--us-ink:#7CD6B4;--uk-bg:#16222E;--uk-line:#2B4054;--uk-ink:#7FB3E8;
+         background:#0E1618}
+  .navmini{height:34px;display:flex;align-items:center;padding:0 14px;font-size:14px;font-weight:700;color:var(--ink)}
+  .card{background:var(--card);border-radius:12px;padding:14px;margin:10px 12px}
+  .section-label{font-size:13px;font-weight:700;color:var(--green);margin-bottom:7px}
+  .word-row{display:flex;align-items:baseline;padding:7px 0;border-bottom:.5px solid var(--line)}
+  .word-row:last-child{border-bottom:none}
+  .word-main{flex:1;min-width:0}
+  .word-head{display:flex;align-items:baseline;flex-wrap:wrap}
+  .word-en{font-size:16px;font-weight:700;color:var(--ink)}
+  .word-pos{font-size:11px;color:var(--green);font-style:italic;margin-left:5px}
+  .ipa-row{display:flex;flex-wrap:wrap;align-items:center;margin-top:1px}
+  .ipa-mod{display:inline-flex;align-items:center;height:28px;padding:0 7px;margin:3px 5px 0 0;border-radius:7px;border:.5px solid var(--us-line);background:var(--us-bg)}
+  .ipa-mod--uk{border-color:var(--uk-line);background:var(--uk-bg)}
+  .spk{display:inline-block;width:15px;height:15px;flex-shrink:0;margin-right:3px;background:center/contain no-repeat;
+       background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Cpath%20d='M3%209v6h4l5%205V4L7%209H3z%20M16.5%2012c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73%202.5-2.25%202.5-4.02z%20M14%203.23v2.06c2.89.86%205%203.54%205%206.71s-2.11%205.85-5%206.71v2.06c4.01-.91%207-4.49%207-8.77s-2.99-7.86-7-8.77z'%20fill='%23176B5B'/%3E%3C/svg%3E")}
+  .ph.dk .spk{background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Cpath%20d='M3%209v6h4l5%205V4L7%209H3z%20M16.5%2012c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73%202.5-2.25%202.5-4.02z%20M14%203.23v2.06c2.89.86%205%203.54%205%206.71s-2.11%205.85-5%206.71v2.06c4.01-.91%207-4.49%207-8.77s-2.99-7.86-7-8.77z'%20fill='%237CD6B4'/%3E%3C/svg%3E")}
+  .spk.uk{background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Cpath%20d='M3%209v6h4l5%205V4L7%209H3z%20M16.5%2012c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73%202.5-2.25%202.5-4.02z%20M14%203.23v2.06c2.89.86%205%203.54%205%206.71s-2.11%205.85-5%206.71v2.06c4.01-.91%207-4.49%207-8.77s-2.99-7.86-7-8.77z'%20fill='%232A5C8A'/%3E%3C/svg%3E")}
+  .ph.dk .spk.uk{background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Cpath%20d='M3%209v6h4l5%205V4L7%209H3z%20M16.5%2012c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73%202.5-2.25%202.5-4.02z%20M14%203.23v2.06c2.89.86%205%203.54%205%206.71s-2.11%205.85-5%206.71v2.06c4.01-.91%207-4.49%207-8.77s-2.99-7.86-7-8.77z'%20fill='%237FB3E8'/%3E%3C/svg%3E")}
+  .ipa-txt{font-size:12px;line-height:1;color:var(--us-ink)}
+  .ipa-mod--uk .ipa-txt{color:var(--uk-ink)}
+  .word-zh{font-size:13px;color:var(--ink2);margin-top:2px}
+  .word-example-row{display:flex;align-items:baseline}
+  .word-example{flex:1;min-width:0;font-size:12.5px;color:var(--muted2);margin-top:3px;padding-left:2px}
+  .ex-speak{flex-shrink:0;width:28px;height:28px;text-align:center;margin-left:6px;
+            display:flex;align-items:center;justify-content:center}
+  .ex-speak .spk{width:11.9px;height:11.9px;margin-right:0}
+  /* ── 本次新增（v1.1.53） ── */
+  .ex-eye{flex-shrink:0;width:28px;height:28px;display:flex;align-items:center;justify-content:center;margin-left:1px}
+  .ico-eye{width:17px;height:17px;background-position:center;background-size:contain;background-repeat:no-repeat}
+  .ico-eye.off{background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='%23176B5B'%20stroke-width='1.8'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpath%20d='M2%2012s3.5-6%2010-6%2010%206%2010%206-3.5%206-10%206-10-6-10-6z'/%3E%3Ccircle%20cx='12'%20cy='12'%20r='2.6'/%3E%3Cpath%20d='M4.5%204.5l15%2015'/%3E%3C/svg%3E")}
+  .ico-eye.on{background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='%23176B5B'%20stroke-width='1.8'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpath%20d='M2%2012s3.5-6%2010-6%2010%206%2010%206-3.5%206-10%206-10-6-10-6z'/%3E%3Ccircle%20cx='12'%20cy='12'%20r='2.4'%20fill='%23176B5B'%20stroke='none'/%3E%3C/svg%3E")}
+  .ph.dk .ico-eye.off{background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='%237CD6B4'%20stroke-width='1.8'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpath%20d='M2%2012s3.5-6%2010-6%2010%206%2010%206-3.5%206-10%206-10-6-10-6z'/%3E%3Ccircle%20cx='12'%20cy='12'%20r='2.6'/%3E%3Cpath%20d='M4.5%204.5l15%2015'/%3E%3C/svg%3E")}
+  .ph.dk .ico-eye.on{background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='%237CD6B4'%20stroke-width='1.8'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpath%20d='M2%2012s3.5-6%2010-6%2010%206%2010%206-3.5%206-10%206-10-6-10-6z'/%3E%3Ccircle%20cx='12'%20cy='12'%20r='2.4'%20fill='%237CD6B4'%20stroke='none'/%3E%3C/svg%3E")}
+  .ex-cn{font-size:12px;color:var(--muted2);line-height:1.6;margin-top:1px;padding-left:2px}
+  .ex-cn.reveal{color:var(--green)}
+  .star{width:32px;height:32px;flex-shrink:0;background:center/contain no-repeat;
+        background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Cpath%20d='M12%2020.1C7.7%2016.9%204%2013.7%203%2010.7%202.1%207.8%203.8%205.1%206.6%204.6%208.5%204.3%2010.5%205.2%2012%206.9%2013.5%205.2%2015.5%204.3%2017.4%204.6%2020.2%205.1%2021.9%207.8%2021%2010.7%2020%2013.7%2016.3%2016.9%2012%2020.1Z'%20fill='none'%20stroke='%23C7D0CC'%20stroke-width='1.8'%20stroke-linejoin='round'/%3E%3C/svg%3E")}
+  .ph.dk .star{background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Cpath%20d='M12%2020.1C7.7%2016.9%204%2013.7%203%2010.7%202.1%207.8%203.8%205.1%206.6%204.6%208.5%204.3%2010.5%205.2%2012%206.9%2013.5%205.2%2015.5%204.3%2017.4%204.6%2020.2%205.1%2021.9%207.8%2021%2010.7%2020%2013.7%2016.3%2016.9%2012%2020.1Z'%20fill='none'%20stroke='%23556964'%20stroke-width='1.8'%20stroke-linejoin='round'/%3E%3C/svg%3E")}
+
+  /* 复习页随机卡 */
+  .random-card{text-align:center;padding:25px 15px}
+  .random-word{font-size:28px;font-weight:800;color:var(--ink)}
+  .random-pos{font-size:12px;color:var(--green);font-style:italic;margin-top:3px}
+  .random-card .ipa-row{justify-content:center;margin-top:8px}
+  .random-zh{margin-top:15px}
+  .random-zh-main{font-size:18px;color:var(--ink4)}
+  .random-zh-ex{font-size:13px;color:var(--muted2);margin-top:8px;display:flex;align-items:baseline;justify-content:center;gap:7px}
+  .random-card .ex-cn{margin-top:4px;text-align:center;padding-left:0}
+  .btn-ghost{display:flex;width:fit-content;margin:0 auto;align-items:center;gap:5px;background:transparent;color:var(--green);border:none;border-radius:22px;font-size:15px;padding:4px 10px}
+  .btn-ghost .ico-eye{width:15px;height:15px}
+
+  /* 图标放大对照 */
+  .zoomrow{display:flex;gap:20px;flex-wrap:wrap}
+  .zoom{background:#fff;border:1px solid #E1E7EC;border-radius:12px;padding:16px 20px;text-align:center;min-width:132px}
+  .zoom.dark{background:#162324;border-color:#2A3B3D}
+  .zoom .big{width:68px;height:68px;margin:0 auto 8px;background-position:center;background-size:contain;background-repeat:no-repeat}
+  .zoom .t{font-size:12px;color:#5B6B78;font-weight:700}
+  .zoom.dark .t{color:#8FA39C}
+  .zoom .s{font-size:11px;color:#8B9893;margin-top:2px}
+  .zoom .big.lo{background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='%23176B5B'%20stroke-width='1.8'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpath%20d='M2%2012s3.5-6%2010-6%2010%206%2010%206-3.5%206-10%206-10-6-10-6z'/%3E%3Ccircle%20cx='12'%20cy='12'%20r='2.6'/%3E%3Cpath%20d='M4.5%204.5l15%2015'/%3E%3C/svg%3E")}
+  .zoom .big.ln{background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='%23176B5B'%20stroke-width='1.8'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpath%20d='M2%2012s3.5-6%2010-6%2010%206%2010%206-3.5%206-10%206-10-6-10-6z'/%3E%3Ccircle%20cx='12'%20cy='12'%20r='2.4'%20fill='%23176B5B'%20stroke='none'/%3E%3C/svg%3E")}
+  .zoom .big.do{background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='%237CD6B4'%20stroke-width='1.8'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpath%20d='M2%2012s3.5-6%2010-6%2010%206%2010%206-3.5%206-10%206-10-6-10-6z'/%3E%3Ccircle%20cx='12'%20cy='12'%20r='2.6'/%3E%3Cpath%20d='M4.5%204.5l15%2015'/%3E%3C/svg%3E")}
+  .zoom .big.dn{background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='%237CD6B4'%20stroke-width='1.8'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpath%20d='M2%2012s3.5-6%2010-6%2010%206%2010%206-3.5%206-10%206-10-6-10-6z'/%3E%3Ccircle%20cx='12'%20cy='12'%20r='2.4'%20fill='%237CD6B4'%20stroke='none'/%3E%3C/svg%3E")}
+
+  table{border-collapse:collapse;width:100%;background:#fff;border-radius:12px;overflow:hidden;font-size:13.5px;box-shadow:0 1px 3px rgba(20,40,50,.07)}
+  th,td{text-align:left;padding:11px 14px;border-bottom:1px solid #EDF1F4;vertical-align:top}
+  th{background:#F7FAF8;font-weight:700;color:#2C3B45;font-size:13px}
+  tr:last-child td{border-bottom:none}
+  code{background:#F1F5F3;border-radius:5px;padding:1px 6px;font-size:12.5px;color:#176B5B;font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+  .ok{color:#176B5B;font-weight:700}
+  .ask{background:#FFF8EC;border:1px solid #F3DFC0;border-radius:12px;padding:16px 20px;margin-top:26px}
+  .ask h3{color:#8A5A12;margin-bottom:8px}
+  .ask ol{margin:0;padding-left:20px;font-size:14px;color:#5A4A2E}
+  .ask li{margin:5px 0}
+  .ask b{color:#8A5A12}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>例句中文「眼睛」开关 · 效果图</h1>
+  <p class="sub">v1.1.53 · 2026-10-09 · 仅 light 实例 · <b>本地提交，未推 GitHub</b></p>
+  <p class="sub">需求：除搜索页外，例句末尾加眼睛图标 —— 睁开＝显示例句中文，闭上＝不显示，<b>默认不显示</b>。</p>
+  <hr class="rule">
+
+  <div class="hint">
+    <b>先说清一件事：</b>中文例句数据目前只覆盖 <b>1169 / 8000</b> 词（每天自动补约 1170 句，约 7 天补齐）。
+    所以眼睛是<b>「有中文才出现」</b>：没有中文的词条不渲染眼睛，不会出现「点了没反应」的死按钮。
+    第 5 节有对照。覆盖顺序是词表顺序，所以<b>最先学到的那批词已经 83% 有了</b>。
+  </div>
+
+  <!-- ══════════ 1 ══════════ -->
+  <h2><span class="n">1</span>今日单词页 · 词行</h2>
+  <p class="hint">眼睛统一放在<b>例句行最右端、喇叭右侧</b>；中文行出现在英文例句下方。左＝默认（闭），右＝点开（睁）。</p>
+  <div class="row">
+
+    <div class="col">
+      <p class="cap"><span class="dot"></span>默认：闭眼，不显示中文</p>
+      <div class="ph lt">
+        <div class="navmini">今日单词</div>
+        <div class="card">
+          <div class="section-label">本日词汇（3）</div>
+
+          <div class="word-row"><div class="word-main">
+            <div class="word-head"><span class="word-en">hello</span><span class="word-pos">int.</span></div>
+            <div class="ipa-row"><span class="ipa-mod"><i class="spk"></i><span class="ipa-txt">/həˈloʊ/</span></span><span class="ipa-mod ipa-mod--uk"><i class="spk uk"></i><span class="ipa-txt">/həˈləʊ/</span></span></div>
+            <div class="word-zh">你好</div>
+            <div class="word-example-row"><div class="word-example">Hello! Nice to meet you.</div><div class="ex-speak"><i class="spk"></i></div><div class="ex-eye"><i class="ico-eye off"></i></div></div>
+          </div><div class="star"></div></div>
+
+          <div class="word-row"><div class="word-main">
+            <div class="word-head"><span class="word-en">goodbye</span><span class="word-pos">int.</span></div>
+            <div class="ipa-row"><span class="ipa-mod"><i class="spk"></i><span class="ipa-txt">/ˌgʊdˈbaɪ/</span></span><span class="ipa-mod ipa-mod--uk"><i class="spk uk"></i><span class="ipa-txt">/gʊdˈbaɪ/</span></span></div>
+            <div class="word-zh">再见</div>
+            <div class="word-example-row"><div class="word-example">Goodbye! See you tomorrow.</div><div class="ex-speak"><i class="spk"></i></div><div class="ex-eye"><i class="ico-eye off"></i></div></div>
+          </div><div class="star"></div></div>
+
+          <div class="word-row"><div class="word-main">
+            <div class="word-head"><span class="word-en">please</span><span class="word-pos">adv.</span></div>
+            <div class="ipa-row"><span class="ipa-mod"><i class="spk"></i><span class="ipa-txt">/pliz/</span></span><span class="ipa-mod ipa-mod--uk"><i class="spk uk"></i><span class="ipa-txt">/pliːz/</span></span></div>
+            <div class="word-zh">请</div>
+            <div class="word-example-row"><div class="word-example">Please sit down.</div><div class="ex-speak"><i class="spk"></i></div><div class="ex-eye"><i class="ico-eye off"></i></div></div>
+          </div><div class="star"></div></div>
+
+        </div>
+      </div>
+    </div>
+
+    <div class="col">
+      <p class="cap"><span class="dot on"></span>点开第 2 个词的眼睛：睁眼 + 中文行</p>
+      <div class="ph lt">
+        <div class="navmini">今日单词</div>
+        <div class="card">
+          <div class="section-label">本日词汇（3）</div>
+
+          <div class="word-row"><div class="word-main">
+            <div class="word-head"><span class="word-en">hello</span><span class="word-pos">int.</span></div>
+            <div class="ipa-row"><span class="ipa-mod"><i class="spk"></i><span class="ipa-txt">/həˈloʊ/</span></span><span class="ipa-mod ipa-mod--uk"><i class="spk uk"></i><span class="ipa-txt">/həˈləʊ/</span></span></div>
+            <div class="word-zh">你好</div>
+            <div class="word-example-row"><div class="word-example">Hello! Nice to meet you.</div><div class="ex-speak"><i class="spk"></i></div><div class="ex-eye"><i class="ico-eye off"></i></div></div>
+          </div><div class="star"></div></div>
+
+          <div class="word-row"><div class="word-main">
+            <div class="word-head"><span class="word-en">goodbye</span><span class="word-pos">int.</span></div>
+            <div class="ipa-row"><span class="ipa-mod"><i class="spk"></i><span class="ipa-txt">/ˌgʊdˈbaɪ/</span></span><span class="ipa-mod ipa-mod--uk"><i class="spk uk"></i><span class="ipa-txt">/gʊdˈbaɪ/</span></span></div>
+            <div class="word-zh">再见</div>
+            <div class="word-example-row"><div class="word-example">Goodbye! See you tomorrow.</div><div class="ex-speak"><i class="spk"></i></div><div class="ex-eye"><i class="ico-eye on"></i></div></div>
+            <div class="ex-cn reveal">再见！明天见。</div>
+          </div><div class="star"></div></div>
+
+          <div class="word-row"><div class="word-main">
+            <div class="word-head"><span class="word-en">please</span><span class="word-pos">adv.</span></div>
+            <div class="ipa-row"><span class="ipa-mod"><i class="spk"></i><span class="ipa-txt">/pliz/</span></span><span class="ipa-mod ipa-mod--uk"><i class="spk uk"></i><span class="ipa-txt">/pliːz/</span></span></div>
+            <div class="word-zh">请</div>
+            <div class="word-example-row"><div class="word-example">Please sit down.</div><div class="ex-speak"><i class="spk"></i></div><div class="ex-eye"><i class="ico-eye off"></i></div></div>
+          </div><div class="star"></div></div>
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <h3 style="margin-top:26px">深色主题同样是两态</h3>
+  <div class="row">
+    <div class="col">
+      <div class="ph dk">
+        <div class="navmini">今日单词</div>
+        <div class="card">
+          <div class="section-label">本日词汇（2）</div>
+          <div class="word-row"><div class="word-main">
+            <div class="word-head"><span class="word-en">hello</span><span class="word-pos">int.</span></div>
+            <div class="ipa-row"><span class="ipa-mod"><i class="spk"></i><span class="ipa-txt">/həˈloʊ/</span></span><span class="ipa-mod ipa-mod--uk"><i class="spk uk"></i><span class="ipa-txt">/həˈləʊ/</span></span></div>
+            <div class="word-zh">你好</div>
+            <div class="word-example-row"><div class="word-example">Hello! Nice to meet you.</div><div class="ex-speak"><i class="spk"></i></div><div class="ex-eye"><i class="ico-eye off"></i></div></div>
+          </div><div class="star"></div></div>
+          <div class="word-row"><div class="word-main">
+            <div class="word-head"><span class="word-en">goodbye</span><span class="word-pos">int.</span></div>
+            <div class="ipa-row"><span class="ipa-mod"><i class="spk"></i><span class="ipa-txt">/ˌgʊdˈbaɪ/</span></span><span class="ipa-mod ipa-mod--uk"><i class="spk uk"></i><span class="ipa-txt">/gʊdˈbaɪ/</span></span></div>
+            <div class="word-zh">再见</div>
+            <div class="word-example-row"><div class="word-example">Goodbye! See you tomorrow.</div><div class="ex-speak"><i class="spk"></i></div><div class="ex-eye"><i class="ico-eye on"></i></div></div>
+            <div class="ex-cn reveal">再见！明天见。</div>
+          </div><div class="star"></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="col" style="flex:1 1 300px">
+      <div class="zoomrow" style="margin-top:34px">
+        <div class="zoom"><div class="big lo"></div><div class="t">闭眼</div><div class="s">浅色 · 未显示</div></div>
+        <div class="zoom"><div class="big ln"></div><div class="t">睁眼</div><div class="s">浅色 · 已显示</div></div>
+        <div class="zoom dark"><div class="big do"></div><div class="t">闭眼</div><div class="s">深色 · 未显示</div></div>
+        <div class="zoom dark"><div class="big dn"></div><div class="t">睁眼</div><div class="s">深色 · 已显示</div></div>
+      </div>
+      <p class="hint" style="margin-top:18px">
+        睁眼＝瞳孔<b>填实</b>；闭眼＝轮廓加了<b>一道斜杠</b>。两者形状差异明显，不靠颜色也能分辨。
+        深色变体由 <code>tools/darkicons.js</code> 自动生成（描边 #176B5B → #7CD6B4）。
+      </p>
+    </div>
+  </div>
+
+  <!-- ══════════ 2 ══════════ -->
+  <h2><span class="n">2</span>复习页 · 随机抽查 / 到期复习卡</h2>
+  <p class="hint">这两个卡原本就有「显示释义」按钮（一个眼睛 + 文字）。新的例句中文眼睛<b>放在例句行右侧</b>，和它并存：外层眼睛管「释义整块」，例句旁的眼睛只管「这一句的中文」。</p>
+  <div class="row">
+    <div class="col">
+      <p class="cap"><span class="dot"></span>点开「显示释义」后 · 例句中文仍默认隐藏</p>
+      <div class="ph lt">
+        <div class="navmini">复习巩固</div>
+        <div class="card random-card">
+          <div class="random-word">policy</div>
+          <div class="random-pos">n.</div>
+          <div class="ipa-row"><span class="ipa-mod"><i class="spk"></i><span class="ipa-txt">/ˈpɑləsi/</span></span></div>
+          <div class="random-zh">
+            <div class="random-zh-main">政策；方针</div>
+            <div class="random-zh-ex"><span>We need a new policy.</span><i class="spk" style="width:12px;height:12px;margin:0"></i><div class="ex-eye" style="width:22px;height:22px"><i class="ico-eye off" style="width:14px;height:14px"></i></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col">
+      <p class="cap"><span class="dot on"></span>再点例句旁的眼睛：中文出现，居中</p>
+      <div class="ph lt">
+        <div class="navmini">复习巩固</div>
+        <div class="card random-card">
+          <div class="random-word">policy</div>
+          <div class="random-pos">n.</div>
+          <div class="ipa-row"><span class="ipa-mod"><i class="spk"></i><span class="ipa-txt">/ˈpɑləsi/</span></span></div>
+          <div class="random-zh">
+            <div class="random-zh-main">政策；方针</div>
+            <div class="random-zh-ex"><span>We need a new policy.</span><i class="spk" style="width:12px;height:12px;margin:0"></i><div class="ex-eye" style="width:22px;height:22px"><i class="ico-eye on" style="width:14px;height:14px"></i></div></div>
+            <div class="ex-cn reveal">我们需要一项新政策。</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════ 3 ══════════ -->
+  <h2><span class="n">3</span>复习页 · 重点词磁贴</h2>
+  <p class="hint">磁贴与今日页同款词行结构，眼睛位置也一致。收藏快照里原本没有中文，渲染时按词反查补全（和现有音标补全是同一套做法）。</p>
+  <div class="row">
+    <div class="col"><div class="ph lt" style="padding:14px 0">
+      <div class="navmini">复习巩固</div>
+      <div class="card">
+        <div class="word-row" style="border-bottom:none;padding:1px 0"><div class="word-main">
+          <div class="word-head"><span class="word-en">please</span><span class="word-pos">adv.</span></div>
+          <div class="ipa-row"><span class="ipa-mod"><i class="spk"></i><span class="ipa-txt">/pliz/</span></span></div>
+          <div class="word-zh">请</div>
+          <div class="word-example-row"><div class="word-example">Please sit down.</div><div class="ex-speak"><i class="spk"></i></div><div class="ex-eye"><i class="ico-eye on"></i></div></div>
+          <div class="ex-cn reveal">请大家坐下。</div>
+        </div></div>
+      </div>
+    </div></div>
+    <div class="col" style="flex:1 1 300px">
+      <p class="hint" style="margin-top:8px">
+        重点词段落里，<b>中文行跟在英文例句下方</b>，与今日页完全一致；右侧的删除叉不受影响。
+      </p>
+    </div>
+  </div>
+
+  <!-- ══════════ 4 ══════════ -->
+  <h2><span class="n">4</span>搜索页 · 按你的要求不动</h2>
+  <p class="hint warn"><b>搜索结果行不加眼睛</b>，保持现状（结构与今日页相同，但有意的例外）。已在验收里加了断言：搜索页不得出现 <code>ex-eye</code> / <code>eye-ico</code> / <code>zhOpen</code>。</p>
+
+  <!-- ══════════ 5 ══════════ -->
+  <h2><span class="n">5</span>没有中文例句的词，就不出眼睛</h2>
+  <p class="hint">
+    下面这条是真实的第 1302 条记录（<code>combination</code>），它还没翻到 —— 例句行右侧<b>没有眼睛，也没有中文行</b>。
+    这样不会出现「点了没反应」的死按钮。等每日翻译跑完，它会自然长出眼睛，不需要再改代码。
+  </p>
+  <div class="row">
+    <div class="col" style="flex:1 1 340px">
+      <div class="ph lt" style="padding:10px 0 16px">
+        <div class="navmini">今日单词</div>
+        <div class="card">
+          <div class="word-row"><div class="word-main">
+            <div class="word-head"><span class="word-en">combination</span><span class="word-pos">n.</span></div>
+            <div class="ipa-row"><span class="ipa-mod"><i class="spk"></i><span class="ipa-txt">/ˌkɑmbəˈneɪʃən/</span></span><span class="ipa-mod ipa-mod--uk"><i class="spk uk"></i><span class="ipa-txt">/ˌkɒmbɪˈneɪʃən/</span></span></div>
+            <div class="word-zh">组合；合并</div>
+            <div class="word-example-row"><div class="word-example">What is the combination of the safe?</div><div class="ex-speak"><i class="spk"></i></div></div>
+          </div><div class="star"></div></div>
+          <div class="word-row"><div class="word-main">
+            <div class="word-head"><span class="word-en">hello</span><span class="word-pos">int.</span></div>
+            <div class="ipa-row"><span class="ipa-mod"><i class="spk"></i><span class="ipa-txt">/həˈloʊ/</span></span></div>
+            <div class="word-zh">你好</div>
+            <div class="word-example-row"><div class="word-example">Hello! Nice to meet you.</div><div class="ex-speak"><i class="spk"></i></div><div class="ex-eye"><i class="ico-eye off"></i></div></div>
+          </div><div class="star"></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="col" style="flex:1 1 320px">
+      <h3>当前覆盖（真实数据）</h3>
+      <table>
+        <tr><th>阶段</th><th>词数区间</th><th>已翻</th><th>覆盖率</th></tr>
+        <tr><td>阶段一：入门词</td><td>1 – 1410</td><td>1169 / 1410</td><td class="ok">82.9%</td></tr>
+        <tr><td>阶段二：常用词</td><td>1411 – 3260</td><td>0 / 1850</td><td>0%</td></tr>
+        <tr><td>阶段三：进阶词</td><td>3261 – 5390</td><td>0 / 2130</td><td>0%</td></tr>
+        <tr><td>阶段四：高阶词</td><td>5391 – 8000</td><td>0 / 2610</td><td>0%</td></tr>
+        <tr><td colspan="2"><b>合计</b></td><td><b>1169 / 8000</b></td><td><b>14.6%</b></td></tr>
+      </table>
+      <p class="hint" style="margin-top:14px">
+        翻译<b>按词表顺序推进</b>，而学习顺序＝词表顺序，所以覆盖天然落在最先学到的那批词上。
+        已学词数 ≤ 1169 时，你的词条<b>全部都有眼睛</b>。
+      </p>
+    </div>
+  </div>
+
+  <!-- ══════════ 6 ══════════ -->
+  <h2><span class="n">6</span>改动清单与验收</h2>
+  <table>
+    <tr><th style="width:34%">文件</th><th>改动</th></tr>
+    <tr><td><code>app.wxss</code></td><td>新增 <code>.eye-ico</code> / <code>.eye-ico--on</code>（闭/睁图标）、<code>.ex-eye</code>（56rpx 热区，与例句喇叭同规格）、<code>.ex-cn</code>（中文行），含宽屏覆盖；<code>tools/darkicons.js</code> 自动生成深色变体 2 条</td></tr>
+    <tr><td><code>pages/today/today.wxml</code></td><td>词行例句右侧加眼睛 + 例句下方加中文行</td></tr>
+    <tr><td><code>pages/today/today.js</code></td><td>data 加 <code>zhOpen</code>；新增 <code>onToggleExZh</code></td></tr>
+    <tr><td><code>pages/review/review.wxml</code></td><td>随机卡 / 到期卡 / 重点词磁贴 三处各加眼睛 + 中文行</td></tr>
+    <tr><td><code>pages/review/review.js</code></td><td>data 加 <code>zhOpen</code>；新增 <code>onToggleExZh</code>；新增 <code>cnOf()</code> 给收藏快照补中文</td></tr>
+    <tr><td><code>pages/search/*</code></td><td class="ok">未改动（按你的要求）</td></tr>
+  </table>
+
+  <h3 style="margin-top:20px">自动化验收 <code>_ipa_build/t_ex_eye.js</code> —— 36 项全过</h3>
+  <table>
+    <tr><th style="width:34%">项目</th><th>结果</th></tr>
+    <tr><td>WXML 标签配对</td><td class="ok">today 66/66 · review 89/89（view / text / block 全配对）</td></tr>
+    <tr><td>渲染点数量</td><td class="ok">today 眼睛 ×1 / review ×3，中文行同样 ×4</td></tr>
+    <tr><td>守卫</td><td class="ok">眼睛 = <code>wx:if="{{…cn}}"</code>；中文行 = <code>cn &amp;&amp; zhOpen[…]</code> 双守卫；默认全闭</td></tr>
+    <tr><td>点击归属</td><td class="ok">眼睛一律 <code>catchtap</code>，不会冒泡吞掉整行点击（沿用 v1.1.49 铁律）</td></tr>
+    <tr><td>搜索页隔离</td><td class="ok">search.wxml / search.js 均无相关类与字段</td></tr>
+    <tr><td>深色图标</td><td class="ok">两条 <code>.theme-dark</code> 变体已自动生成</td></tr>
+    <tr><td>换行符</td><td class="ok">未破坏（review.js 仍 CRLF，其余 LF，零混用）</td></tr>
+    <tr><td>语法</td><td class="ok">today.js / review.js <code>node --check</code> 通过</td></tr>
+  </table>
+
+  <div class="ask">
+    <h3>等你确认</h3>
+    <ol>
+      <li><b>眼睛位置</b>：现在是「例句行最右端、喇叭右侧」。要不要改成喇叭左边，或者干脆放到中文行的位置？</li>
+      <li><b>睁眼/闭眼的图形</b>：闭眼＝轮廓+斜杠，睁眼＝瞳孔填实。认可就照此上传体验版。</li>
+      <li><b>「有中文才出现眼睛」</b>这个策略你认可吗？（若想「永远显示眼睛、没中文时提示一句」，我改。）</li>
+      <li>确认后：<b>本地提交</b>已完成，你手动上传体验版即可；<b>推 GitHub 仍等你发话</b>。</li>
+    </ol>
+  </div>
+
+</div>
+</body>
+</html>

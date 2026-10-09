@@ -1,0 +1,404 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>例句中文「眼睛」开关 v2 · 图形改版 + 位置方案（待确认）</title>
+<style>
+  *{box-sizing:border-box}
+  body{margin:0;background:#EEF3EC;font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;color:#24332F;padding:26px 22px 60px}
+  .wrap{max-width:1040px;margin:0 auto}
+  h1{font-size:23px;margin:0 0 6px;color:#0F4A3E;letter-spacing:.5px}
+  .lead{font-size:13.5px;color:#5F6D68;line-height:1.75;margin:0 0 22px}
+  .card{background:#fff;border:1px solid #E1EAE3;border-radius:14px;padding:18px 20px 20px;margin:0 0 20px;box-shadow:0 1px 2px rgba(20,60,45,.04)}
+  h2{font-size:16px;margin:0 0 4px;color:#176B5B;display:flex;align-items:center;gap:8px}
+  h2 .n{display:inline-flex;width:22px;height:22px;border-radius:7px;background:#E8F4EE;color:#176B5B;font-size:12.5px;align-items:center;justify-content:center;font-weight:700}
+  .sub{font-size:12.5px;color:#82908B;line-height:1.72;margin:8px 0 16px}
+  .sub b{color:#24332F}
+  .tagx{display:inline-block;font-size:11px;padding:1px 7px;border-radius:6px;background:#E8F4EE;color:#176B5B;margin-right:6px;vertical-align:1px}
+  .tagx.bad{background:#FDECEA;color:#C0392B}
+  .tagx.warn{background:#FDF4E3;color:#9A6B10}
+
+  /* ── 图标对照 ── */
+  .icons{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+  .ic{background:#FAFCFA;border:1px solid #E6EEE8;border-radius:12px;padding:14px 12px;text-align:center}
+  .ic h3{font-size:13px;margin:0 0 2px;color:#24332F}
+  .ic .note{font-size:11px;color:#8B9893;line-height:1.55;min-height:34px;margin:0 0 10px}
+  .sizes{display:flex;align-items:flex-end;justify-content:center;gap:14px;padding:10px 0 8px;border-top:1px dashed #E6EEE8;border-bottom:1px dashed #E6EEE8}
+  .sz{display:flex;flex-direction:column;align-items:center;gap:5px}
+  .sz em{font-size:9.5px;color:#A6B2AD;font-style:normal}
+  .darkline{background:#162324;border-radius:8px;margin-top:10px;padding:10px 0;display:flex;justify-content:center;gap:14px;color:#7CD6B4}
+  svg{display:block}
+  .c-light{color:#176B5B}
+  .picked{outline:2px solid #176B5B;outline-offset:2px}
+
+  /* ── 手机还原 ── */
+  .plans{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .plan{background:#FAFCFA;border:1px solid #E6EEE8;border-radius:12px;padding:12px 12px 14px}
+  .plan h3{font-size:13.5px;margin:0 0 3px;color:#24332F;display:flex;align-items:center;gap:7px}
+  .plan .desc{font-size:11.5px;color:#82908B;line-height:1.65;margin:0 0 10px;min-height:56px}
+  .plan .cost{font-size:11px;margin-top:9px;padding:7px 9px;border-radius:8px;background:#F3F7F4;color:#5F6D68;line-height:1.6}
+  .plan .cost.warn{background:#FDF4E3;color:#8A5E0C}
+  .plan .cost.good{background:#E8F4EE;color:#0F4A3E}
+  .phone{width:100%;background:#F3F8EF;border:1px solid #DCE7DF;border-radius:11px;padding:2px 0 4px}
+  .wcard{background:#fff;margin:8px 8px 6px;padding:0 13px;border-radius:11px;border:.5px solid #DCE7DF}
+  .wrow{padding:7px 0}
+  .whead{display:flex;align-items:baseline;flex-wrap:wrap}
+  .wen{font-size:16px;font-weight:700;color:#24332F}
+  .wpos{font-size:11px;color:#176B5B;font-style:italic;margin-left:5px}
+  .iparow{display:flex;flex-wrap:wrap;align-items:center;margin-top:1px}
+  .ipamod{display:inline-flex;align-items:center;height:28px;padding:0 7px;margin:3px 5px 0 0;border-radius:7px;border:.5px solid;font-size:12px}
+  .ipamod.us{border-color:#CBE7DA;background:#EAF6F0;color:#176B5B}
+  .ipamod.uk{border-color:#CBDDEF;background:#EAF1F9;color:#2A5C8A}
+  .ipamod .spk{width:15px;height:15px;margin-right:3px;flex:0 0 auto}
+  .wzh{font-size:13px;color:#5F6D68;margin-top:2px}
+  .exrow{display:flex;align-items:baseline}
+  .exrow.cn{align-items:center;margin-top:1px}
+  .extext{flex:1;min-width:0;font-size:12.5px;color:#82908B;margin-top:3px;padding-left:2px;line-height:1.45}
+  .excn{font-size:12px;color:#82908B;line-height:1.6;margin-top:1px;padding-left:2px;flex:1;min-width:0}
+  .ibox{flex:0 0 auto;width:28px;height:28px;display:flex;align-items:center;justify-content:center}
+  .ibox.nex{margin-left:1px}
+  .ibox.nsp{margin-left:6px}
+  .spk{width:12px;height:12px}
+  .eye{width:17px;height:17px}
+  .chip{flex:0 0 auto;display:inline-flex;align-items:center;gap:3px;height:22px;padding:0 7px;border-radius:11px;border:.5px solid #CBE7DA;background:#EAF6F0;color:#176B5B;font-size:11.5px;margin-left:3px;margin-top:3px}
+  .chip .eye{width:13px;height:13px}
+  .hint{font-size:11px;color:#A6B2AD;padding-left:2px}
+
+  /* ── 译文修复 ── */
+  table.fix{width:100%;border-collapse:collapse;font-size:12.5px}
+  table.fix th{text-align:left;font-size:11.5px;color:#8B9893;font-weight:600;padding:0 8px 7px 0;border-bottom:1px solid #E9F0EC}
+  table.fix td{padding:9px 8px 9px 0;border-bottom:1px solid #F1F6F2;vertical-align:top;line-height:1.6}
+  .mono{font-family:ui-monospace,Consolas,monospace;font-size:11.5px;color:#53605B;word-break:break-all}
+  .before{color:#C0392B}
+  .after{color:#0F4A3E;font-weight:600}
+
+  /* ── 清单 ── */
+  ul.chk{margin:0;padding-left:0;list-style:none;font-size:13px;line-height:2}
+  ul.chk li{display:flex;gap:9px;align-items:flex-start;border-bottom:1px dashed #EDF3EF;padding:5px 0}
+  ul.chk li:last-child{border-bottom:0}
+  .box{flex:0 0 auto;width:15px;height:15px;border-radius:4px;border:1.5px solid #C7D0CC;margin-top:4px}
+  .box.done{background:#176B5B;border-color:#176B5B;position:relative}
+  .box.done::after{content:"";position:absolute;left:4px;top:1px;width:4px;height:8px;border:2px solid #fff;border-top:0;border-left:0;transform:rotate(42deg)}
+  .ask{background:#0F4A3E;color:#EAF7F1;border-radius:12px;padding:15px 18px;font-size:13px;line-height:1.85}
+  .ask b{color:#8FE0C0}
+  .foot{font-size:11px;color:#A6B2AD;text-align:center;margin-top:26px;line-height:1.8}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>例句中文「眼睛」开关 · v2</h1>
+  <p class="lead">
+    两件事：<b>①闭眼图形改版</b>（你说得对，斜杠那个不对）　<b>②眼睛该放在哪</b>（你提了一个方案，我另想了一个，一起放上来比）。
+    下面所有还原都用真机色值、1rpx = 0.5px 等比，词条用的是词库里的真数据（hello / family）。
+  </p>
+
+  <!-- ══════════ 1 图标 ══════════ -->
+  <div class="card">
+    <h2><span class="n">1</span>闭眼图形改版</h2>
+    <p class="sub">
+      旧版把「闭眼」画成<b>眼睛 + 一道斜杠</b>（= 划掉、禁止），确实不对 —— 斜杠在图标语汇里是「禁用」，不是「隐藏」。
+      改成你说的<b>眼皮形态</b>：<b>闭合的上眼皮弧线 + 三根睫毛</b>，睁开时才是一个完整的眼睛。
+      两种形态轮廓差异大，<b>不依赖颜色也能分辨</b>（深色模式下尤其重要）。
+    </p>
+    <div class="icons">
+      <!-- 旧版 -->
+      <div class="ic">
+        <h3>旧版 <span class="tagx bad">已废弃</span></h3>
+        <p class="note">眼睛 + 斜杠。斜杠=禁用语义，且和「睁眼」共用眼形，缩到 17px 容易糊成一团。</p>
+        <div class="sizes c-light">
+          <div class="sz"><svg class="eye" style="width:17px;height:17px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6z"/><circle cx="12" cy="12" r="2.6"/><path d="M4.5 4.5l15 15"/></svg><em>17px 真机</em></div>
+          <div class="sz"><svg style="width:34px;height:34px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6z"/><circle cx="12" cy="12" r="2.6"/><path d="M4.5 4.5l15 15"/></svg><em>2×</em></div>
+          <div class="sz"><svg style="width:52px;height:52px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6z"/><circle cx="12" cy="12" r="2.6"/><path d="M4.5 4.5l15 15"/></svg><em>3×</em></div>
+        </div>
+        <div class="darkline">
+          <svg style="width:17px;height:17px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6z"/><circle cx="12" cy="12" r="2.6"/><path d="M4.5 4.5l15 15"/></svg>
+          <svg style="width:34px;height:34px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6z"/><circle cx="12" cy="12" r="2.6"/><path d="M4.5 4.5l15 15"/></svg>
+        </div>
+      </div>
+
+      <!-- 新版 A -->
+      <div class="ic picked">
+        <h3>新版 A <span class="tagx">已改好</span></h3>
+        <p class="note">闭合的上眼皮弧 + 三根睫毛。含义直白：<b>眼睛闭上了，点一下让它睁开</b>。</p>
+        <div class="sizes c-light">
+          <div class="sz"><svg style="width:17px;height:17px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6C8.6 16.7 15.4 16.7 22 6"/><path d="M12 14.2v3.4"/><path d="M7 12l-1.3 2.6"/><path d="M17 12l1.3 2.6"/></svg><em>17px 真机</em></div>
+          <div class="sz"><svg style="width:34px;height:34px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6C8.6 16.7 15.4 16.7 22 6"/><path d="M12 14.2v3.4"/><path d="M7 12l-1.3 2.6"/><path d="M17 12l1.3 2.6"/></svg><em>2×</em></div>
+          <div class="sz"><svg style="width:52px;height:52px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6C8.6 16.7 15.4 16.7 22 6"/><path d="M12 14.2v3.4"/><path d="M7 12l-1.3 2.6"/><path d="M17 12l1.3 2.6"/></svg><em>3×</em></div>
+        </div>
+        <div class="darkline">
+          <svg style="width:17px;height:17px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6C8.6 16.7 15.4 16.7 22 6"/><path d="M12 14.2v3.4"/><path d="M7 12l-1.3 2.6"/><path d="M17 12l1.3 2.6"/></svg>
+          <svg style="width:34px;height:34px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6C8.6 16.7 15.4 16.7 22 6"/><path d="M12 14.2v3.4"/><path d="M7 12l-1.3 2.6"/><path d="M17 12l1.3 2.6"/></svg>
+        </div>
+      </div>
+
+      <!-- 备选 B -->
+      <div class="ic">
+        <h3>备选 B <span class="tagx warn">可选</span></h3>
+        <p class="note">你说的「眼皮覆盖」的另一种画法：眼形还在，<b>上眼皮压下来盖过眼球</b>（一条盖下来的眼皮线）。更写实，但「闭上」的信号比 A 弱。</p>
+        <div class="sizes c-light">
+          <div class="sz"><svg style="width:17px;height:17px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6z"/><path d="M4 11.2c2.5 2.3 5.2 3.4 8 3.4s5.5-1.1 8-3.4"/></svg><em>17px 真机</em></div>
+          <div class="sz"><svg style="width:34px;height:34px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6z"/><path d="M4 11.2c2.5 2.3 5.2 3.4 8 3.4s5.5-1.1 8-3.4"/></svg><em>2×</em></div>
+          <div class="sz"><svg style="width:52px;height:52px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6z"/><path d="M4 11.2c2.5 2.3 5.2 3.4 8 3.4s5.5-1.1 8-3.4"/></svg><em>3×</em></div>
+        </div>
+        <div class="darkline">
+          <svg style="width:17px;height:17px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6z"/><path d="M4 11.2c2.5 2.3 5.2 3.4 8 3.4s5.5-1.1 8-3.4"/></svg>
+          <svg style="width:34px;height:34px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6z"/><path d="M4 11.2c2.5 2.3 5.2 3.4 8 3.4s5.5-1.1 8-3.4"/></svg>
+        </div>
+      </div>
+
+      <!-- 睁眼 -->
+      <div class="ic">
+        <h3>睁开（显示中文后）</h3>
+        <p class="note">睁开的眼形 + 填实的瞳孔 —— 和「闭上」对比强烈，一眼看出当前状态。</p>
+        <div class="sizes c-light">
+          <div class="sz"><svg style="width:17px;height:17px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6z"/><circle cx="12" cy="12" r="2.4" fill="currentColor" stroke="none"/></svg><em>17px 真机</em></div>
+          <div class="sz"><svg style="width:34px;height:34px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6z"/><circle cx="12" cy="12" r="2.4" fill="currentColor" stroke="none"/></svg><em>2×</em></div>
+          <div class="sz"><svg style="width:52px;height:52px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6z"/><circle cx="12" cy="12" r="2.4" fill="currentColor" stroke="none"/></svg><em>3×</em></div>
+        </div>
+        <div class="darkline">
+          <svg style="width:17px;height:17px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6z"/><circle cx="12" cy="12" r="2.4" fill="currentColor" stroke="none"/></svg>
+          <svg style="width:34px;height:34px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6z"/><circle cx="12" cy="12" r="2.4" fill="currentColor" stroke="none"/></svg>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════ 2 位置 ══════════ -->
+  <div class="card">
+    <h2><span class="n">2</span>眼睛放哪儿 · 四个方案</h2>
+    <p class="sub">
+      你的顾虑是「得让人知道按了这儿会出东西」。我把它拆成两个变量：<b>①放在哪一行</b>　<b>②没中文时要不要留着图标</b>。
+      下面是四个方案的整行还原（词条 = hello，浅色主题，真机宽度 375px）。
+    </p>
+
+    <div class="plans">
+      <!-- A -->
+      <div class="plan">
+        <h3>A 现状 <span class="tagx">已实现</span></h3>
+        <p class="desc">眼睛在<b>英文例句行最右端、喇叭右边</b>，和喇叭一样 56rpx 热区、垂直居中。<br><b>没中文的单词不显示眼睛</b>（避免点了没反应的死按钮）。</p>
+        <div class="phone">
+          <div class="wcard">
+            <div class="wrow">
+              <div class="whead"><span class="wen">hello</span><span class="wpos">int.</span></div>
+              <div class="iparow">
+                <span class="ipamod us"><svg class="spk" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3z M16.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z M14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z" fill="currentColor"/></svg>/həˈloʊ/</span>
+                <span class="ipamod uk"><svg class="spk" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3z M16.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z M14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z" fill="currentColor"/></svg>/həˈləʊ/</span>
+              </div>
+              <div class="wzh">你好</div>
+              <div class="exrow">
+                <span class="extext">Hello! Nice to meet you.</span>
+                <span class="ibox nsp"><svg class="spk" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3z M16.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z M14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z" fill="currentColor"/></svg></span>
+                <span class="ibox nex c-light"><svg class="eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6C8.6 16.7 15.4 16.7 22 6"/><path d="M12 14.2v3.4"/><path d="M7 12l-1.3 2.6"/><path d="M17 12l1.3 2.6"/></svg></span>
+              </div>
+              <div class="hint">点开眼睛后，下面多一行：</div>
+              <div class="excn" style="padding-left:2px">你好，很高兴认识你！</div>
+            </div>
+          </div>
+          <div class="wcard" style="margin-top:0">
+            <div class="wrow" style="border-bottom:0">
+              <div class="whead"><span class="wen">family</span><span class="wpos">n.</span></div>
+              <div class="wzh">家庭；家人</div>
+              <div class="exrow">
+                <span class="extext">There are four people in my family.</span>
+                <span class="ibox nsp"><svg class="spk" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3z M16.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z M14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z" fill="currentColor"/></svg></span>
+                <span class="ibox nex" style="opacity:.28;font-size:10px;color:#A6B2AD">无</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="cost good">额外高度 <b>0</b>：图标在例句行内，不新增行。词条没中文时不出现（不制造死按钮）。<br>代价：眼睛出现在英文例句右边，和它控制的「中文行」隔了一行。</div>
+      </div>
+
+      <!-- B -->
+      <div class="plan">
+        <h3>B 你的方案 <span class="tagx warn">待你定</span></h3>
+        <p class="desc">眼睛移到<b>中文例句行右端</b>，和该行文字垂直居中。<b>这一行常驻</b> —— 中文没展开时只有右侧一个眼睛，展开后中文就出现在眼睛左边。</p>
+        <div class="phone">
+          <div class="wcard">
+            <div class="wrow">
+              <div class="whead"><span class="wen">hello</span><span class="wpos">int.</span></div>
+              <div class="iparow">
+                <span class="ipamod us"><svg class="spk" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3z M16.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z M14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z" fill="currentColor"/></svg>/həˈloʊ/</span>
+                <span class="ipamod uk"><svg class="spk" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3z M16.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z M14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z" fill="currentColor"/></svg>/həˈləʊ/</span>
+              </div>
+              <div class="wzh">你好</div>
+              <div class="exrow">
+                <span class="extext">Hello! Nice to meet you.</span>
+                <span class="ibox nsp"><svg class="spk" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3z M16.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z M14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z" fill="currentColor"/></svg></span>
+              </div>
+              <div class="exrow cn">
+                <span class="excn" style="color:transparent">·</span>
+                <span class="ibox nex c-light"><svg class="eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6C8.6 16.7 15.4 16.7 22 6"/><path d="M12 14.2v3.4"/><path d="M7 12l-1.3 2.6"/><path d="M17 12l1.3 2.6"/></svg></span>
+              </div>
+              <div class="hint">↑ 收起时：这一行只有右边的眼睛　展开时 ↓</div>
+              <div class="exrow cn">
+                <span class="excn">你好，很高兴认识你！</span>
+                <span class="ibox nex c-light"><svg class="eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6z"/><circle cx="12" cy="12" r="2.4" fill="currentColor" stroke="none"/></svg></span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="cost warn">额外高度 <b>每个词 +28px</b>（图标撑起来的行高）。一天 20 个词 ≈ <b>多滚 560px，约 0.85 屏</b>。<br>好处：眼睛就长在「中文会出现的位置」，指向性最清楚。</div>
+      </div>
+
+      <!-- C -->
+      <div class="plan">
+        <h3>C 图标组 <span class="tagx">我的备选</span></h3>
+        <p class="desc">眼睛和喇叭<b>并排成一组</b>放在英文例句行右端（眼睛在左、喇叭在右），<b>位置永不移动</b>，也不多占高度。</p>
+        <div class="phone">
+          <div class="wcard">
+            <div class="wrow">
+              <div class="whead"><span class="wen">hello</span><span class="wpos">int.</span></div>
+              <div class="iparow">
+                <span class="ipamod us"><svg class="spk" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3z M16.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z M14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z" fill="currentColor"/></svg>/həˈloʊ/</span>
+                <span class="ipamod uk"><svg class="spk" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3z M16.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z M14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z" fill="currentColor"/></svg>/həˈləʊ/</span>
+              </div>
+              <div class="wzh">你好</div>
+              <div class="exrow">
+                <span class="extext">Hello! Nice to meet you.</span>
+                <span class="ibox nex c-light"><svg class="eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6C8.6 16.7 15.4 16.7 22 6"/><path d="M12 14.2v3.4"/><path d="M7 12l-1.3 2.6"/><path d="M17 12l1.3 2.6"/></svg></span>
+                <span class="ibox nsp"><svg class="spk" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3z M16.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z M14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z" fill="currentColor"/></svg></span>
+              </div>
+              <div class="hint">两条线对齐：左＝按下眼睛后长出来的中文</div>
+              <div class="excn">你好，很高兴认识你！</div>
+            </div>
+          </div>
+        </div>
+        <div class="cost good">额外高度 <b>0</b>，且图标总在固定位置。<br>但没中文的词仍需决定：留着（点了给一句提示）还是一样隐藏。</div>
+      </div>
+
+      <!-- D -->
+      <div class="plan">
+        <h3>D 带文字标签 <span class="tagx">最直白</span></h3>
+        <p class="desc">在喇叭右侧放一个<b>「👁 中文」小胶囊</b>。看到「中文」两个字，谁都知道点它会出中文 —— 发现成本最低。</p>
+        <div class="phone">
+          <div class="wcard">
+            <div class="wrow">
+              <div class="whead"><span class="wen">hello</span><span class="wpos">int.</span></div>
+              <div class="iparow">
+                <span class="ipamod us"><svg class="spk" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3z M16.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z M14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z" fill="currentColor"/></svg>/həˈloʊ/</span>
+                <span class="ipamod uk"><svg class="spk" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3z M16.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z M14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z" fill="currentColor"/></svg>/həˈləʊ/</span>
+              </div>
+              <div class="wzh">你好</div>
+              <div class="exrow">
+                <span class="extext">Hello! Nice to meet you.</span>
+                <span class="ibox nsp"><svg class="spk" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3z M16.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z M14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z" fill="currentColor"/></svg></span>
+                <span class="chip c-light"><svg class="eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6C8.6 16.7 15.4 16.7 22 6"/><path d="M12 14.2v3.4"/><path d="M7 12l-1.3 2.6"/><path d="M17 12l1.3 2.6"/></svg>中文</span>
+              </div>
+              <div class="excn">你好，很高兴认识你！</div>
+            </div>
+          </div>
+        </div>
+        <div class="cost warn">额外高度 <b>0</b>，发现成本最低。<br>代价：每个词都多一个胶囊，<b>例句可用宽度少约 100rpx</b>，长例句更容易折行；且视觉比前三个方案热闹。</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════ 3 深色 ══════════ -->
+  <div class="card">
+    <h2><span class="n">3</span>深色主题下的样子</h2>
+    <p class="sub">深色下图标自动换成亮绿 <span class="mono">#7CD6B4</span>（由 <span class="mono">tools/darkicons.js</span> 生成，不用手改）。这里放方案 A 与方案 C 的深色还原。</p>
+    <div class="plans" style="grid-template-columns:1fr 1fr">
+      <div class="plan" style="background:#162324;border-color:#223430">
+        <h3 style="color:#E4EEEA">方案 A · 深色</h3>
+        <div class="phone" style="background:#0E1618;border-color:#223430">
+          <div class="wcard" style="background:#162324;border-color:#223430">
+            <div class="wrow" style="border-bottom:0">
+              <div class="whead"><span class="wen" style="color:#E4EEEA">hello</span><span class="wpos" style="color:#7CD6B4">int.</span></div>
+              <div class="iparow">
+                <span class="ipamod us" style="border-color:#2C4A3C;background:#16281F;color:#7CD6B4"><svg class="spk" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3z M16.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z M14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z" fill="currentColor"/></svg>/həˈloʊ/</span>
+                <span class="ipamod uk" style="border-color:#2B4054;background:#16222E;color:#7FB3E8"><svg class="spk" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3z M16.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z M14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z" fill="currentColor"/></svg>/həˈləʊ/</span>
+              </div>
+              <div class="wzh" style="color:#A9BBB4">你好</div>
+              <div class="exrow">
+                <span class="extext" style="color:#7E938B">Hello! Nice to meet you.</span>
+                <span class="ibox nsp" style="color:#7CD6B4"><svg class="spk" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3z M16.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z M14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z" fill="currentColor"/></svg></span>
+                <span class="ibox nex" style="color:#7CD6B4"><svg class="eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6C8.6 16.7 15.4 16.7 22 6"/><path d="M12 14.2v3.4"/><path d="M7 12l-1.3 2.6"/><path d="M17 12l1.3 2.6"/></svg></span>
+              </div>
+              <div class="excn" style="color:#7E938B">你好，很高兴认识你！</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="plan" style="background:#162324;border-color:#223430">
+        <h3 style="color:#E4EEEA">方案 C · 深色（眼睛在喇叭左侧）</h3>
+        <div class="phone" style="background:#0E1618;border-color:#223430">
+          <div class="wcard" style="background:#162324;border-color:#223430">
+            <div class="wrow" style="border-bottom:0">
+              <div class="whead"><span class="wen" style="color:#E4EEEA">hello</span><span class="wpos" style="color:#7CD6B4">int.</span></div>
+              <div class="iparow">
+                <span class="ipamod us" style="border-color:#2C4A3C;background:#16281F;color:#7CD6B4"><svg class="spk" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3z M16.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z M14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z" fill="currentColor"/></svg>/həˈloʊ/</span>
+                <span class="ipamod uk" style="border-color:#2B4054;background:#16222E;color:#7FB3E8"><svg class="spk" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3z M16.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z M14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z" fill="currentColor"/></svg>/həˈləʊ/</span>
+              </div>
+              <div class="wzh" style="color:#A9BBB4">你好</div>
+              <div class="exrow">
+                <span class="extext" style="color:#7E938B">Hello! Nice to meet you.</span>
+                <span class="ibox nex" style="color:#7CD6B4"><svg class="eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6C8.6 16.7 15.4 16.7 22 6"/><path d="M12 14.2v3.4"/><path d="M7 12l-1.3 2.6"/><path d="M17 12l1.3 2.6"/></svg></span>
+                <span class="ibox nsp" style="color:#7CD6B4"><svg class="spk" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3z M16.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z M14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z" fill="currentColor"/></svg></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════ 4 译文修复 ══════════ -->
+  <div class="card">
+    <h2><span class="n">4</span>顺带修好的两条译文（你揪出来的那类问题）</h2>
+    <p class="sub">
+      先说清楚：你引用的 <span class="mono">The eagle is the king of the air</span> 是词库里 <b>eagle 的真实例句</b>（第 7940 条）。
+      我当时拿它去测一个<b>被我否决的备用翻译通道</b>，它吐出「鹰为空相之相」，这正是我判定它不可用的证据 —— <b>这条脏译文从没进过 App</b>
+      （翻译才推进到第 1169 条）。不过顺着你的质疑，我把<b>已入库的 1169 条</b>全扫了一遍，揪出 2 条真缺陷，已修：
+    </p>
+    <table class="fix">
+      <tr><th style="width:150px">单词</th><th style="width:38%">英文例句</th><th>译文 · 修前 → 修后</th></tr>
+      <tr>
+        <td><b>travel</b></td>
+        <td>I love traveling by train.</td>
+        <td><span class="mono before">我很喜&lt;gid="1"&gt;欢&lt;/g&gt;坐火&lt;gid="2"&gt;车&lt;/g&gt;旅行。</span><br>
+            <span class="mono after">我很喜欢坐火车旅行。</span><br>
+            <span style="font-size:11.5px;color:#8B9893">通道返回了内联标签没被清掉</span></td>
+      </tr>
+      <tr>
+        <td><b>recently</b></td>
+        <td>What have you been up to recently?</td>
+        <td><span class="mono before">Whathaveyoubeenupto?（你最近都在做什么？）</span><br>
+            <span class="mono after">你最近都在做什么？</span><br>
+            <span style="font-size:11.5px;color:#8B9893">旧清洗逻辑 <span class="mono">replace(/\s+/g,'')</span> 把英文里的空格也删了，又没处理「原句回声 + 括号译文」</span></td>
+      </tr>
+    </table>
+    <p class="sub" style="margin:14px 0 0">
+      修法：新增 <span class="mono">_ipa_build/clean_cn.js</span>（去标签 → 拆回声 → <b>只删中文之间的空格</b> → 折叠空白），
+      并把这套逻辑内建进翻译脚本，<b>以后每天自动续跑都不会再产生这两类脏译文</b>。另外还有 1 条真·机器翻译误差
+      （<span class="mono">This is the rule of the game.</span> → 「这是游戏的名称。」，应为「这是游戏的规则」），
+      这类属通道能力上限，我留一个手工修正表（<span class="mono">CN_FIX</span>）逐条改，不阻塞。
+    </p>
+  </div>
+
+  <!-- ══════════ 5 清单 ══════════ -->
+  <div class="card">
+    <h2><span class="n">5</span>这一轮改了什么 / 等你点头的</h2>
+    <ul class="chk">
+      <li><span class="box done"></span><span><b>闭眼图标改版</b>：斜杠 → 上眼皮弧线 + 三根睫毛（浅色 <span class="mono">#176B5B</span> / 深色 <span class="mono">#7CD6B4</span>，深色变体由脚本自动生成）</span></li>
+      <li><span class="box done"></span><span><b>译文清洗</b>：新增 <span class="mono">clean_cn.js</span>，修掉 2 条脏译文；逻辑并入每日翻译链路；重注入后 8000 条逐条校验通过</span></li>
+      <li><span class="box done"></span><span><b>题库复验</b> 7/7：1169 条中文 / 1154 词可出题 / 干扰项同词性 99.2% / 选项无释义泄漏</span></li>
+      <li><span class="box"></span><span><b>等你定</b>：闭眼用 <b>新版 A</b>（眼皮弧+睫毛）还是 <b>备选 B</b>（眼皮压下来盖住眼球）</span></li>
+      <li><span class="box"></span><span><b>等你定</b>：眼睛位置用 <b>A 现状</b> / <b>B 中文行右端常驻</b> / <b>C 图标组</b> / <b>D 带「中文」文字标签</b></span></li>
+      <li><span class="box"></span><span><b>等你定</b>：没中文的单词要不要也显示眼睛（显示则点了给一句「该词暂无中文例句」提示）</span></li>
+    </ul>
+    <div class="ask" style="margin-top:16px">
+      <b>按我的建议：</b>闭眼用 A（缩到 17px 也认得出）；位置用 <b>A 现状</b> 或 <b>C 图标组</b> —— 你担心的「不知道能点」，本质上靠<b>图形本身</b>解决（闭眼＝点它开），
+      而 B 方案每词多 28px 行高、一天多滚近一屏，代价偏大；如果你要「绝对直白」，那就 D。
+      <br><br>
+      <b>另外：</b>tabBar 书本图标你说没问题了，<b>上传体验版是你的动作，我先不上手</b>。但要提醒一句 —— 眼睛图标这轮刚改，建议<b>等我改完再一起传</b>，省得上传两次。
+    </div>
+  </div>
+
+  <p class="foot">
+    开溜 6.5 · light 实例 · 2026-10-09 · 例句中文眼睛开关 v2<br>
+    词条数据来自 <span class="mono">miniprogram/utils/words.js</span>；色值取自 <span class="mono">app.wxss</span> 浅/深色 token；1rpx = 0.5px 等比还原
+  </p>
+</div>
+</body>
+</html>
