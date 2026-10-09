@@ -220,6 +220,9 @@
 - **落点只有 4 处**：今日页词行、复习页随机卡 / 到期卡 / 重点词磁贴。其余页面**没有例句渲染点**（`weeks`、`settings` 不渲染例句；今日页「例句精读」的 `dayData.g.ex` 只有英文原句、无中文译文，见 `data-p1..p6.js` 的 `g.exp` 是中文讲解）。**搜索页按用户要求不动**，验收里加了隔离断言。
 - 变量/类：`zhOpen`（页面 data，按词记展开态 `{ 单词: 1 }`；默认空 = 全闭）、`.ex-eye`（56rpx 热区）、`.eye-ico`（闭）/ `.eye-ico--on`（睁）、`.ex-cn`（中文行）。切换用**整对象替换**，不用 `setData({'zhOpen.'+w:…})`——词条含空格（`get up`）拼路径不可靠。
 - **两个必须记住的样式约束**：①图标类只能写「只含 background-image 一条声明」，否则 `tools/darkicons.js` 的正则扫不到、深色模式不会自动出变体；②`.ex-eye .eye-ico` **禁用 `background` 简写**（会把上一条的 background-image 重置为 none，`.ico-inline` 踩过同坑），只能用 position/size/repeat 长手属性。
+- **例句行对齐铁律（v1.1.55，无头浏览器三方案实测后定）**：`.word-example-row` / `.random-zh-ex` 都是 `align-items:baseline`，行内的**图标盒必须与 `.ex-speak` 完全同构**——普通块 + `::before{content:'\200B'}` strut + 图标 `inline-block;vertical-align:middle`（x-height 锚定）+ 与盒内 `font-size` 配套。**给图标盒加 `display:flex` 居中必错**：flex 容器在 baseline 行里没有真实基线，浏览器拿子元素底边当基线 → 图标被抬离（实测 Δ=−5px/10rpx，v1.1.53 的眼睛就这么错位的）。同理，**宽屏块里图标盒的 font-size 必须显式 px 化**（28rpx 在 700px+ 窗口放大 3 倍 → 锚定点漂移）。
+- **例句喇叭尺寸（v1.1.55）**：`.ex-speak .spk-ico` = **36rpx 显式定值**（原 0.85em≈23.8rpx 被用户反馈「没放大」），比眼睛 34rpx 略大；热区 56rpx 不变；词级小喇叭（`.ipa-mod .spk-ico` 30rpx）不动。
+- **存量缺口（v1.1.55 发现，未改）**：绿色 `.spk-ico` 无深色变体（#176B5B 压深色卡片对比度 ~2.5:1；英音/眼睛都有变体）。因 `.spk-ico` 规则混了尺寸声明被 darkicons.js 跳过；补法 = 手写 `.theme-dark .spk-ico(--on)` 两条，等用户拍板（见 `tools/exspeak-align-20261009.html` 第 4 区）。
 - **收藏快照没有 cn**：`store.toggleStar` 只存 `{w,m,p,e,ai,ts}` → `review.js` 新增 `cnOf(w)` 在渲染时按词反查补全（与 v1.1.50 补 `ipa` 同套路）。**别去改 store 的快照**，那会把 cn 塞进云同步载荷。
 - **无中文不出眼睛**：`wx:if="{{item.cn}}"`。当前 1169/8000 有 cn，随每日翻译自动长出，代码无需再动。
 - **闭眼图形改版（v1.1.54）**：v1.1.53 的「眼睛+斜杠」被用户否决（斜杠=禁用语义，不是隐藏）→ 改为「**闭合的上眼皮弧线 + 三根睫毛**」；睁眼（瞳孔填实）不变。**用户已拍板（2026-10-09）**：闭眼用 A（眼皮弧+睫毛）/ 眼睛位置用 A 现状（例句行右端喇叭右侧，不改 WXML）/ 无中文的词**不显示**眼睛（维持 `wx:if="{{item.cn}}"`）。备选方案（B 中文行右端常驻 / C 图标组 / D 文字胶囊）记录在效果图里，不再做。

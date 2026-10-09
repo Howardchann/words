@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>例句喇叭放大 + 眼睛对齐 · 修前/修后 · 2026-10-09</title>
+<style>
+:root{--ink:#1F2A28;--sub:#5F6D68;--line:#E3ECE6;--green:#176B5B;--green2:#2E8B72;--bg:#F6F9F6;--card:#fff;--indigo:#3D5A80}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Segoe UI','Microsoft YaHei',sans-serif;background:var(--bg);color:var(--ink);padding:28px 20px 60px;line-height:1.65}
+.page{max-width:980px;margin:0 auto}
+h1{font-size:22px;font-weight:800;letter-spacing:.2px}
+.meta{color:var(--sub);font-size:13px;margin:6px 0 22px}
+.meta b{color:var(--green)}
+h2{font-size:16px;font-weight:800;margin:34px 0 4px;color:var(--green)}
+h2 .no{display:inline-block;width:22px;height:22px;border-radius:6px;background:var(--green);color:#fff;font-size:12px;text-align:center;line-height:22px;margin-right:8px;vertical-align:1px}
+.sub{color:var(--sub);font-size:13px;margin-bottom:12px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:760px){.grid{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;box-shadow:0 1px 3px rgba(20,40,30,.05)}
+.tag{display:inline-block;font-size:11px;font-weight:700;padding:2px 9px;border-radius:20px;margin-bottom:10px}
+.tag.bad{background:#FDECEA;color:#C0392B}
+.tag.good{background:#EAF6F0;color:#176B5B}
+.phone{width:340px;background:#F3F8EF;border:1px solid #E9F0EC;border-radius:14px;padding:10px 12px}
+.word-row{display:flex;align-items:baseline;padding:7px 0;border-bottom:1px solid #E9F0EC}
+.word-main{flex:1;min-width:0}
+.word-head{display:flex;align-items:baseline;flex-wrap:wrap}
+.word-en{font-size:16px;font-weight:700;color:#24332F}
+.word-pos{font-size:11px;color:#176B5B;font-style:italic;margin-left:5px}
+.ipa-row{display:flex;flex-wrap:wrap;align-items:center;margin-top:1px}
+.ipa-mod{display:inline-flex;align-items:center;height:28px;padding:0 7px;margin:3px 5px 0 0;border-radius:7px;border:1px solid #CBE7DA;background:#EAF6F0}
+.ipa-mod .spk{flex-shrink:0}
+.ipa-txt{font-size:12px;line-height:1;color:#176B5B;margin-left:3px}
+.ipa-mod--uk{border-color:#CBDDEF;background:#EAF1F9}
+.ipa-mod--uk .ipa-txt{color:#2A5C8A}
+.word-zh{font-size:13px;color:#5F6D68;margin-top:2px}
+/* 例句行 —— 两套真实 CSS（rpx÷2=px），修前/修后各一套 */
+.word-example{font-size:12.5px;color:#82908B;margin-top:3px;padding-left:2px;line-height:1.6}
+.word-example-row{display:flex;align-items:baseline}
+.word-example-row .word-example{flex:1;min-width:0}
+.ex-speak{flex-shrink:0;width:28px;height:28px;font-size:14px;text-align:center;margin-left:6px}
+.ex-speak::before{content:'\200B'}
+.ex-cn{font-size:12px;color:#82908B;line-height:1.6;margin-top:1px;padding-left:2px}
+/* 修后（=本次改动的真实值） */
+.new .ex-eye{flex-shrink:0;width:28px;height:28px;font-size:14px;text-align:center;margin-left:1px}
+.new .ex-eye::before{content:'\200B'}
+.new .ex-eye .eye-ico{display:inline-block;vertical-align:middle;width:17px;height:17px;background:center/contain no-repeat}
+.new .ex-speak .spk-ico{width:18px;height:18px}
+/* 修前（=线上现状） */
+.old .ex-eye{flex-shrink:0;width:28px;height:28px;display:flex;align-items:center;justify-content:center;margin-left:1px}
+.old .ex-eye .eye-ico{width:17px;height:17px;background:center/contain no-repeat}
+.old .ex-speak .spk-ico{width:.85em;height:.85em}
+.spk-ico{display:inline-block;vertical-align:middle;width:.9em;height:.9em;background:center/contain no-repeat}
+.zoomrow{display:flex;align-items:center;gap:26px;padding:10px 4px;flex-wrap:wrap}
+.zoom{display:flex;flex-direction:column;align-items:center;gap:6px}
+.zbox{width:56px;height:56px;border:1px dashed #C9D8CF;border-radius:10px;display:flex;align-items:center;justify-content:center;background:#fff}
+.zlab{font-size:11.5px;color:var(--sub);text-align:center;line-height:1.45}
+.zlab b{color:var(--ink);font-size:12px}
+table{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:8px}
+th,td{border:1px solid var(--line);padding:7px 10px;text-align:left;vertical-align:top}
+th{background:#F0F7F3;color:var(--green);font-weight:700;white-space:nowrap}
+td num,td .num{font-family:ui-monospace,Consolas,monospace}
+.ok{color:#176B5B;font-weight:700}
+.no2{color:#C0392B;font-weight:700}
+.note{font-size:12px;color:var(--sub);margin-top:8px}
+.darkbox{background:#0E1618;border-radius:14px;padding:14px 12px}
+.darkbox .word-row{border-bottom-color:#223430}
+.darkbox .word-en{color:#E4EEEA}
+.darkbox .word-zh,.darkbox .word-example,.darkbox .ex-cn{color:#7E938B}
+.darkbox .ipa-mod{background:#16281F;border-color:#2C4A3C}
+.darkbox .ipa-mod .ipa-txt{color:#7CD6B4}
+.darkbox .ipa-mod--uk{background:#16222E;border-color:#2B4054}
+.darkbox .ipa-mod--uk .ipa-txt{color:#7FB3E8}
+.darkbox .phone{background:#0E1618;border-color:#223430}
+.q{display:flex;gap:10px;align-items:flex-start;margin-top:10px;padding:10px 12px;border-radius:10px;background:#F0F7F3;border:1px solid #D5EDE3;font-size:13px}
+.q b{color:var(--green)}
+ul{margin:6px 0 0 18px;font-size:13px}
+li{margin:3px 0}
+.checklist td:first-child{width:26px;text-align:center}
+code{background:#F0F4F1;border:1px solid var(--line);border-radius:4px;padding:0 5px;font-size:12px;font-family:ui-monospace,Consolas,monospace}
+</style>
+</head>
+<body>
+<div class="page">
+<h1>例句喇叭放大 + 眼睛对齐</h1>
+<div class="meta">2026-10-09 · v1.1.55 · 只改 <b>light</b> · 依据：你反馈「例句播放按钮没放大；眼睛和喇叭不在一条水平线上」。改法经无头浏览器三方案实测（Δ=眼中心−喇叭中心，修前 <b>−5px</b>，修后 <b>0.00px</b>）。</div>
+
+<h2><span class="no">1</span>修前 / 修后（真实 CSS 值，1rpx=0.5px，行高 1.6）</h2>
+<div class="sub">左边是你现在看到的（喇叭 23.8rpx 且偏小、眼睛比喇叭高 10rpx）；右边是修后（喇叭 36rpx，两图标中心完全等高，均锚在例句第一行）。</div>
+<div class="grid">
+  <div class="card"><span class="tag bad">修前 · 现状</span>
+    <div class="phone old">
+      <div class="word-row"><div class="word-main">
+        <div class="word-head"><span class="word-en">hello</span><span class="word-pos">int.</span></div>
+        <div class="ipa-row">
+          <span class="ipa-mod"><svg class="spk" width="15" height="15" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3z M16.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z M14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z" fill="#176B5B"/></svg><span class="ipa-txt">/həˈloʊ/</span></span>
+          <span class="ipa-mod ipa-mod--uk"><svg class="spk" width="15" height="15" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3z M16.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z M14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z" fill="#2A5C8A"/></svg><span class="ipa-txt">/həˈləʊ/</span></span>
+        </div>
+        <div class="word-zh">你好；喂（打招呼）</div>
+        <div class="word-example-row"><div class="word-example">Hello! Nice to meet you.</div><div class="ex-speak"><span class="spk-ico"><svg width="100%" height="100%" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3z M16.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z M14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z" fill="#176B5B"/></svg></span></div><div class="ex-eye"><span class="eye-ico"><svg width="100%" height="100%" viewBox="0 0 24 24" fill="none" stroke="#176B5B" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6C8.6 16.7 15.4 16.7 22 6"/><path d="M12 14.2v3.4"/><path d="M7 12l-1.3 2.6"/><path d="M17 12l1.3 2.6"/></svg></span></div></div>
+      </div></div>
+    </div>
+    <div class="note">喇叭 23.8rpx（偏小）· 眼睛中心比喇叭高 10rpx</div>
+  </div>
+  <div class="card"><span class="tag good">修后 · 本次改动</span>
+    <div class="phone new">
+      <div class="word-row"><div class="word-main">
+        <div class="word-head"><span class="word-en">hello</span><span class="word-pos">int.</span></div>
+        <div class="ipa-row">
+          <span class="ipa-mod"><svg class="spk" width="15" height="15" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3z M16.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z M14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z" fill="#176B5B"/></svg><span class="ipa-txt">/həˈloʊ/</span></span>
+          <span class="ipa-mod ipa-mod--uk"><svg class="spk" width="15" height="15" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3z M16.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z M14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z" fill="#2A5C8A"/></svg><span class="ipa-txt">/həˈləʊ/</span></span>
+        </div>
+        <div class="word-zh">你好；喂（打招呼）</div>
+        <div class="word-example-row"><div class="word-example">Hello! Nice to meet you.</div><div class="ex-speak"><span class="spk-ico"><svg width="100%" height="100%" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3z M16.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z M14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z" fill="#176B5B"/></svg></span></div><div class="ex-eye"><span class="eye-ico"><svg width="100%" height="100%" viewBox="0 0 24 24" fill="none" stroke="#176B5B" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6C8.6 16.7 15.4 16.7 22 6"/><path d="M12 14.2v3.4"/><path d="M7 12l-1.3 2.6"/><path d="M17 12l1.3 2.6"/></svg></span></div></div>
+        <div class="ex-cn">你好！很高兴认识你。</div>
+      </div></div>
+    </div>
+    <div class="note">喇叭 36rpx · 两图标中心等高（Δ=0）· 都锚在例句第一行</div>
+  </div>
+</div>
+
+<h2><span class="no">2</span>图标尺寸对照（3× 放大）</h2>
+<div class="card">
+  <div class="zoomrow">
+    <div class="zoom"><div class="zbox"><svg width="30" height="30" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3z M16.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z M14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z" fill="#176B5B"/></svg></div><div class="zlab"><b>喇叭 · 修前</b><br>23.8rpx（.85em）</div></div>
+    <div class="zoom"><div class="zbox"><svg width="45" height="45" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3z M16.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z M14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z" fill="#176B5B"/></svg></div><div class="zlab"><b>喇叭 · 修后</b><br>36rpx（+51%）</div></div>
+    <div class="zoom"><div class="zbox"><svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="#176B5B" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6C8.6 16.7 15.4 16.7 22 6"/><path d="M12 14.2v3.4"/><path d="M7 12l-1.3 2.6"/><path d="M17 12l1.3 2.6"/></svg></div><div class="zlab"><b>眼睛 · 闭上（不变）</b><br>34rpx</div></div>
+    <div class="zoom"><div class="zbox"><svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="#176B5B" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6z"/><circle cx="12" cy="12" r="2.4" fill="#176B5B" stroke="none"/></svg></div><div class="zlab"><b>眼睛 · 睁开（不变）</b><br>34rpx</div></div>
+  </div>
+  <div class="note">词级小喇叭（双音标胶囊里那个 30rpx）<b>不动</b>——你说的是「例句播放按钮」；热区维持 56rpx 不变，只放大图标本身。</div>
+</div>
+
+<h2><span class="no">3</span>三方案实测（无头浏览器，真实行高 1.6）</h2>
+<div class="card">
+<table>
+<tr><th>方案</th><th>Δ（眼中心−喇叭中心）</th><th>长例句折行时</th><th>结论</th></tr>
+<tr><td>A 现状（eye 用 flex 居中）</td><td class="no2">−5.00px（错位 10rpx）</td><td>—</td><td>❌ 你看到的错位</td></tr>
+<tr><td>B <b>eye 改成与喇叭同机制</b>（零宽空格撑基线 + x-height 锚定）+ 喇叭放大</td><td class="ok">0.00px</td><td>图标仍贴第一行</td><td class="ok">✅ 已采用</td></tr>
+<tr><td>C 行改 align-items:center + 双 flex 居中</td><td class="ok">0.00px</td><td>图标悬在两行中间</td><td>弃</td></tr>
+</table>
+<div class="note">错位根因：<code>.ex-eye</code> 是 flex 容器，在 <code>align-items:baseline</code> 的行里没有真实基线，浏览器拿它子元素的底边当基线 → 整只眼睛被抬离喇叭。修法 = 让眼睛与喇叭<b>完全同构</b>（这正是 app.wxss 里 v1.1.20 定下的 x-height 锚定机制），不是调 margin 硬凑。</div>
+</div>
+
+<h2><span class="no">4</span>深色模式：喇叭没有深色变体（顺带发现，要不要一起修？）</h2>
+<div class="sub">深色下美音喇叭和例句喇叭仍是 <code>#176B5B</code> 压在 <code>#162324</code> 卡片上，对比度约 2.5:1（英音模块有深色变体 #7FB3E8，眼睛也有 #7CD6B4，唯独绿喇叭没有——darkicons.js 只给「只含 background-image 一条声明」的类自动生成变体，.spk-ico 规则里混了尺寸声明所以被跳过）。</div>
+<div class="grid">
+  <div class="card"><span class="tag bad">现状 · 深色下喇叭很难看清</span>
+    <div class="darkbox"><div class="phone">
+      <div class="word-example-row"><div class="word-example">Hello! Nice to meet you.</div><div class="ex-speak new-x"><span class="spk-ico"><svg width="18" height="18" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3z M16.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z M14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z" fill="#176B5B"/></svg></span></div><div class="ex-eye" style="width:28px;height:28px;font-size:14px;text-align:center"><span style="display:inline-block;vertical-align:middle;width:17px;height:17px"><svg width="100%" height="100%" viewBox="0 0 24 24" fill="none" stroke="#7CD6B4" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6C8.6 16.7 15.4 16.7 22 6"/><path d="M12 14.2v3.4"/><path d="M7 12l-1.3 2.6"/><path d="M17 12l1.3 2.6"/></svg></span></div></div>
+    </div></div>
+    <div class="note">眼睛亮绿（有变体）· 喇叭暗绿（无变体）→ 一深一亮，喇叭像「禁用」</div>
+  </div>
+  <div class="card"><span class="tag good">提议 · 给绿喇叭补深色变体 #7CD6B4</span>
+    <div class="darkbox"><div class="phone">
+      <div class="word-example-row"><div class="word-example">Hello! Nice to meet you.</div><div class="ex-speak"><span class="spk-ico"><svg width="18" height="18" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3z M16.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z M14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z" fill="#7CD6B4"/></svg></span></div><div class="ex-eye" style="width:28px;height:28px;font-size:14px;text-align:center"><span style="display:inline-block;vertical-align:middle;width:17px;height:17px"><svg width="100%" height="100%" viewBox="0 0 24 24" fill="none" stroke="#7CD6B4" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6C8.6 16.7 15.4 16.7 22 6"/><path d="M12 14.2v3.4"/><path d="M7 12l-1.3 2.6"/><path d="M17 12l1.3 2.6"/></svg></span></div></div>
+    </div></div>
+    <div class="note">加 2 条规则：<code>.theme-dark .spk-ico</code> / <code>.theme-dark .spk-ico--on</code>，与英音模块深色 #7FB3E8 同一套惯例</div>
+  </div>
+</div>
+
+<h2><span class="no">5</span>落点清单</h2>
+<div class="card">
+<table class="checklist">
+<tr><th></th><th>位置</th><th>影响</th></tr>
+<tr><td>✓</td><td>今日单词 · 词行例句喇叭</td><td>放大 + 与眼睛对齐</td></tr>
+<tr><td>✓</td><td>今日单词 · 例句精读（语法区）喇叭</td><td>放大（该行无眼睛）</td></tr>
+<tr><td>✓</td><td>复习 · 随机抽查卡 / 到期复习卡</td><td>放大 + 对齐</td></tr>
+<tr><td>✓</td><td>复习 · 重点词磁贴</td><td>放大 + 对齐</td></tr>
+<tr><td>✓</td><td>搜索页例句喇叭</td><td class="no2">也会被放大（同一全局类）——你说「所有例句播放按钮」，故未排除；要排除说一声</td></tr>
+<tr><td>—</td><td>词级小喇叭（美/英音胶囊内 30rpx）</td><td>不动</td></tr>
+</table>
+</div>
+</div>
+</body>
+</html>
