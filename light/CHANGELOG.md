@@ -2,6 +2,37 @@
 
 > 本实例由 cloud 实例 v1.1.38（仓库提交 `dbe76dc` 的 cloud/ 树）派生，**共享全部产品与机制历史**——完整变更史见 `../cloud/CHANGELOG.md`，此处只记录本实例自身的差异与后续变更。
 
+## 2026-10-09 · 双音标（美音 + 英音）方案 A 落地 —— 音标模块化 + 按口音朗读（v1.1.51）
+
+> **范围**：只改 light；未推远端（等用户真机验收）。用户拍板「先按推荐的方案 A 修改」，本条为实施记录。
+
+### 词行 UI（方案 A：音标模块化）
+
+1. **删除词行左侧的长按整块喇叭**（`.word-speak`），`word-main` 由 510rpx 增至 ≈582rpx；**词性从独立行上移到单词同行**（`word-head` 内 `.word-en` + `.word-pos`）。
+2. **新增 `.ipa-row` + `.ipa-mod`**：美音模块（绿系 `--us-bg/--us-line/--us-ink`）与英音模块（蓝系 `--uk-bg/--uk-line/--uk-ink`）各带小喇叭，**点模块 = 按该口音朗读**；浅/深两套 token + 宽屏（≥700px）分支。英音模块 `wx:if="{{item.uk}}"`；无音标的短语仍渲染美音模块（只有喇叭）以保留朗读入口。
+3. **三页同步改造**：`today.wxml` / `search.wxml` / `review.wxml`（随机抽查 + 到期复习 + 重点词列表，共 6 个音标模块）；`.ipa-row` 用 `flex-wrap:wrap` 做折行兜底。宽度实测双音标单行容纳率 **99.3%**（立项时估 88.5%，因左侧喇叭腾出 72rpx 而大幅改善），仅 58 词折行。
+4. **播放态精细到口音**：页面 data 增 `playingAccent`，由 `speech.onStateChange` 新增的 `payload.accent` 驱动，点亮对应口音的模块；同词同口音再点 = 暂停/续播。
+5. 例句喇叭 `.ex-speak` 46→56rpx（与音标模块等高，视觉对齐）。
+
+### 语音链路（按口音朗读）
+
+6. `speech.js`：新增 `state.playingAccent`；`onlineUrl(text, accent)` → 英音用有道 `type=1`、美音 `type=2`；`trySentence/tryWords` 串 accent；`notify` 载荷加 `accent`；`speak(text, opts)` 在 `opts.accent` 存在时也走对象通道（否则口音会丢）。
+7. **关键修复**：预生成音频只有美音一套 → 链条改为「`accent==='us'` 且 `engineMode!=='online'` 才进预生成」，而 **`accent==='uk'` 时即便 `engineMode='pregen'` 也放行在线**，否则「仅预生成」的用户点英音模块永远无音源（桩住 wx 的穷举测试 `t_accent.js` 8/8 通过）。
+8. 设置页「发音口音」卡改名「**默认口音**」，补说明：影响例句朗读与朗读全部，单词页美/英音标各读各的口音；英音走在线音源、暂无离线音频。
+
+### 数据（`utils/words.js` 第 7 字段 + 归一化流水线）
+
+9. 注入英音音标：8000 行 = 5 字段 60（短语）/ 6 字段 415（仅美音）/ 7 字段 7525（双音标）；**UK 命中 94.1%**（en_UK 源缺 415 个高频词，如 mother/use/job/number/put，App 中只显示美音）。`data.js` 三处装配加 `uk` 字段（`allWords` / `wordsOfStudyDay` / `searchWords`）。
+10. **归一化流水线**（`_ipa_build/uk_norm.js` 唯一实现 + `harmonize.js` 重刷）：字符降级 → **重音符左移**（受合法音节首约束，否则 computer 会错成 `kəˈmpjuːtə`）→ **塞擦音先合成单单位**（否则 gently→`dˈʒɛntli`）→ 非重读 ʌ→ə / ɐ→ə → **多主重音降级**（只留最后一个 ˈ，其余转 ˌ，修 association 这类）→ 单音节去重音符。
+11. **美音侧顺带修正 82 词**：多音变体时改选「主重音与英音一致 + 与当前值最接近 + 不引入新元音」的一条 → 修掉 `effect/museum/umbrella/emerge/emotion` 等重音错位，也修掉 `center/enter/printer/international/different` 这类误选弱化变体的旧数据；另做多主重音降级 9 词。
+12. **质检脚本** `t_uk_data.js`：7 项结构断言全过（无「有 UK 无 US」/ 斜杠成对 / 无非法残留字符 / 均含元音 / 无空白 / 至多一个主重音 / 字段数），18 词抽查 18/18；美英重音位置不一致 **127/5723 = 2.2%**（含约 25 条英美固有差异，两边都对）。残余 ≈2% 暂不逐词人工修，留 `uk_norm.js#UK_FIX` 接口，等真机验收后按用户实际反馈点单点修。
+
+### 已知未做 / 边界
+
+- `cloud/`、`dark/` 尚未同步方案 A（按「只同步功能内核」规则，待真机验收后做）；
+- `app.wxss` 中 `.word-speak` / `.word-ipa` 已成 light 死规则，**暂留不删**（避免与 cloud/dark 的同步出现不对称）；
+- 词尾次重音 `ˌ`（两侧都有，US 737 / UK 477 条）与词尾 `ə`（`table /ˈteɪbəl/`）是源约定，**非缺陷，未改**。
+
 ## 2026-10-09 · 修复搜索页播放闪烁/卡片变色 + 复习页补音标 + come 读音修正 + 双音标排版数据（v1.1.50）
 
 > **范围**：只改 light；未推远端。本版同时为「双音标」立项完成数据侧调研。

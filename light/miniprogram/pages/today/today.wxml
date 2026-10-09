@@ -55,11 +55,19 @@
       <view class="group-tag" wx:if="{{index === 0 && coreCount > 0}}">主题词 · {{coreCount}}</view>
       <view class="group-tag group-tag--extra" wx:if="{{index === extraStart}}">扩展词 · {{extraCount}}</view>
       <view class="word-row{{hlWord === item.w ? ' word-row--hl' : ''}}" id="w{{index}}">
-      <view class="word-speak {{playingText === item.w ? 'playing' : ''}}"
-            hover-class="speak-hover" hover-stay-time="120"
-            data-text="{{item.w}}" data-ai="{{item.ai}}" data-kind="w" bindtap="onSpeakWord"><view class="spk-ico {{playingText === item.w ? 'spk-ico--on' : ''}}"></view></view>
       <view class="word-main">
-        <view class="word-head"><text class="word-en"><text wx:if="{{playingText === item.w}}" class="kara-lit">{{karaLit}}</text>{{playingText === item.w ? karaRest : item.w}}</text><text class="word-ipa" wx:if="{{item.ipa}}">{{item.ipa}}</text><text class="word-pos">{{item.p}}</text></view>
+        <view class="word-head"><text class="word-en"><text wx:if="{{playingText === item.w}}" class="kara-lit">{{karaLit}}</text>{{playingText === item.w ? karaRest : item.w}}</text><text class="word-pos">{{item.p}}</text></view>
+        <!-- 双音标模块（v1.1.51 方案A）：美音绿系 / 英音蓝系，各带小喇叭，点模块即按该口音朗读。
+             无音标的短语仍渲染美音模块（只有喇叭）以保留朗读入口。 -->
+        <view class="ipa-row">
+          <view class="ipa-mod {{playingText === item.w && playingAccent === 'us' ? 'on' : ''}}"
+                hover-class="speak-hover" hover-stay-time="120"
+                data-text="{{item.w}}" data-ai="{{item.ai}}" data-kind="w" data-accent="us" bindtap="onSpeakWord"><view class="spk-ico {{playingText === item.w && playingAccent === 'us' ? 'spk-ico--on' : ''}}"></view><text class="ipa-txt" wx:if="{{item.ipa}}">{{item.ipa}}</text></view>
+          <view class="ipa-mod ipa-mod--uk {{playingText === item.w && playingAccent === 'uk' ? 'on' : ''}}"
+                wx:if="{{item.uk}}"
+                hover-class="speak-hover" hover-stay-time="120"
+                data-text="{{item.w}}" data-ai="{{item.ai}}" data-kind="w" data-accent="uk" bindtap="onSpeakWord"><view class="spk-ico {{playingText === item.w && playingAccent === 'uk' ? 'spk-ico--on' : ''}}"></view><text class="ipa-txt">{{item.uk}}</text></view>
+        </view>
         <view class="word-zh">{{item.m}}</view>
         <view class="word-example-row">
           <view class="word-example"

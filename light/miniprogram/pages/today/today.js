@@ -33,6 +33,7 @@ Page({
     checked: false,
     hlWord: '',       // 从搜索页跳来时的定位高亮词（v1.1.46），2s 后自动清空
     playingText: '',
+    playingAccent: '',
     playingMode: 'idle',
     pluginOk: false,
   },
@@ -46,7 +47,7 @@ Page({
     speech.setEngine(store.get('engine'));
     speech.setEngineMode(store.get('engineMode') || 'auto');
     this._offSpeech = speech.onStateChange((payload) => {
-      const upd = { playingText: payload.playing ? payload.text : '', playingMode: payload.mode };
+      const upd = { playingText: payload.playing ? payload.text : '', playingAccent: payload.accent || '', playingMode: payload.mode };
       // 歌词式进度：按朗读进度把当前文本切成「已读/未读」两段，已读染绿
       if (payload.playing && payload.text) {
         const lit = Math.round((payload.progress || 0) * payload.text.length);
@@ -232,16 +233,19 @@ Page({
   },
 
   // ---- 朗读 ----
+  // 一个 handler 通吃：音标模块（带 data-accent=us|uk）、例句、语法例句（不带 accent → 用全局口音）
   onSpeakWord(e) {
     const ds = e.currentTarget.dataset;
     const text = ds.text || ds.example || ds.word;
     if (!text) return;
-    if (this.data.playingText === text) {
+    const accent = ds.accent || '';
+    const same = this.data.playingText === text && (this.data.playingAccent || '') === accent;
+    if (same) {
       const r = speech.togglePause();
-      this.setData({ playingText: r === 'paused' ? '' : text });
+      this.setData({ playingText: r === 'paused' ? '' : text, playingAccent: r === 'paused' ? '' : accent });
       return;
     }
-    speech.speak(text, { ai: Number(ds.ai) || 0, kind: ds.kind || 's' });
+    speech.speak(text, { ai: Number(ds.ai) || 0, kind: ds.kind || 's', accent: accent });
   },
 
   onSpeakAll() {

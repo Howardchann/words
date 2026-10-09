@@ -26,6 +26,7 @@ Page({
     list: [],
     wordTotal: plan.WORD_TOTAL,
     playingText: '',
+    playingAccent: '',
     playingMode: 'idle',
     jumpingW: '',   // 正在跳转的词（行内显示「跳转中…」，让「点了没反应」不再无声）
   },
@@ -41,8 +42,10 @@ Page({
       // 同值也会把 60 行结果列表整棵重渲染 —— 低端机上就是「播放时卡一下」。
       // 只在真的有变化时才 setData。
       const text = payload.playing ? payload.text : '';
+      const accent = payload.accent || '';
       const upd = {};
       if (text !== this.data.playingText) upd.playingText = text;
+      if (accent !== this.data.playingAccent) upd.playingAccent = accent;
       if (payload.mode !== this.data.playingMode) upd.playingMode = payload.mode;
       if (text) {
         const lit = Math.round((payload.progress || 0) * text.length);
@@ -62,7 +65,7 @@ Page({
         upd.karaLit = '';
         upd.karaRest = '';
       }
-      if (upd.playingText !== undefined || upd.playingMode !== undefined || upd.karaLit !== undefined) {
+      if (upd.playingText !== undefined || upd.playingAccent !== undefined || upd.playingMode !== undefined || upd.karaLit !== undefined) {
         this.setData(upd);
       }
     });
@@ -181,16 +184,17 @@ Page({
     go(false);
   },
 
-  // 喇叭 / 例句：用 catchtap 拦在本页朗读，不触发整行的跳转
+  // 音标模块 / 例句：用 catchtap 拦在本页朗读，不触发整行的跳转
   onSpeakWord(e) {
     const ds = e.currentTarget.dataset;
     const text = ds.text;
     if (!text) return;
-    if (this.data.playingText === text) {
+    const accent = ds.accent || '';   // 音标模块带 data-accent；例句不带 → 用全局口音
+    if (this.data.playingText === text && (this.data.playingAccent || '') === accent) {
       const r = speech.togglePause();
-      this.setData({ playingText: r === 'paused' ? '' : text });
+      this.setData({ playingText: r === 'paused' ? '' : text, playingAccent: r === 'paused' ? '' : accent });
       return;
     }
-    speech.speak(text, { ai: Number(ds.ai) || 0, kind: ds.kind || 'w' });
+    speech.speak(text, { ai: Number(ds.ai) || 0, kind: ds.kind || 'w', accent: accent });
   },
 });

@@ -10,6 +10,9 @@ page {
   --red: #C0392B; --red-press: #A93226; --red-soft: #FDECEA;
   --line: #E9F0EC; --cur-line: #9ED8C5; --cur-bg: #F8FCF9; --field: #FBFDFC;
   --card-line: #DCE7DF; /* 卡片描边（v1.1.42 学习提示卡方案B 用） */
+  /* 双音标模块（v1.1.51 方案A）：美音绿系 / 英音蓝系，两套语义色互不干扰 */
+  --us-bg: #EAF6F0; --us-line: #CBE7DA; --us-ink: #176B5B;
+  --uk-bg: #EAF1F9; --uk-line: #CBDDEF; --uk-ink: #2A5C8A;
   /* 自定义导航栏（v1.1.40 方案A浅顶）：nav-bg=窗口底色 #F3F8EF，冷启动首帧与终态零色差，
      首点 tab「顶部闪 1~2 帧」的感知随之消除；品牌绿退守内容区（按钮/选中态/tab 栏）。
      回退绿顶：改回 --nav-bg:#176B5B; --nav-fg:#FFFFFF; 即可（仅此一处）。 */
@@ -37,6 +40,8 @@ page {
   --red: #E8795F; --red-press: #F19485; --red-soft: #34211C;
   --line: #223430; --cur-line: #2E5B4F; --cur-bg: #14211F; --field: #101B1D;
   --card-line: #223430;
+  --us-bg: #16281F; --us-line: #2C4A3C; --us-ink: #7CD6B4;
+  --uk-bg: #16222E; --uk-line: #2B4054; --uk-ink: #7FB3E8;
   --nav-bg: #0E1618; --nav-fg: #FFFFFF;
 }
 /* 深色下的特殊覆盖（data-URI 图标 / 语义色点 / 状态块，走不了变量） */
@@ -109,12 +114,28 @@ page {
 .word-main { flex:1; min-width:0; }
 .word-head { display:flex; align-items:baseline; flex-wrap:wrap; }
 .word-en { font-size:32rpx; font-weight:700; color:var(--ink); }
-/* 音标（v1.1.44）：纯文本，无底色无描边——朗读入口统一走左侧喇叭，音标只作书面依据，
-   不再自带「可点」暗示（点喇叭读的就是该词本身）。等双音标(US/UK)上线时再让它变成点读目标。
-   v1.1.45：字号 22rpx→24rpx。依据 = 最宽词头 characterization 在真机（含开发者工具的 iPhone 5
-   最小档 320px）实测不折行且与右侧收藏键仍有间距，说明余量充足；rpx 全等比故与分辨率无关。 */
+/* 音标（v1.1.44 纯文本 → v1.1.51 方案A 双音标模块）：
+   朗读入口不再用左侧大喇叭，改为「美音 / 英音」两个胶囊模块各自带小喇叭，
+   点模块即按该口音朗读。移除左侧喇叭后词区整体左移（word-main 510→582rpx），
+   双音标单行容纳率 88.5%→99.3%（仅 58 个超长词靠 flex-wrap 折到第二行）。
+   字号沿用 v1.1.45 定的 24rpx；rpx 全等比，折行点与分辨率无关。 */
 .word-ipa { font-size:24rpx; color:var(--ink3); margin-left:12rpx; }
 .word-pos { font-size:22rpx; color:var(--green); font-style:italic; margin-left:10rpx; }
+/* 音标模块行：flex-wrap 兜底——超长词自动折到第二行，永不挤到右侧收藏键 */
+.ipa-row { display:flex; flex-wrap:wrap; align-items:center; margin-top:2rpx; }
+.ipa-mod { display:inline-flex; align-items:center; height:56rpx; padding:0 14rpx; margin:6rpx 10rpx 0 0;
+  border-radius:14rpx; border:1rpx solid var(--us-line); background:var(--us-bg); }
+.ipa-mod--uk { border-color:var(--uk-line); background:var(--uk-bg); }
+.ipa-mod .spk-ico { width:30rpx; height:30rpx; flex-shrink:0; margin-right:6rpx; }
+.ipa-txt { font-size:24rpx; line-height:1; color:var(--us-ink); }
+.ipa-mod--uk .ipa-txt { color:var(--uk-ink); }
+.ipa-mod.speak-hover { transform:scale(.96); opacity:.75; }
+.ipa-mod.on { border-color:var(--us-ink); }
+.ipa-mod--uk.on { border-color:var(--uk-ink); }
+/* 英音模块的喇叭换蓝系（美音沿用全局 .spk-ico 绿） */
+.ipa-mod--uk .spk-ico{background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Cpath%20d='M3%209v6h4l5%205V4L7%209H3z%20M16.5%2012c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73%202.5-2.25%202.5-4.02z%20M14%203.23v2.06c2.89.86%205%203.54%205%206.71s-2.11%205.85-5%206.71v2.06c4.01-.91%207-4.49%207-8.77s-2.99-7.86-7-8.77z'%20fill='%232A5C8A'/%3E%3C/svg%3E");}
+.ipa-mod--uk .spk-ico--on{background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Cpath%20d='M3%209v6h4l5%205V4L7%209H3z%20M16.5%2012c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73%202.5-2.25%202.5-4.02z%20M14%203.23v2.06c2.89.86%205%203.54%205%206.71s-2.11%205.85-5%206.71v2.06c4.01-.91%207-4.49%207-8.77s-2.99-7.86-7-8.77z'%20fill='%231E4468'/%3E%3C/svg%3E");}
+.theme-dark .ipa-mod--uk .spk-ico{background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Cpath%20d='M3%209v6h4l5%205V4L7%209H3z%20M16.5%2012c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73%202.5-2.25%202.5-4.02z%20M14%203.23v2.06c2.89.86%205%203.54%205%206.71s-2.11%205.85-5%206.71v2.06c4.01-.91%207-4.49%207-8.77s-2.99-7.86-7-8.77z'%20fill='%237FB3E8'/%3E%3C/svg%3E");}
 .word-zh { font-size:26rpx; color:var(--ink2); margin-top:4rpx; }
 .word-example { font-size:25rpx; color:var(--muted2); margin-top:6rpx; padding-left:4rpx; }
 /* 例句行：文本占满 + 右侧播放按钮（与语法区 ex-speak 同款，让人一眼看出可以播） */
@@ -130,7 +151,8 @@ page {
 .grammar-ex:last-child { border-bottom:none; }
 .grammar-ex-text { flex:1; min-width:0; font-size:27rpx; line-height:1.75; color:var(--ink4); white-space:normal; word-break:break-word; overflow-wrap:break-word; }
 .ex-no { flex-shrink:0; width:36rpx; color:var(--green); font-weight:700; font-size:26rpx; line-height:1.75; text-align:center; margin:0 14rpx 0 0; }
-.ex-speak { flex-shrink:0; width:46rpx; height:46rpx; font-size:26rpx; text-align:center; margin-left:12rpx; }
+/* 例句喇叭热区 46→56rpx（v1.1.51，用户反映「播放按钮偏小不好点」）：只放大盒与热区，图标随之略增 */
+.ex-speak { flex-shrink:0; width:56rpx; height:56rpx; font-size:28rpx; text-align:center; margin-left:12rpx; }
 .checkin-btn { margin:24rpx 0; }
 .done-state { display:flex; align-items:center; justify-content:center; color:var(--green); font-size:28rpx; font-weight:700; padding:16rpx 0; }
 
@@ -209,13 +231,16 @@ page {
   .word-en { font-size:16px; }
   .word-ipa { font-size:12px; margin-left:6px; }
   .word-pos { font-size:11px; margin-left:5px; }
+  .ipa-mod { height:28px; padding:0 7px; margin:3px 5px 0 0; border-radius:7px; }
+  .ipa-mod .spk-ico { width:15px; height:15px; margin-right:3px; }
+  .ipa-txt { font-size:12px; }
   .word-zh { font-size:13px; margin-top:2px; }
   .word-example { font-size:13px; margin-top:3px; padding-left:2px; }
   .word-star { width:32px; height:32px; font-size:16px; }
   .grammar-ex { padding:7px 0; }
   .grammar-ex-text { font-size:14px; }
   .ex-no { width:18px; font-size:13px; line-height:1.75; margin:0 7px 0 0; }
-  .ex-speak { width:23px; height:23px; font-size:13px; margin-left:6px; }
+  .ex-speak { width:28px; height:28px; font-size:14px; margin-left:6px; }
   .spk-ico { width:.9em; height:.9em; }
   .ex-speak .spk-ico { width:.85em; height:.85em; }
   .checkin-btn { margin:12px 0; }

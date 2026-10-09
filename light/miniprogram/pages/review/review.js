@@ -27,6 +27,7 @@ Page({
     showZh: false,
     starred: [],
     playingWord: '',
+    playingAccent: '',
     tab: 'random',      // random | due | starred
   },
 
@@ -35,7 +36,7 @@ Page({
     theme.applyPage(this); theme.syncTabBar(this);
     // 监听器返回取消函数，页面卸载时注销（旧实现会永久堆积回调）
     this._offSpeech = speech.onStateChange((payload) => {
-      const upd = { playingWord: payload.playing ? payload.text : '' };
+      const upd = { playingWord: payload.playing ? payload.text : '', playingAccent: payload.playing ? (payload.accent || '') : '' };
       if (payload.playing && payload.text) {
         const lit = Math.round((payload.progress || 0) * payload.text.length);
         upd.karaLit = payload.text.slice(0, lit);
@@ -175,15 +176,17 @@ Page({
   // v1.1.38：当前卡片随 tab 走 —— 两块卡片各绑各的数据，朗读/收藏/释义操作都作用在本 tab 的词上
   _cur() { return this.data.tab === 'due' ? this.data.currentDue : this.data.currentRandom; },
 
-  onSpeakCurrent() {
+  // accent 由音标模块的 data-accent 带入（us/uk）；无则用全局口音
+  onSpeakCurrent(e) {
     const c = this._cur();
     if (!c) return;
-    if (this.data.playingWord === c.w) {
+    const accent = (e && e.currentTarget && e.currentTarget.dataset.accent) || '';
+    if (this.data.playingWord === c.w && (this.data.playingAccent || '') === accent) {
       const r = speech.togglePause();
-      this.setData({ playingWord: r === 'paused' ? '' : c.w });
+      this.setData({ playingWord: r === 'paused' ? '' : c.w, playingAccent: r === 'paused' ? '' : accent });
       return;
     }
-    speech.speak(c.w, { ai: c.ai, kind: 'w' });
+    speech.speak(c.w, { ai: c.ai, kind: 'w', accent: accent });
     this.setData({ playingWord: c.w });
   },
 
@@ -219,14 +222,15 @@ Page({
 
   onSpeakStarred(e) {
     const w = e.currentTarget.dataset.word;
-    if (this.data.playingWord === w) {
+    const accent = e.currentTarget.dataset.accent || '';
+    if (this.data.playingWord === w && (this.data.playingAccent || '') === accent) {
       const r = speech.togglePause();
-      this.setData({ playingWord: r === 'paused' ? '' : w });
+      this.setData({ playingWord: r === 'paused' ? '' : w, playingAccent: r === 'paused' ? '' : accent });
       return;
     }
     // 重点词列表只传了单词文本，需从收藏数组里取回音频编号（旧记录经 _aiOf 从词库补）
     const it = (this.data.starred || []).filter(x => x && x.w === w)[0];
-    speech.speak(w, { ai: this._aiOf(it), kind: 'w' });
+    speech.speak(w, { ai: this._aiOf(it), kind: 'w', accent: accent });
     this.setData({ playingWord: w });
   },
 

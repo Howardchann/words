@@ -84,7 +84,7 @@ function allWords() {
   const out = new Array(lines.length);
   for (let i = 0; i < lines.length; i++) {
     const c = lines[i].split('\t');
-    out[i] = { w: c[0], p: c[1], m: c[2], e: c[3], ai: c[4] | 0, ipa: c[5] || '' };
+    out[i] = { w: c[0], p: c[1], m: c[2], e: c[3], ai: c[4] | 0, ipa: c[5] || '', uk: c[6] || '' };
   }
   _words = out;
   return out;
@@ -126,7 +126,7 @@ function wordsOfStudyDay(di, perDay) {
   const ws = allWords().slice(start, start + perDay);
   const cn = CORE_CNT[di] || 0;
   for (let i = 0; i < ws.length; i++) {
-    ws[i] = { w: ws[i].w, m: ws[i].m, p: ws[i].p, e: ws[i].e, ai: ws[i].ai, ipa: ws[i].ipa || '', core: i < cn };
+    ws[i] = { w: ws[i].w, m: ws[i].m, p: ws[i].p, e: ws[i].e, ai: ws[i].ai, ipa: ws[i].ipa || '', uk: ws[i].uk || '', core: i < cn };
   }
   return ws;
 }
@@ -238,7 +238,7 @@ function searchWords(kw, limit) {
     const day = dayOfWordIndex(i);
     const info = dayInfo(day);
     return {
-      w: it.w, p: it.p, m: it.m, e: it.e, ai: it.ai, ipa: it.ipa || '',
+      w: it.w, p: it.p, m: it.m, e: it.e, ai: it.ai, ipa: it.ipa || '', uk: it.uk || '',
       day: day, dow: DOW[info.k - 1], wn: info.wIdx + 1,
     };
   });

@@ -21,7 +21,7 @@ const cloudCfg = require('./cloud.js');
 
 const state = {
   engine: 'pregen', engineMode: 'auto',   // engineMode: auto=预生成优先 | pregen=仅预生成 | online=仅在线TTS
-  rate: 0.9, accent: 'us', audio: null,
+  rate: 0.9, accent: 'us', playingAccent: '', audio: null,
   playingText: '', queueMode: false, queue: [], playing: false, paused: false, listeners: [],
 };
 let playToken = 0, audioTimeout = null, audioOptDone = false;
@@ -46,7 +46,7 @@ function setEngineMode(m) {
 }
 function setAccent(accent) { if (accent === 'uk' || accent === 'us') state.accent = accent; }
 function notify(text, playing, mode, progress) {
-  const p = { text: text || '', playing: !!playing, source: usedSource || '', mode: mode || (state.queueMode ? 'queue' : (playing ? 'single' : 'idle')), progress: typeof progress === 'number' ? progress : 0 };
+  const p = { text: text || '', playing: !!playing, source: usedSource || '', mode: mode || (state.queueMode ? 'queue' : (playing ? 'single' : 'idle')), progress: typeof progress === 'number' ? progress : 0, accent: playing ? (state.playingAccent || '') : '' };
   state.listeners.slice().forEach(fn => { try { fn(p); } catch (e) {} });
 }
 
@@ -245,7 +245,8 @@ function tryPregenG(text, onResult) {
 }
 
 // ---------- ③ 在线兜底链 ----------
-function onlineUrl(text) { return 'https://dict.youdao.com/dictvoice?audio=' + encodeURIComponent(text) + '&type=' + (state.accent === 'uk' ? 1 : 2); }
+// accent：'uk' 时用有道 type=1（英音），否则 type=2（美音）。显式传入优先于全局设置。
+function onlineUrl(text, accent) { return 'https://dict.youdao.com/dictvoice?audio=' + encodeURIComponent(text) + '&type=' + ((accent || state.accent) === 'uk' ? 1 : 2); }
 function fallbackUrl(text) { return 'https://fanyi.baidu.com/gettts?lan=en&spd=3&source=web&text=' + encodeURIComponent(text); }
 function shortErr(e) { return String((e && (e.errMsg || e.errmsg || e.errCode)) || e || '').replace(/^[^:]*:fail\s*/, '').slice(0, 50); }
 
@@ -272,15 +273,15 @@ function tryUrl(url, onResult, ms) {
     playSrc(url, false, onResult, t, state.rate);
   });
 }
-function trySentence(text, onResult) { usedSource = '有道整句'; tryUrl(onlineUrl(text), onResult, 6000); }
-function tryWords(text, onResult) {
+function trySentence(text, accent, onResult) { usedSource = '有道整句'; tryUrl(onlineUrl(text, accent), onResult, 6000); }
+function tryWords(text, accent, onResult) {
   const words = String(text).replace(/[^A-Za-z0-9'\-\s]/g, ' ').split(/\s+/).filter(Boolean);
   if (words.length < 2) { onResult(false); return; }
   usedSource = '有道逐词';
   let i = 0, okAny = false;
   const next = () => {
     if (i >= words.length) { onResult(okAny); return; }
-    playSrc(onlineUrl(words[i++]), false, ok => { if (ok) okAny = true; next(); }, 3500, state.rate);
+    playSrc(onlineUrl(words[i++], accent), false, ok => { if (ok) okAny = true; next(); }, 3500, state.rate);
   };
   next();
 }
@@ -299,22 +300,29 @@ function playItem(item, onDone) {
   if (!text) { if (onDone) onDone(false); return; }
   const ai = isObj ? item.ai : 0;
   const kind = (isObj && item.kind) || 's';
+  // 口音：显式传入优先（点美音/英音音标），否则用设置里的全局口音
+  const accent = (isObj && item.accent) || state.accent;
+  state.playingAccent = accent;
   const useG = (kind === 'g') || (kind === 's' && !ai);   // 无编号的句子 = 语法例句（文本哈希预生成）
 
   // 朗读链按 engineMode 组装：
   //   auto    → 预生成 → 有道整句 → 百度整句
   //   pregen  → 仅预生成
   //   online  → 有道整句 → 百度整句
+  // ⚠️ 预生成音频**只有美音一套**（Azure en-US）→ 仅 accent='us' 时可用；
+  //    英音一律走在线有道（type=1），因此 accent='uk' 时即使 engineMode=pregen 也放行在线，
+  //    否则「仅预生成」的用户点英音音标会永远无音源。
   // 「逐词连播」只保留给单词（kind='w'）——句子逐词蹦体验差，宁可用百度整句兜底。
   const chain = [];
-  if (state.engineMode !== 'online') {
+  if (state.engineMode !== 'online' && accent === 'us') {
     chain.push(useG ? { run: cb => tryPregenG(text, cb) } : { run: cb => tryPregen(kind, ai, cb) });
   }
-  if (state.engineMode !== 'pregen') {
-    chain.push({ run: cb => trySentence(text, cb) });
-    if (kind === 'w') chain.push({ run: cb => tryWords(text, cb) });
+  if (state.engineMode !== 'pregen' || accent === 'uk') {
+    chain.push({ run: cb => trySentence(text, accent, cb) });
+    if (kind === 'w') chain.push({ run: cb => tryWords(text, accent, cb) });
     chain.push({ run: cb => tryBaidu(text, cb) });
   }
+  if (!chain.length) chain.push({ run: cb => cb(false) });   // 兜底：链为空时别让 chain[0] 崩
   let i = 0;
   const step = ok => {
     if (ok) { notify(state.playingText, true); if (onDone) onDone(true); return; }
@@ -377,7 +385,9 @@ function speakCore(item, onDone) {
 function speak(text, opts) {
   const t = String(text || '').trim();
   if (!t) return;
-  const item = opts && opts.ai ? { text: t, ai: opts.ai, kind: opts.kind || 's' } : t;
+  const o = opts || {};
+  // accent 单独给（如音标模块）时也要走对象通道，否则口音会丢
+  const item = (o.ai || o.accent) ? { text: t, ai: o.ai || 0, kind: o.kind || 's', accent: o.accent || '' } : t;
   if (state.queueMode) { state.queue = []; state.queueMode = false; }
   speakCore(item);
 }
