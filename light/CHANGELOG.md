@@ -27,13 +27,23 @@
 - 题干＝中文例句整句 + 英文例句（目标词挖空 `____`）+ 四选一英文选项，**不显示释义**。
 - 选「英文挖空」而非「中文挖空」：跨语种把词义对齐进中文句子不可靠；英文挖空可正则 + 词形回退（`child`→`children`）。
 - `words.js` 第 8 字段 = 中文例句；`data.js` 装配 `cn`；`plan.clozeSentence` / `plan.clozeOptions`（干扰项优先同词性）。
-- 中文例句数据未生成 → `clozePoolSize=0` 时空态降级；流水线 `_ipa_build/translate_cn.js`（MyMemory，续跑/配额自停）已就绪，注入脚本待写。
+- 中文例句数据：**已生成首批并注入**（见下条）。
+
+### 中文例句数据链路（`_ipa_build/`）
+- `translate_cn.js`（MyMemory 免费 API）：按词表顺序推进、增量落 `cn_map.json`、**HTTP 429 或连续 30 条被拒即熔断**（旧版只认 `quotaFinished`，会空转几千次）。
+- `cn_to_simp.py`：OpenCC 官方繁简字表（经 jsdelivr 取；本机 PyPI/GitHub 不可达）→ 转简体。首轮命中 3/1169。顺序：短语表 → 单字表，幂等。
+- `inject_cn.js`：注入 `words.js` 第 8 字段。**不能用文本替换**——该文件真实换行为 CRLF，而记录/字段分隔是字面两字符 `\n`/`\t`，且含 664 处 `\'`；必须 require 取真实数据 → 改字段 → 重新转义序列化。幂等 + 先写 `words_new.js` 逐条比对通过才 rename + 带时间戳备份。
+- **首轮成果：1169/8000（14.6%）已注入**，其中 **1154 词可出题**（`clozeSentence` 挖不空的 15 词自动不进题库）。按词表顺序推进 → 覆盖天然前置：**阶段一：入门词 82.9%（1169/1410）**，阶段二/三/四 0%。
+- 配额实测：MyMemory 匿名约 505 句/轮上限；加 `de=<邮箱>` 可再得约 575 句，**当日总量约 1170 句后 HTTP 429**。故 8000 句需约 7 个自然日续跑。备用通道 LibreTranslate 已验证**不可用**（4/6 返回 undefined，"The eagle is the king of the air" → "鹰为空相之相"）。
+- **体积预算**：整包 1490.5 KB / 2048 KB（**无分包**），本次 +34.5 KB；若 8000 条全注入外推 +236 KB → 约 1.65 MB，余量降到约 357 KB。
 
 ### 验证
 - `node --check`：store.js / data.js / today.js / weeks.js / settings.js / review.js / custom-tab-bar 全过。
 - `_ipa_build/t_sm2.js`：SM-2 行为 23/23（含旧数据迁移、旧布尔兼容、ef 下限、10 分钟学习步不进到期队列）。
 - WXML 结构：today 63/63、weeks 31/31、review 80/80（view/text/block 全配对）；review tab=4、grade-btn=4、无 `data-result` 残留。
 - `clozeOptions` 200 次抽样：长度/去重/含正确答案/均来自词池 全过。
+- `_ipa_build/t_cloze_data.js`：题库验收 **7/7**（1169 条带 cn、1154 条进题库、挖空必含 `____`、恒 4 选项、必含答案、互不重复、**选项无中文/释义泄漏**、**干扰项同词性 99.2%**）。
+- `_ipa_build/inject_cn.js`：注入前后 **8000 条记录逐条比对一致**；字段分布 `5:56 / 6:352 / 7:6423 / 8:1169`（合计 8000）；CRLF 未被破坏（11 CRLF / 0 裸 LF）。
 - 词库字段与换行符：全库无混用（store.js/custom-tab-bar/app.json 为 CRLF，其余 LF）。
 
 ## 2026-10-09 · 双音标（美音 + 英音）方案 A 落地 —— 音标模块化 + 按口音朗读（v1.1.51）
