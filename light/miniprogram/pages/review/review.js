@@ -10,6 +10,12 @@ function ipaOf(w) {
   if (!_ipaMap) { _ipaMap = {}; plan.allWords().forEach(x => { if (x.ipa) _ipaMap[x.w] = x.ipa; }); }
   return _ipaMap[w] || '';
 }
+// 同理：收藏快照（store.toggleStar）只存 {w,m,p,e,ai,ts}，没有 cn，渲染前按词反查补全（v1.1.53）
+let _cnMap = null;
+function cnOf(w) {
+  if (!_cnMap) { _cnMap = {}; plan.allWords().forEach(x => { if (x.cn) _cnMap[x.w] = x.cn; }); }
+  return _cnMap[w] || '';
+}
 
 Page({
   data: {
@@ -31,6 +37,7 @@ Page({
     dueHint: null,      // 四档各自的下次间隔提示（Anki 式按钮副标题）
     cloze: null,        // 中文例句挖空：当前题 {zh, en, answer, options, done, right}
     clozePoolSize: 0,   // 可出填空题的词数（词库有中文例句的）
+    zhOpen: {},         // 例句中文展开表 { 单词: 1 }（v1.1.53，默认不显示）
     tab: 'random',      // random | due | cloze | starred
   },
 
@@ -90,7 +97,7 @@ Page({
     this.refreshPool();
     // 收藏列表同值守卫（新数组实例同值也会触发重渲染）；ipa 渲染时反查补全（v1.1.50）
     const raw = store.get('starredWords') || [];
-    const starred = raw.map(v => (v.ipa ? v : Object.assign({}, v, { ipa: ipaOf(v.w) })));
+    const starred = raw.map(v => (v.ipa && v.cn) ? v : Object.assign({}, v, { ipa: v.ipa || ipaOf(v.w), cn: v.cn || cnOf(v.w) }));
     const sj = JSON.stringify(starred);
     if (sj !== this._starredJson) { this._starredJson = sj; this.setData({ starred }); }
   },
@@ -221,6 +228,15 @@ Page({
   },
 
   onShowZh() { this.setData({ showZh: true }); },
+
+  // 例句中文眼睛开关（v1.1.53）：按词记展开态，切词后各自独立；默认不显示。
+  onToggleExZh(e) {
+    const w = e.currentTarget.dataset.w;
+    if (!w) return;
+    const m = Object.assign({}, this.data.zhOpen);
+    if (m[w]) delete m[w]; else m[w] = 1;
+    this.setData({ zhOpen: m });
+  },
 
   // v1.1.38：当前卡片随 tab 走 —— 两块卡片各绑各的数据，朗读/收藏/释义操作都作用在本 tab 的词上
   _cur() { return this.data.tab === 'due' ? this.data.currentDue : this.data.currentRandom; },

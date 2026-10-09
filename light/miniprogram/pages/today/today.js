@@ -27,6 +27,7 @@ Page({
     weekNum: 0,
     dayData: null,
     vocab: [],
+    zhOpen: {},        // 例句中文展开表 { 单词: 1 }（v1.1.53，默认不显示）
     extraStart: -1,   // 扩展词在 vocab 中的起始下标（-1 表示全是核心词）
     coreCount: 0,
     extraCount: 0,
@@ -267,5 +268,16 @@ Page({
     const patch = {};
     patch['vocab[' + i + '].starred'] = starred;
     this.setData(patch);
+  },
+
+  // 例句中文眼睛开关（v1.1.53）：按词记展开态，默认不显示。
+  // 用「整对象替换」而不是 setData({'zhOpen.' + w: ...}) —— 词条含空格（get up）等字符，
+  // 拼数据路径不可靠；整表只有当天十几~几十个词，开销可忽略。
+  onToggleExZh(e) {
+    const w = e.currentTarget.dataset.w;
+    if (!w) return;
+    const m = Object.assign({}, this.data.zhOpen);
+    if (m[w]) delete m[w]; else m[w] = 1;
+    this.setData({ zhOpen: m });
   },
 });

@@ -153,6 +153,21 @@ page {
 .ex-no { flex-shrink:0; width:36rpx; color:var(--green); font-weight:700; font-size:26rpx; line-height:1.75; text-align:center; margin:0 14rpx 0 0; }
 /* 例句喇叭热区 46→56rpx（v1.1.51，用户反映「播放按钮偏小不好点」）：只放大盒与热区，图标随之略增 */
 .ex-speak { flex-shrink:0; width:56rpx; height:56rpx; font-size:28rpx; text-align:center; margin-left:12rpx; }
+/* ── 例句中文「眼睛」开关（v1.1.53）────────────────────────────
+   闭上（默认）= 不显示例句中文；睁开 = 显示。眼睛只在词条有 cn（中文例句）时渲染，
+   没有中文的例句不出现眼睛（首批 1169/8000 已有，随每日翻译补齐）。
+   ⚠️ 下面两个图标类必须保持「只含 background-image 一条声明」——tools/darkicons.js
+   的正则才能扫到并自动生成 .theme-dark 变体（见文件末尾 auto 块）。
+   ⚠️ .ex-eye .eye-ico 绝不能用 background 简写 —— 简写会把上一个规则的 background-image
+   重置为 none（app.wxss 里 .ico-inline 踩过同样的坑）。 */
+.eye-ico{background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='%23176B5B'%20stroke-width='1.8'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpath%20d='M2%2012s3.5-6%2010-6%2010%206%2010%206-3.5%206-10%206-10-6-10-6z'/%3E%3Ccircle%20cx='12'%20cy='12'%20r='2.6'/%3E%3Cpath%20d='M4.5%204.5l15%2015'/%3E%3C/svg%3E")}
+.eye-ico--on{background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='%23176B5B'%20stroke-width='1.8'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpath%20d='M2%2012s3.5-6%2010-6%2010%206%2010%206-3.5%206-10%206-10-6-10-6z'/%3E%3Ccircle%20cx='12'%20cy='12'%20r='2.4'%20fill='%23176B5B'%20stroke='none'/%3E%3C/svg%3E")}
+/* 眼睛按钮热区与 .ex-speak 同规格 56rpx，图标略小不抢喇叭 */
+.ex-eye{flex-shrink:0;width:56rpx;height:56rpx;display:flex;align-items:center;justify-content:center;margin-left:2rpx}
+.ex-eye .eye-ico{width:34rpx;height:34rpx;background-position:center;background-size:contain;background-repeat:no-repeat}
+.ex-eye.speak-hover{transform:scale(.85);opacity:.6}
+/* 例句中文：比英文例句小一号、弱一档；默认不渲染（wx:if），展开后出现在例句行下方 */
+.ex-cn{font-size:24rpx;color:var(--muted2);line-height:1.6;margin-top:2rpx;padding-left:4rpx}
 .checkin-btn { margin:24rpx 0; }
 .done-state { display:flex; align-items:center; justify-content:center; color:var(--green); font-size:28rpx; font-weight:700; padding:16rpx 0; }
 
@@ -243,6 +258,11 @@ page {
   .ex-speak { width:28px; height:28px; font-size:14px; margin-left:6px; }
   .spk-ico { width:.9em; height:.9em; }
   .ex-speak .spk-ico { width:.85em; height:.85em; }
+  /* 例句中文眼睛（v1.1.53）宽屏；字号 = rpx × 0.5 */
+  .ex-eye { width:28px; height:28px; margin-left:1px; }
+  .ex-eye .eye-ico { width:17px; height:17px; }
+  .ex-cn { font-size:12px; margin-top:1px; padding-left:2px; }
+  .random-card .ex-cn { margin-top:4px; }
   .checkin-btn { margin:12px 0; }
   .done-state { font-size:14px; padding:8px 0; }
   .icon-button { width:32px; height:32px; border-radius:9px; font-size:15px; }
@@ -253,6 +273,8 @@ page {
 
 /* ==== darkicons:auto-start（由 tools/darkicons.js 生成，勿手改） ==== */
 .theme-dark .ico-play{background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Cpath%20d='M7%205v14l11-7z'%20fill='%237CD6B4'/%3E%3C/svg%3E")}
+.theme-dark .ico-stop{background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Crect%20x='6.5'%20y='6.5'%20width='11'%20height='11'%20rx='2.5'%20fill='%237CD6B4'/%3E%3C/svg%3E")}
+.theme-dark .ico-check{background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Cpath%20d='M4.5%2012.8l5%205L19.5%207'%20fill='none'%20stroke='%237CD6B4'%20stroke-width='2.4'%20stroke-linecap='round'%20stroke-linejoin='round'/%3E%3C/svg%3E")}
 .theme-dark .ico-eye{background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='%237CD6B4'%20stroke-width='1.8'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpath%20d='M2%2012s3.5-6%2010-6%2010%206%2010%206-3.5%206-10%206-10-6-10-6z'/%3E%3Ccircle%20cx='12'%20cy='12'%20r='2.6'/%3E%3C/svg%3E")}
 .theme-dark .ico-ask{background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='%237CD6B4'%20stroke-width='1.8'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Ccircle%20cx='12'%20cy='12'%20r='9'/%3E%3Cpath%20d='M9.6%209.3a2.5%202.5%200%201%201%203.3%202.4c-.7.3-.9.8-.9%201.5'/%3E%3Cpath%20d='M12%2016.6h.01'/%3E%3C/svg%3E")}
 .theme-dark .ico-undo{background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='%23E8795F'%20stroke-width='1.8'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpath%20d='M9%2014%204%209l5-5'/%3E%3Cpath%20d='M4%209h9.5a6%206%200%200%201%200%2012H10'/%3E%3C/svg%3E")}
@@ -266,6 +288,7 @@ page {
 .theme-dark .ico-merge{background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='%237CD6B4'%20stroke-width='1.8'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpath%20d='M6%2015V6h12'/%3E%3Cpath%20d='M4%2018h6a4%204%200%200%200%204-4V9'/%3E%3Cpath%20d='M11%2012l3-3%203%203'/%3E%3C/svg%3E")}
 .theme-dark .ico-cover{background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='%237CD6B4'%20stroke-width='1.8'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpath%20d='M4%206h12v12H4z'/%3E%3Cpath%20d='M9%2018h11V7'/%3E%3C/svg%3E")}
 .theme-dark .ico-uparrow{background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='%237CD6B4'%20stroke-width='1.8'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpath%20d='M6%2014l6-6%206%206'/%3E%3C/svg%3E")}
-.theme-dark .ico-stop{background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Crect%20x='6.5'%20y='6.5'%20width='11'%20height='11'%20rx='2.5'%20fill='%237CD6B4'/%3E%3C/svg%3E")}
-.theme-dark .ico-check{background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Cpath%20d='M4.5%2012.8l5%205L19.5%207'%20fill='none'%20stroke='%237CD6B4'%20stroke-width='2.4'%20stroke-linecap='round'%20stroke-linejoin='round'/%3E%3C/svg%3E")}
+.theme-dark .eye-ico{background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='%237CD6B4'%20stroke-width='1.8'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpath%20d='M2%2012s3.5-6%2010-6%2010%206%2010%206-3.5%206-10%206-10-6-10-6z'/%3E%3Ccircle%20cx='12'%20cy='12'%20r='2.6'/%3E%3Cpath%20d='M4.5%204.5l15%2015'/%3E%3C/svg%3E")}
+.theme-dark .eye-ico--on{background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='%237CD6B4'%20stroke-width='1.8'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpath%20d='M2%2012s3.5-6%2010-6%2010%206%2010%206-3.5%206-10%206-10-6-10-6z'/%3E%3Ccircle%20cx='12'%20cy='12'%20r='2.4'%20fill='%237CD6B4'%20stroke='none'/%3E%3C/svg%3E")}
 /* ==== darkicons:auto-end ==== */
+

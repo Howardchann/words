@@ -75,7 +75,9 @@
           <view class="ex-speak {{playingText === item.e ? 'playing' : ''}}"
                 hover-class="speak-hover" hover-stay-time="120"
                 data-text="{{item.e}}" data-ai="{{item.ai}}" data-kind="s" bindtap="onSpeakWord"><view class="spk-ico {{playingText === item.e ? 'spk-ico--on' : ''}}"></view></view>
+          <view class="ex-eye" wx:if="{{item.cn}}" hover-class="speak-hover" hover-stay-time="120" data-w="{{item.w}}" catchtap="onToggleExZh"><view class="eye-ico {{zhOpen[item.w] ? 'eye-ico--on' : ''}}"></view></view>
         </view>
+        <view class="ex-cn" wx:if="{{item.cn && zhOpen[item.w]}}">{{item.cn}}</view>
       </view>
       <view class="word-star {{item.starred ? 'on' : ''}}" data-index="{{index}}" hover-class="hover-dim" hover-stay-time="120" bindtap="onStar"><view class="star-ico {{item.starred ? 'star-ico--on' : 'star-ico--off'}}"></view></view>
       </view>
