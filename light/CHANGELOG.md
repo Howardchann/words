@@ -15,8 +15,12 @@
 
 ### 二、英音慢速音频（离线）
 - 音色同正常速 `en-GB-SoniaNeural`；rate **−33%**（正常速是 −4%，即在正常速基础上再放慢 ~30%，与美音 −30% 口径对齐；实际倍率 ≈0.96×0.70=0.672）。
-- 输出 `D:/idea/ielts-audio/dist2uk/w/{分片}/{ai}s.mp3`，与美音 `w/{分片}/{ai}s.mp3` 同构；脚本 `_ipa_build/gen_uk_slow.py`（断点续跑）。
-- 上传 `wuk/` 桶 8 片（复用 v1.1.58 的 `tcb storage upload <分片目录> wuk/<分片>` 范式）。
+- 输出 `D:/idea/ielts-audio/dist2uk/w/{分片}/{ai}s.mp3`，与美音 `w/{分片}/{ai}s.mp3` 同构；脚本 `_ipa_build/gen_uk_slow.py`（断点续跑）。**实测 8000/8000 零失败、耗时 36.6 分钟、102 MB**（平均 12.8 KB，正常速 9.4 KB 的 1.36 倍）。
+- 上传 `wuk/` 桶 8 片（复用 v1.1.58 的 `tcb storage upload <分片目录> wuk/<分片>` 范式），**零失败**。
+  只传慢速：`_ipa_build/prep_uk_slow_upload.js` 先把 `*s.mp3` 挑到 `dist2uk_slow/w/{分片}/`，避免整目录重传那 8000 个正常速文件。
+- **核对**：`verify_uk_slow_cloud.js` 慢速差集 = 本地 8000 / 云端 8000 / 缺失 0 / 多余 0；`verify_uk_all_cloud.js` 全量 = 本地 16000 / 云端 16000 / 差集 0。
+  抽验 `wuk/1/1788s.mp3`：云函数签发 `status:0 errMsg:ok`（非法路径 `../x.txt` 仍被拦），签名链接 curl **HTTP 200 / 9504 字节 / audio-mpeg**，**md5 与本地一致**。
+- 英音合计 **175 MB / 16000 文件**；云存储总占用约 **1024 MB / 2 GB（50%）**。
 - `speech.js`：`const slow = state.rate <= SLOW_GATE;` —— 英音不再强制 `false`，慢速时直接取 `wuk/…s.mp3`，`playbackRate=1`（音高不变）。`prefetch` 同步。
 
 ### 验收
