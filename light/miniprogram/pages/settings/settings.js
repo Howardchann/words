@@ -18,7 +18,7 @@ const ABOUT_MODAL_TITLE = '关于开溜';
 // ⑤ 弹窗正文：\n 表示换行。行首不要留空格，否则手机弹窗里会出现空档
 const ABOUT_TEXT =
   '2026 年 9 月 21 日开始开发。初衷：给自己一套能坚持下来的零基础单词学习节奏——每天 30 分钟左右，先养习惯，再上强度。\n' +
-  '计划共 4 个等级、546 天、8000 词：1125 个主题核心词 + 6875 个词频扩展词，每 7 天里安排 1 天弹性复习。\n' +
+  '计划共 546 天、8000 词：1125 个主题核心词 + 6875 个词频扩展词，每 7 天里安排 1 天弹性复习。\n' +
   '进度自动云同步，也可在「备份与重置」导出文本存档；语音预生成，播过即缓存，离线可听。';
 // ========================================================================================
 
@@ -89,11 +89,11 @@ Page({
   shiftMonth(e){const dir=Number(e.currentTarget.dataset.dir);let{y,m}=this.data.cal;m+=dir;if(m<0){m=11;y--;}if(m>11){m=0;y++;}if((dir<0&&(y===2025&&m===0))||(dir>0&&(y===2028&&m===11))){return;}const g=this._buildCal(y,m);this.setData({'cal.y':y,'cal.m':m,'cal.label':g.label,'cal.grid':g.grid,'cal.canPrev':g.canPrev,'cal.canNext':g.canNext});},
   closeCal(){this.setData({'cal.show':false});},
   pickDay(e){const ds=e.currentTarget.dataset;if(ds.dis==='true'||ds.dis===true)return;const iso=ds.iso;
-  // v1.1.66：不再强制对齐周一——等级制下第 1 天就是所选当天，「周」不再是计划单位。
+  // v1.1.66：不再强制对齐周一——第 1 天就是所选当天，「周」不再是计划单位。
   // 日历仍禁选今天之前的日期，startDate 恒 ≥ 今天；开始日设到未来时进入准备期倒计时。
   store.set('startDate',iso);getCurrentPages().forEach(pg=>{if(pg.resetView)pg.resetView();});this.setData({'cal.show':false,startDate:iso});this.refresh();this.fb().toast('开始日期已更新');},
   // 学习进度数字跳转（v1.1.26 方案B → v1.1.27 二轮修）：①原生 hover-class 切 tab 返回后残影
-  // （微信清理不可靠，与等级页同病）→ 改 data.statPress 手动按压态：touchstart 亮 / touchmove 灭
+  // （微信清理不可靠）→ 改 data.statPress 手动按压态：touchstart 亮 / touchmove 灭
   // （滚动不拖亮块）/ touchend 不灭灯（tap 紧随跳转）/ tap 未派发 350ms 兜底 / onShow·onHide 双兜底。
   // ②跳转前清态 + 延迟 100ms switchTab（v1.1.21 铁律，防返回残影）。
   // ③重点词→复习页 starred tab、复习记录→random tab：经 globalData.reviewTab 传递（switchTab

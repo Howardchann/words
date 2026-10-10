@@ -25,13 +25,10 @@ const WORD_PARTS = require('./words.js');
 
 const WEEKS = [].concat(p1, p2, p3, p4, p5, p6);
 const TOTAL_DAYS = 546;
-// 阶段名（v1.1.52 L3 去雅思化）：只描述「词量与难度递进」，不再提考试/冲刺。
-// shortName 由 '：' 之后的部分截取（见 weeks.js），改格式务必同步。
-const PHASE_NAMES = ['', '阶段一：入门词', '阶段二：常用词', '阶段三：进阶词', '阶段四：高阶词'];
 const DOW = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
-// 默认开始日期（v1.1.66 等级制）：改为「今天」。
+// 默认开始日期：取「今天」。
 // 旧版取「下一个周一」——那是「周」还作为对外单位时的遗留，会让新用户先等几天才能开学。
-// 等级制下第 1 天就是开始日，无需对齐星期；老用户已存有 startDate，不受影响。
+// 第 1 天就是开始日，无需对齐星期；老用户已存有 startDate，不受影响。
 const DEFAULT_START = (() => {
   const n = new Date();
   const p = x => ('0' + x).slice(-2);
@@ -65,48 +62,13 @@ const CORE_CNT = [
 
 const WORD_TOTAL = 8000;
 const WEEK_COUNT = 78;
-const P1_TOTAL = RAMP.slice(0, 13).reduce((a, b) => a + b, 0) * 5;   // 前 13 组（L1 入门词）累计词数
+// 可打卡天数（v1.1.67）：每 7 天里第 6 天是弹性复习日（type='sat'，页面不给打卡按钮），
+// 所以「能打卡的天」= 78 组 × 6 天 = 468。工具页学习记录的分母用它，
+// 剩余天数才能随进度真正归零（旧版用 546 作分母，学满 468 天后剩余会永远停在 78）。
+const CHECKIN_DAYS = WEEK_COUNT * 6;
+const P1_TOTAL = RAMP.slice(0, 13).reduce((a, b) => a + b, 0) * 5;   // 前 13 组（入门段）累计词数
 
-// ── 等级制（v1.1.66）───────────────────────────────────────────────────
-// 对外单位由「周」改为「天」：4 个等级沿用原四阶段的词量边界，
-// 原 13/13/26/26 组 × 7 天 = 91/91/182/182 天（合计 546）；词量 930/1090/2660/3320（合计 8000）。
-// 「周」退化为纯内部实现细节（RAMP / CORE_CNT / DAY_OFF / 打卡键 wNdK 都按 7 天一组），不再对外出现。
-const LEVEL_NAMES = ['', '入门词', '常用词', '进阶词', '高阶词'];
-const LEVELS = (function () {
-  const RANGES = [[1, 13], [14, 26], [27, 52], [53, 78]];   // 每级对应的组区间
-  const out = [];
-  let dayStart = 1, wordFrom = 1;
-  for (let i = 0; i < RANGES.length; i++) {
-    const groups = RANGES[i][1] - RANGES[i][0] + 1;
-    let words = 0;
-    for (let w = RANGES[i][0] - 1; w < RANGES[i][1]; w++) words += RAMP[w] * 5;
-    out.push({
-      lv: i + 1,
-      name: LEVEL_NAMES[i + 1],
-      label: 'L' + (i + 1) + ' ' + LEVEL_NAMES[i + 1],
-      startDay: dayStart,
-      endDay: dayStart + groups * 7 - 1,
-      days: groups * 7,
-      groups: groups,
-      wordFrom: wordFrom,
-      wordTo: wordFrom + words - 1,
-      words: words,
-      rangeText: '第 ' + dayStart + '–' + (dayStart + groups * 7 - 1) + ' 天',
-    });
-    dayStart += groups * 7;
-    wordFrom += words;
-  }
-  return out;
-})();
-
-// 某天（1..546）所属等级；越界按最近端处理
-function levelOfDay(day) {
-  const d = Math.max(1, Math.min(TOTAL_DAYS, parseInt(day, 10) || 1));
-  for (let i = 0; i < LEVELS.length; i++) if (d <= LEVELS[i].endDay) return LEVELS[i];
-  return LEVELS[LEVELS.length - 1];
-}
-
-// 每个学习日的词表起始偏移（0 基），启动时算一次
+// ── 每个学习日的词表起始偏移（0 基），启动时算一次 ────────────────────
 const DAY_OFF = [];
 (function () {
   let off = 0;
@@ -279,7 +241,7 @@ function searchWords(kw, limit) {
     const info = dayInfo(day);
     return {
       w: it.w, p: it.p, m: it.m, e: it.e, ai: it.ai, ipa: it.ipa || '', uk: it.uk || '', cn: it.cn || '',
-      day: day, dow: DOW[info.k - 1], wn: info.wIdx + 1, lvName: levelOfDay(day).label,
+      day: day, dow: DOW[info.k - 1], wn: info.wIdx + 1,
     };
   });
   return { total: total, list: list };
@@ -291,7 +253,7 @@ function clozeSentence(it) {
   const s = String((it && it.e) || '');
   const w = String((it && it.w) || '');
   if (!s || !w) return '';
-  const esc = w.replace(/[.*+?^${}()|[\]\\]/g, '\\// 中文例句挖空练习：为 target 生成 n 个选项（含正确答案），返回打乱后的英文单词数组。');
+  const esc = w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   let re = new RegExp('\\b' + esc + '\\b', 'i');
   if (re.test(s)) return s.replace(re, '____');
   const stem = esc.replace(/e$/, '');
@@ -321,10 +283,24 @@ function clozeOptions(target, pool, n) {
   return shuffled(cand.concat([target.w]));
 }
 
+// 词形 → 预生成音频编号（工具页音标区的例词播放用）。
+// 词表里有的词直接拿它的 ai（可离线播放）；没有的返回 0，由调用方降级到在线朗读。
+// 首次调用建一次 8000 项的表，之后 O(1)。
+let _aiMap = null;
+function wordAi(word) {
+  const w = String(word || '').toLowerCase();
+  if (!w) return 0;
+  if (!_aiMap) {
+    _aiMap = {};
+    const ws = allWords();
+    for (let i = 0; i < ws.length; i++) { const k = String(ws[i].w || '').toLowerCase(); if (k && !(k in _aiMap)) _aiMap[k] = ws[i].ai | 0; }
+  }
+  return _aiMap[w] || 0;
+}
+
 module.exports = {
-  WEEKS, TOTAL_DAYS, PHASE_NAMES, DOW, DEFAULT_START, SATURDAY,
-  LEVELS, LEVEL_NAMES, levelOfDay,
-  RAMP, CORE_CNT, WORD_TOTAL, WEEK_COUNT, P1_TOTAL, SEARCH_LIMIT,
+  WEEKS, TOTAL_DAYS, DOW, DEFAULT_START, SATURDAY,
+  RAMP, CORE_CNT, WORD_TOTAL, WEEK_COUNT, CHECKIN_DAYS, P1_TOTAL, SEARCH_LIMIT,
   dayInfo, getDay, currentDayFromStart, learnedWords, allWords, demo, clozeOptions, clozeSentence,
-  searchWords, dayOfWordIndex,
+  searchWords, dayOfWordIndex, wordAi,
 };

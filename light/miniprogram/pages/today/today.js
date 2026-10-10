@@ -21,7 +21,7 @@ Page({
     preStart: false,
     daysToStart: 0,
     dayNum: 1,
-    levelText: '',     // 当前等级名（如「L2 常用词」，v1.1.66 取代原「周一 · 第N周」）
+    dowText: '',       // 日期副标题：星期（周一~周日）；等级模块下线后，这行从「等级名」改回星期
     theme: '',
     dayData: null,
     vocab: [],
@@ -103,8 +103,19 @@ Page({
     this._offSpeech = null;
   },
 
-  // 搜索入口（v1.1.46）：搜索页是普通页面（非 tab），走 navigateTo
-  goSearch() { wx.navigateTo({ url: '/pages/search/search' }); },
+  // 搜索入口（v1.1.67）：搜索已并入「工具」tab 页 —— 这里切到工具页并让输入框聚焦。
+  // switchTab 不能带参，走 globalData 中转（工具页 onShow 消费后立即清标记，避免下次切 tab 又弹键盘）。
+  goSearch() {
+    const app = getApp();
+    if (app && app.globalData) app.globalData.toolsFocus = true;
+    wx.switchTab({
+      url: '/pages/tools/tools',
+      fail: () => {
+        if (app && app.globalData) app.globalData.toolsFocus = false;
+        this.fb().toast('打开工具页失败');
+      },
+    });
+  },
 
   // 从搜索页跳来时的定位（v1.1.46）：等渲染上屏 → 量目标行位置 → 滚进视口 → 闪一下。
   // renderDay 的 setData 是异步的，量不到（还没上屏）就重试，最多 5 次（v1.1.49 由 3 次放宽，
@@ -138,7 +149,7 @@ Page({
   // 否则「第 N 天 · 等级名」。标题是 data 字段，经 sameSet 同值守卫绑定到 <nav-bar>，
   // 换 tab 不会串（旧「原生标题为空」防御只对仍在用原生栏的 weeks/review 有意义）。
   _setTitle(day) {
-    const t = day ? '第 ' + day + ' 天 · ' + plan.levelOfDay(day).label : '今日单词';
+    const t = day ? '第 ' + day + ' 天' : '今日单词';
     theme.sameSet(this, { navTitle: t });
   },
 
@@ -171,7 +182,7 @@ Page({
     this.setData({
       viewDay: day,
       dayNum: day,
-      levelText: plan.levelOfDay(day).label,
+      dowText: info.dow,
       theme: week.theme,
       dayData,
       prLines,
@@ -214,7 +225,7 @@ Page({
     speech.stop();
     this._daySig = null;
     this.setData({ preStart: true, viewDay: 0 });
-    this._setTitle(null); // 标题同步回「今日单词」，否则残留「第 N 天 · 等级」
+    this._setTitle(null); // 标题同步回「今日单词」，否则残留「第 N 天」
   },
 
   fb() { return this.selectComponent('#fb'); },

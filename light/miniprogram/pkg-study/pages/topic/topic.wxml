@@ -1,0 +1,51 @@
+<view class="page-root" wx:if="{{t}}">
+<!-- 标题区 -->
+<view class="card head">
+  <view class="head__cat">{{catName}}</view>
+  <view class="head__t">{{t.t}}</view>
+  <view class="head__def">{{t.def}}</view>
+</view>
+
+<!-- 用法 -->
+<view class="card">
+  <view class="section-label">用法</view>
+  <view class="li" wx:for="{{t.use}}" wx:key="*this">
+    <text class="li__dot"></text><text class="li__tx">{{item}}</text>
+  </view>
+</view>
+
+<!-- 易错点 -->
+<view class="card" wx:if="{{t.note.length}}">
+  <view class="section-label">易错点</view>
+  <view class="li li--note" wx:for="{{t.note}}" wx:key="*this">
+    <text class="li__dot"></text><text class="li__tx">{{item}}</text>
+  </view>
+</view>
+
+<!-- 例句：点整行朗读 -->
+<view class="card" wx:if="{{t.ex.length}}">
+  <view class="section-label">例句</view>
+  <view class="ex {{playingText === item.en ? 'ex--on' : ''}}" wx:for="{{t.ex}}" wx:key="en"
+        data-text="{{item.en}}" hover-class="ex--press" hover-stay-time="60" bindtap="onSpeakEx">
+    <view class="ex__main">
+      <view class="ex__en">{{item.en}}</view>
+      <view class="ex__cn">{{item.cn}}</view>
+    </view>
+    <view class="ex__spk"></view>
+  </view>
+</view>
+
+<!-- 课程里哪几天讲过 -->
+<view class="card" wx:if="{{days.length}}">
+  <view class="section-label">课程对应</view>
+  <view class="day-chips">
+    <view class="day-chip" wx:for="{{days}}" wx:key="d" data-d="{{item.d}}"
+          hover-class="day-chip--press" hover-stay-time="60" bindtap="goDay">第 {{item.d}} 天</view>
+  </view>
+  <view class="note">这些天的「例句精读」讲的就是这个语法点，点一下跳到当天原文。<block wx:if="{{dayMore}}">另有 {{dayMore}} 天也涉及它，未一一列出。</block></view>
+</view>
+
+<view class="foot">讲解为速查用的精简版；要看完整上下文，回课程里那一天读原文。</view>
+
+<view class="toast" wx:if="{{toast}}">{{toast}}</view>
+</view>

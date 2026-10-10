@@ -132,6 +132,12 @@ function toggleCheck(w, k) {
   return checked;
 }
 function checkedCount() { return Object.keys(data.checkedDays || {}).length; }
+// 已学单词数（去重）：工具页学习记录的「已学单词 N 个」用它。
+// 口径 = 所有已打卡学习日词汇的并集（周日/弹性日不产生新词，不计入）。
+function checkedWordCount() {
+  const plan = require('./data.js');
+  return plan.learnedWords(data.checkedDays || {}).length;
+}
 
 // 进度游标：第一个「需要打卡且未打卡」的学习日。
 // 没学 / 没学完，第二天打开仍停在这一天 —— 进度由打卡驱动，不由自然日驱动
@@ -683,7 +689,7 @@ function resetProgress() {
 
 module.exports = {
   init, onResume, flush, onChange, get, set,
-  isChecked, toggleCheck, checkedCount, firstUnfinishedDay, weekCheckedCount, weekCheckedMap,
+  isChecked, toggleCheck, checkedCount, checkedWordCount, firstUnfinishedDay, weekCheckedCount, weekCheckedMap,
   isStarred, toggleStar, reviewWord, getReviewStats, gradePreview, dueWords, activeReviewCount, resetProgress,
   sync, syncNow, setSyncEnabled, cloudStatus,
   exportBackup, importBackup

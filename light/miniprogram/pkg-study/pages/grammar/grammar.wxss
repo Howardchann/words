@@ -1,0 +1,51 @@
+/* 语法速查 · 体系目录（分包页） */
+/* 本页是普通页面（非 tab）：撤掉 app.wxss 给 tabBar 预留的 132rpx 底部内边距 */
+page { padding-bottom: env(safe-area-inset-bottom); }
+
+.sb { display: flex; align-items: center; margin: 18rpx 24rpx 4rpx; padding: 0 22rpx; height: 76rpx;
+  background: var(--card); border-radius: 38rpx; border: 1rpx solid var(--card-line); }
+.sb__ico { flex-shrink: 0; width: 30rpx; height: 30rpx; margin-right: 14rpx;
+  background: center/contain no-repeat;
+  background-image: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='%23176B5B'%20stroke-width='2'%20stroke-linecap='round'%3E%3Ccircle%20cx='10.8'%20cy='10.8'%20r='6.6'/%3E%3Cpath%20d='M15.8%2015.8l4.7%204.7'/%3E%3C/svg%3E"); }
+.sb__input { flex: 1; min-width: 0; height: 76rpx; font-size: 28rpx; color: var(--ink); }
+.sb__ph { color: var(--muted); font-size: 26rpx; }
+.sb__clear { flex-shrink: 0; width: 48rpx; height: 48rpx; line-height: 46rpx; text-align: center;
+  font-size: 38rpx; color: var(--muted); border-radius: 50%; }
+
+.meta { margin: 20rpx 32rpx 0; font-size: 25rpx; color: var(--muted3); }
+.intro { margin: 22rpx 32rpx 0; font-size: 24rpx; color: var(--muted3); line-height: 1.8; }
+.empty { text-align: center; padding: 80rpx 48rpx; font-size: 27rpx; color: var(--muted); }
+.foot { text-align: center; font-size: 22rpx; color: var(--muted2); padding: 10rpx 48rpx 40rpx; }
+
+/* 分类卡（手风琴） */
+.cat { padding: 6rpx 28rpx; }
+.cat__head { display: flex; align-items: center; padding: 22rpx 0; }
+.cat__head--press { background: var(--soft); border-radius: 12rpx; }
+.cat__l { flex: 1; min-width: 0; }
+.cat__name { font-size: 30rpx; font-weight: 700; color: var(--ink); }
+.cat__intro { margin-top: 6rpx; font-size: 23rpx; color: var(--muted3); line-height: 1.6; }
+.cat__n { flex-shrink: 0; font-size: 23rpx; color: var(--green); margin-left: 14rpx; }
+.cat__arrow { flex-shrink: 0; width: 40rpx; text-align: center; font-size: 34rpx; color: var(--muted2);
+  transition: transform .18s; margin-left: 6rpx; }
+.cat__arrow.on { transform: rotate(90deg); }
+
+/* 语法点行 */
+.tp { padding: 20rpx 0; border-top: 1rpx solid var(--line); }
+.tp--press { background: var(--soft); border-radius: 12rpx; }
+.tp__head { display: flex; align-items: baseline; }
+.tp__t { flex: 1; min-width: 0; font-size: 28rpx; font-weight: 700; color: var(--ink); }
+.tp__cat { flex-shrink: 0; margin-left: 14rpx; font-size: 21rpx; color: var(--uk-ink);
+  background: var(--uk-bg); border-radius: 8rpx; padding: 2rpx 10rpx; }
+.tp__def { margin-top: 6rpx; font-size: 24rpx; color: var(--muted3); line-height: 1.6; }
+
+/* 自绘轻提示（不引组件，分包零依赖） */
+.toast { position: fixed; left: 50%; bottom: 180rpx; transform: translateX(-50%); z-index: 9999;
+  background: var(--card); color: var(--ink); font-size: 26rpx; padding: 18rpx 34rpx; border-radius: 40rpx;
+  box-shadow: 0 8rpx 30rpx rgba(0,0,0,.14); }
+
+@media (min-width:700px) {
+  .sb { height: 38px; border-radius: 19px; margin: 9px 12px 2px; padding: 0 11px; }
+  .sb__input { height: 38px; font-size: 14px; }
+  .cat__name { font-size: 15px; }
+  .tp__t { font-size: 14px; }
+}

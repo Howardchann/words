@@ -27,24 +27,32 @@ const icons = {
       : `<path d='M12,13V8.5M12,13l3,2' ${SW} stroke='${main}' stroke-linecap='round'/>`) +
     `<path d='M9,3h6' ${SW} stroke='${main}' stroke-linecap='round'/>`
   ),
-  cal: (main, red) => svg(
-    `<rect x='4' y='5.5' width='16' height='15' rx='2.5' ${SW} stroke='${main}'/>` +
-    `<path d='M8,3.5v4M16,3.5v4' ${SW} stroke='${main}' stroke-linecap='round'/>` +
-    (red ? `<path d='M9,12.5l2,2 4,-4' ${SW} stroke='${RED}' stroke-linecap='round' stroke-linejoin='round'/>`
-         : `<path d='M9,12.5l2,2 4,-4' ${SW} stroke='${main}' stroke-linecap='round' stroke-linejoin='round'/>`)
+  // 工具：工具箱（v1.1.67 定稿，取代初版扳手）。用户选定的「工具箱 + 红提手」方案：
+  // 红只出现在选中态（未选中态整体单色灰、无红色元素——用户点名要求），选中态提手变红
+  // （提手是工具箱最有辨识度的部位，且在最上方，视觉重心与其它三枚一致）。
+  // 结构 = 箱体圆角矩形 + 箱缝横线 + 上方提手弧；箱体收窄到 x4~20（宽 16，与 clock 外圆同宽），
+  // 提手 5 格宽 —— 初版箱体宽 18 比其它三枚墩一圈，实测对齐后更协调（见 _reviews/_iconalign.png）。
+  tool: (main, red) => svg(
+    `<rect x='4' y='8' width='16' height='12.5' rx='2.6' ${SW} stroke='${main}'/>` +
+    `<path d='M4,13.6h16' ${SW} stroke='${main}'/>` +
+    `<path d='M9.5,8V6.9a2.5,2.5 0 0 1 5,0V8' ${SW} stroke='${red ? RED : main}' stroke-linecap='round'/>`
   ),
-  // 复习：单弧 300°（缺口在右上 60°），箭头V在弧末端(19.8,12)指向行进方向(上)，即逆时针↺「再来一遍」。
+  // 复习：单弧 300°（缺口在右上 60°），箭头V在弧末端(19.6,12)指向行进方向(上)，即逆时针↺「再来一遍」。
+  // v1.1.67 尺寸归一：半径 7.8→7.6、箭头内收（尖端 21.2→20.6），使外接宽 ≈17.8 与另三枚一致。
   // 注意 sweep/large-arc 标志：圆心(12,12)时 3点→1点 逆时针仅存在 60° 小弧，300° 大弧必须 sweep=1
   // （或如现在这样：从1点起 sweep=0 逆时针绕到3点）。之前 sweep=0 从3点起画导致 SVG 换候选圆心(23.7,5.2)，弧变碎块。
   review: (main, red) => svg(
-    `<path d='M15.9,5.25A7.8,7.8 0 1 0 19.8,12' ${SW} stroke='${main}' stroke-linecap='round'/>` +
-    `<path d='M18.4,14L19.8,12L21.2,14' ${SW} stroke='${main}' stroke-linecap='round' stroke-linejoin='round'/>` +
+    `<path d='M15.8,5.42A7.6,7.6 0 1 0 19.6,12' ${SW} stroke='${main}' stroke-linecap='round'/>` +
+    `<path d='M18.6,13.7L19.6,12L20.6,13.7' ${SW} stroke='${main}' stroke-linecap='round' stroke-linejoin='round'/>` +
     `<path d='M12,16.2c-2.3,-1.7 -4.2,-3.4 -4.7,-5 -0.5,-1.5 0.4,-2.9 1.8,-3.2 1,-0.2 2,0.3 2.9,1.4 0.9,-1.1 1.9,-1.6 2.9,-1.4 1.4,0.3 2.3,1.7 1.8,3.2 -0.5,1.6 -2.4,3.3 -4.7,5z' ${SW} stroke='${red ? RED : main}' stroke-linejoin='round' ${HEART_T}/>`
   ),
+  // 设置：双轨滑块。v1.1.67 尺寸归一：轨道 5~19（宽 14）→ 4~20（宽 16），
+  // 圆钮 r 2.4→2.8、上下轨 8/16 → 7.2/16.8；外接宽 17.8 / 高 17.0，与 clock 外圆一致。
+  // 圆钮正好卡在轨道断口里（轨道让位给圆钮），所以四段轨道的端点必须跟着圆钮圆心走。
   set: (main, red) => svg(
-    `<path d='M5,8h2.6M12.4,8H19M5,16h7.6M17.4,16H19' ${SW} stroke='${main}' stroke-linecap='round'/>` +
-    `<circle cx='10' cy='8' r='2.4' ${SW} stroke='${main}'/>` +
-    `<circle cx='15' cy='16' r='2.4' ${SW} stroke='${red ? RED : main}'/>`
+    `<path d='M4,7.2h2.8M12.4,7.2H20M4,16.8h8.2M17.8,16.8H20' ${SW} stroke='${main}' stroke-linecap='round'/>` +
+    `<circle cx='9.6' cy='7.2' r='2.8' ${SW} stroke='${main}'/>` +
+    `<circle cx='15' cy='16.8' r='2.8' ${SW} stroke='${red ? RED : main}'/>`
   )
 };
 

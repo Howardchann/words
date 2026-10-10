@@ -8,8 +8,8 @@ Component({
     dark: theme.isDark(),
     list: [
       { pagePath: 'pages/today/today', text: '今日', key: 'clock' },
-      { pagePath: 'pages/weeks/weeks', text: '词表', key: 'book' },
       { pagePath: 'pages/review/review', text: '复习', key: 'review' },
+      { pagePath: 'pages/tools/tools', text: '工具', key: 'tool' },
       { pagePath: 'pages/settings/settings', text: '设置', key: 'set' }
     ]
   },

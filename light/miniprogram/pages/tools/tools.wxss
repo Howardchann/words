@@ -1,0 +1,85 @@
+/* 工具页（v1.1.67 · 原词表/计划页改造）
+   四块：学习记录 / 查单词 / 音标 / 语法速查。
+   词行、喇叭、歌词高亮、卡片等一律复用全局 app.wxss，这里只写本页特有的部分。 */
+
+/* ① 学习记录 */
+.rec-card { padding: 30rpx 28rpx 22rpx; }
+.rec-row { display: flex; align-items: center; }
+.rec-item { flex: 1; text-align: center; }
+.rec-div { width: 1rpx; height: 68rpx; background: var(--line); }
+/* 三格数字统一绿色（与「设置」页 .stat-num 同一口径）；单位跟着数字走，不再另起一色 */
+.rec-num { font-size: 56rpx; line-height: 1.1; font-weight: 800; color: var(--green); font-variant-numeric: tabular-nums; }
+.rec-unit { font-size: 24rpx; font-weight: 600; margin-left: 6rpx; }
+.rec-label { margin-top: 6rpx; font-size: 24rpx; color: var(--muted); }
+
+/* ② 查单词 */
+.search-card { padding: 24rpx 28rpx; }
+.tk-bar { display: flex; align-items: center; padding: 0 22rpx; height: 76rpx;
+  background: var(--soft); border-radius: 38rpx; }
+.tk-bar__ico { flex-shrink: 0; width: 32rpx; height: 32rpx; margin-right: 14rpx; }
+.tk-bar__input { flex: 1; min-width: 0; height: 76rpx; font-size: 28rpx; color: var(--ink); }
+.tk-bar__ph { color: var(--muted); font-size: 28rpx; }
+.tk-bar__clear { flex-shrink: 0; width: 48rpx; height: 48rpx; line-height: 46rpx; text-align: center;
+  font-size: 38rpx; color: var(--muted); border-radius: 50%; }
+.tk-hint { margin-top: 16rpx; font-size: 25rpx; color: var(--muted3); line-height: 1.7; }
+.tk-hint__n { color: var(--green); font-weight: 700; }
+.tk-meta { margin-top: 16rpx; font-size: 25rpx; color: var(--muted3); }
+.tk-meta__n { color: var(--green); font-weight: 700; }
+.tk-row { border-radius: 14rpx; }
+.tk-row--press { background: var(--soft); }
+.tk-day { font-size: 22rpx; color: var(--green); margin-top: 10rpx; }
+.tk-day__go { color: var(--muted); }
+.tk-empty { text-align: center; padding: 40rpx 24rpx 24rpx; }
+.tk-empty__sub { margin-top: 14rpx; font-size: 24rpx; color: var(--muted); line-height: 1.7; }
+.tk-note { margin-top: 16rpx; font-size: 23rpx; color: var(--muted2); line-height: 1.7; }
+
+/* ④ 语法速查（分类卡） */
+.cat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14rpx; }
+.cat-cell { background: var(--soft); border-radius: 16rpx; padding: 20rpx 22rpx;
+  display: flex; align-items: center; justify-content: space-between; }
+.cat-cell--press { background: var(--press-green); }
+.cat-name { font-size: 27rpx; font-weight: 700; color: var(--ink); }
+.cat-count { font-size: 22rpx; color: var(--green); }
+
+/* ③ 音标（分组 chips + 常驻详情面板） */
+.ph-title { font-size: 24rpx; font-weight: 700; color: var(--ink3); margin-top: 6rpx; letter-spacing: 1rpx; }
+.ph-title--gap { margin-top: 26rpx; }
+.ph-grp { font-size: 22rpx; color: var(--muted2); margin: 16rpx 0 8rpx; }
+.ph-grid { display: flex; flex-wrap: wrap; gap: 12rpx; }
+.ph-chip { min-width: 96rpx; padding: 12rpx 16rpx; box-sizing: border-box; text-align: center;
+  background: var(--soft); border-radius: 14rpx; font-size: 28rpx; font-weight: 700; color: var(--green);
+  font-family: 'Times New Roman', Georgia, serif; }
+.ph-chip--press { background: var(--press-green); }
+/* 选中态：绿底白字（两个类选择器，优先级高于单类的 --press，按压时不会掉色） */
+.ph-chip.on { background: var(--green); color: #FFFFFF; }
+.ph-chip.on.ph-chip--press { opacity: .88; }
+
+/* 常驻详情面板：位置固定不动，避免弹层「整片白遮罩」观感；默认选中第一个音标所以永不留白 */
+.ph-panel { margin-top: 24rpx; padding: 22rpx 26rpx 18rpx; border-radius: 16rpx;
+  background: var(--soft); border: 1rpx solid var(--line); }
+.ph-head { display: flex; align-items: baseline; }
+.ph-big { font-size: 56rpx; font-weight: 800; color: var(--green); line-height: 1.15;
+  font-family: 'Times New Roman', Georgia, serif; }
+.ph-tag { margin-left: 16rpx; font-size: 23rpx; color: var(--muted); }
+.ph-block { margin-top: 20rpx; }
+.ph-block__t { font-size: 24rpx; font-weight: 700; color: var(--green); margin-bottom: 8rpx; letter-spacing: 1rpx; }
+.ph-block__b { font-size: 27rpx; color: var(--ink4); line-height: 1.75; }
+.ph-ex { display: flex; align-items: center; padding: 16rpx 14rpx; border-radius: 14rpx; border-bottom: 1rpx solid var(--line); }
+.ph-ex:last-child { border-bottom: none; }
+.ph-ex__w { font-size: 29rpx; font-weight: 700; color: var(--ink); margin-left: 12rpx; }
+.ph-ex__hit { font-size: 22rpx; color: var(--uk-ink); margin-left: 10rpx; }
+.ph-ex__cn { flex: 1; text-align: right; font-size: 24rpx; color: var(--muted3); }
+
+/* iPad / 宽屏覆盖（纯追加，手机端不受影响），尺寸 = rpx × 0.5 */
+@media (min-width:700px) {
+  .rec-card { padding: 15px 14px 11px; }
+  .rec-num { font-size: 28px; }
+  .rec-div { height: 34px; }
+  .tk-bar { height: 38px; border-radius: 19px; padding: 0 11px; }
+  .tk-bar__input { height: 38px; }
+  .cat-grid { gap: 7px; }
+  .cat-cell { padding: 10px 11px; border-radius: 8px; }
+  .ph-chip { min-width: 48px; padding: 6px 8px; font-size: 14px; }
+  .ph-panel { margin-top: 12px; padding: 11px 13px 9px; border-radius: 8px; }
+  .ph-big { font-size: 28px; }
+}

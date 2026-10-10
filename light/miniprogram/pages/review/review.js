@@ -96,7 +96,7 @@ Page({
     // 本实例 setData 换 tab，切过来首帧即目标 tab——否则 webview 先恢复上次旧 tab 的 DOM、
     // onShow 的 setData 晚一帧才换，出现「random→starred 瞬移」闪现（v1.1.27 真机实锤）
     if (app && app.globalData) app.globalData._reviewPage = this;
-    theme.syncTabBar(this, 2);
+    theme.syncTabBar(this, 1);
     this.applyTheme();
     store.onResume();
     this._pool = null;

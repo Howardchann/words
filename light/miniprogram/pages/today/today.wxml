@@ -23,7 +23,7 @@
       <view class="nav-btn {{viewDay > 1 ? '' : 'nav-btn--dis'}}" hover-class="{{viewDay > 1 ? 'nav-btn--press' : 'none'}}" hover-stay-time="120" bindtap="prevDay">‹ 前一天</view>
       <view class="day-title">
         <view class="day-num">第 {{dayNum}} 天</view>
-        <view class="day-dow">{{levelText}}</view>
+        <view class="day-dow">{{dowText}}</view>
       </view>
       <view class="nav-btn {{viewDay < totalDays ? '' : 'nav-btn--dis'}}" hover-class="{{viewDay < totalDays ? 'nav-btn--press' : 'none'}}" hover-stay-time="120" bindtap="nextDay">后一天 ›</view>
     </view>

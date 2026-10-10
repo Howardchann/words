@@ -1,0 +1,50 @@
+<view class="page-root">
+<!-- 过滤框：71 条语法点里找一条，比翻目录快 -->
+<view class="sb">
+  <view class="sb__ico"></view>
+  <input class="sb__input" value="{{q}}" confirm-type="search" hold-keyboard="{{true}}"
+         placeholder="搜语法点，如 时态 / 从句 / 冠词" placeholder-class="sb__ph"
+         bindinput="onInput" bindconfirm="onInput" />
+  <view class="sb__clear" wx:if="{{q}}" hover-class="hover-dim" hover-stay-time="120" bindtap="onClear">×</view>
+</view>
+
+<!-- 过滤结果 -->
+<block wx:if="{{q}}">
+  <view class="meta" wx:if="{{hits.length}}">找到 {{hits.length}} 个语法点</view>
+  <view class="card" wx:if="{{hits.length}}">
+    <view class="tp" wx:for="{{hits}}" wx:key="t" data-c="{{item.c}}" data-i="{{item.i}}"
+          hover-class="tp--press" hover-stay-time="60" bindtap="onTopic">
+      <view class="tp__head"><text class="tp__t">{{item.t}}</text><text class="tp__cat">{{item.catName}}</text></view>
+      <view class="tp__def">{{item.def}}</view>
+    </view>
+  </view>
+  <view class="empty" wx:else>没有找到「{{q}}」，换个词试试</view>
+</block>
+
+<!-- 分类目录（手风琴） -->
+<block wx:else>
+  <view class="intro">共 {{total}} 个语法点，按 12 个体系分类排列。每个语法点含：一句话定义、用法、易错点、例句，并在能对应上的条目里挂出「课程里讲过哪几天」。</view>
+
+  <view class="card cat" wx:for="{{cats}}" wx:key="id" wx:for-item="C">
+    <view class="cat__head" data-id="{{C.id}}" hover-class="cat__head--press" hover-stay-time="80" bindtap="onToggle">
+      <view class="cat__l">
+        <view class="cat__name">{{C.name}}</view>
+        <view class="cat__intro">{{C.intro}}</view>
+      </view>
+      <view class="cat__n">{{C.topics.length}}</view>
+      <view class="cat__arrow {{open === C.id ? 'on' : ''}}">›</view>
+    </view>
+    <block wx:if="{{open === C.id}}">
+      <view class="tp" wx:for="{{C.topics}}" wx:key="t" data-c="{{C.id}}" data-i="{{index}}"
+            hover-class="tp--press" hover-stay-time="60" bindtap="onTopic">
+        <view class="tp__head"><text class="tp__t">{{item.t}}</text></view>
+        <view class="tp__def">{{item.def}}</view>
+      </view>
+    </block>
+  </view>
+</block>
+
+<view class="foot">语法速查 · 讲解为精简版，要看完整上下文，回课程里那一天读原文</view>
+
+<view class="toast" wx:if="{{toast}}">{{toast}}</view>
+</view>
