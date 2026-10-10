@@ -2,8 +2,8 @@
 // 在开发者工具点「上传」或「预览」之前跑一次：node tools/stamp-build.js
 // 作用：让「设置 → 关于」显示手机上跑的到底是哪一次提交。
 module.exports = {
-  sha: '3ef0e53',
+  sha: '9fc69ef',
   branch: 'cloud-sync',
   dirty: true,
-  builtAt: 1791660246012,
+  builtAt: 1791662888930,
 };
