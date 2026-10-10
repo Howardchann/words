@@ -30,7 +30,7 @@ const MAX_DIRTY_PER_SYNC = 400; // 单次最多上送多少个单词的复习记
 const SETTINGS_KEYS = { startDate: 1, rate: 1, accent: 1, engineMode: 1 };
 
 const defaults = () => ({
-  startDate: plan.DEFAULT_START,   // 计划开始日（v1.1.66 起默认为今天）
+  startDate: '',                   // 计划开始日（v1.1.78 起新装默认「未开学」→ 今日页准备期；选日期即开学）
   checkedDays: {},                 // { 'w1d1': 打卡时间戳 }   ← 旧版值是 1，两个都能用
   uncheckedDays: {},               // { 'w1d1': 取消打卡时间戳 } 防止另一端把取消掉的打卡复活
   starredWords: [],                // [ { w, m, p, e, ts } ]
