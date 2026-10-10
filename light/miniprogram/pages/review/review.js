@@ -16,6 +16,12 @@ function cnOf(w) {
   if (!_cnMap) { _cnMap = {}; plan.allWords().forEach(x => { if (x.cn) _cnMap[x.w] = x.cn; }); }
   return _cnMap[w] || '';
 }
+// 收藏快照同样没有 uk（英音音标，v1.1.51 加入）——重点词磁贴只显示美音胶囊的根因，渲染前反查补全
+let _ukMap = null;
+function ukOf(w) {
+  if (!_ukMap) { _ukMap = {}; plan.allWords().forEach(x => { if (x.uk) _ukMap[x.w] = x.uk; }); }
+  return _ukMap[w] || '';
+}
 
 Page({
   data: {
@@ -97,7 +103,7 @@ Page({
     this.refreshPool();
     // 收藏列表同值守卫（新数组实例同值也会触发重渲染）；ipa 渲染时反查补全（v1.1.50）
     const raw = store.get('starredWords') || [];
-    const starred = raw.map(v => (v.ipa && v.cn) ? v : Object.assign({}, v, { ipa: v.ipa || ipaOf(v.w), cn: v.cn || cnOf(v.w) }));
+    const starred = raw.map(v => (v.ipa && v.uk && v.cn) ? v : Object.assign({}, v, { ipa: v.ipa || ipaOf(v.w), uk: v.uk || ukOf(v.w), cn: v.cn || cnOf(v.w) }));
     const sj = JSON.stringify(starred);
     if (sj !== this._starredJson) { this._starredJson = sj; this.setData({ starred }); }
   },
