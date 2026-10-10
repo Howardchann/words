@@ -55,8 +55,10 @@
 .cat-cell { background: var(--soft); border-radius: 16rpx; padding: 20rpx 22rpx;
   display: flex; align-items: center; justify-content: space-between; }
 .cat-cell--press { background: var(--press-green); }
-.cat-name { font-size: 27rpx; font-weight: 700; color: var(--ink); }
-.cat-count { font-size: 22rpx; color: var(--green); }
+.cat-name { flex: 1; min-width: 0; font-size: 27rpx; font-weight: 700; color: var(--ink); }
+/* 可点击指引（v1.1.77）：分类格右侧加箭头 —— 首层此前只有文字+数字，用户第一眼不知可点 */
+.cat-cell__go { flex-shrink: 0; margin-right: 10rpx; font-size: 30rpx; color: var(--muted2); line-height: 1; }
+.cat-count { flex-shrink: 0; font-size: 22rpx; color: var(--green); }
 
 /* ③ 音标（大类 + 子类两级筛选 → 音标网格 → 常驻详情面板） */
 .ph-hint { margin: 8rpx 0 14rpx; font-size: 23rpx; color: var(--muted2); line-height: 1.7; }

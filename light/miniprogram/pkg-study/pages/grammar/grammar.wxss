@@ -27,7 +27,9 @@ page { padding-bottom: env(safe-area-inset-bottom); }
 .cat { padding: 6rpx 28rpx; }
 .cat__head { display: flex; align-items: center; padding: 22rpx 0; }
 /* 按压反馈（v1.1.75 统一口径）：无底色行改「变淡」，与今日页/工具页一致，不再整行铺背景 */
-.cat__head--press { opacity: .55; }
+/* 按压反馈（v1.1.77 收窄）：不再整头行变淡（数字跟着闪，用户点名不要）——
+   箭头旋转 + 展开本身已表达交互，按压只让箭头（可点击指引本体）变淡。 */
+.cat__head--press .cat__arrow { opacity: .45; }
 .cat__l { flex: 1; min-width: 0; }
 .cat__name { font-size: 30rpx; font-weight: 700; color: var(--ink); }
 .cat__intro { margin-top: 6rpx; font-size: 23rpx; color: var(--muted3); line-height: 1.6; }

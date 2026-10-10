@@ -6,7 +6,8 @@
 <view class="card prestart-card" wx:if="{{preStart}}">
   <view class="prestart-title">准备期</view>
   <view class="prestart-sub">计划开始日前，可先熟悉操作</view>
-  <view class="prestart-days">还有 {{daysToStart}} 天开始学单词</view>
+  <view class="prestart-days" wx:if="{{daysToStart > 0}}">还有 {{daysToStart}} 天开始学单词</view>
+  <view class="prestart-days" wx:else>尚未设置开始日期 · 选好日期即开学</view>
   <view class="tip-box">
     <view class="tip-text">可以先看看第 1 天的单词，熟悉一下操作：点音标模块听发音（美音 / 英音各读各的），点<view class="ico-inline ico-heart"></view>收藏重点词</view>
   </view>
@@ -15,7 +16,7 @@
 
 <block wx:else>
 <!-- 准备期预览提示条：替代原「回到准备期」纯文字链接，常驻顶部一眼可见 -->
-<view class="prep-back" wx:if="{{todayNum === 0}}" hover-class="hover-dim" hover-stay-time="120" bindtap="backToPrep">‹ 返回准备期（还有 {{daysToStart}} 天开始）</view>
+<view class="prep-back" wx:if="{{todayNum === 0}}" hover-class="hover-dim" hover-stay-time="120" bindtap="backToPrep">‹ 返回准备期（{{daysToStart > 0 ? '还有 ' + daysToStart + ' 天开始' : '未设置开始日期'}}）</view>
 
   <!-- 日期导航 -->
   <view class="card day-head">
@@ -68,6 +69,12 @@
                 hover-class="speak-hover" hover-stay-time="120"
                 data-text="{{item.w}}" data-ai="{{item.ai}}" data-kind="w" data-accent="uk" bindtap="onSpeakWord"><view class="spk-ico {{playingText === item.w && playingAccent === 'uk' ? 'spk-ico--on' : ''}}"></view><text class="ipa-txt">{{item.uk}}</text></view>
         </view></view>
+        <!-- 其他词形（v1.1.77）：固定常驻（不再只跟 2s 跳转高亮），点词形即朗读该形式 -->
+        <view class="wf-line" wx:if="{{item.wf.length}}">
+          <view class="wf-line__t" wx:for="{{item.wf}}" wx:for-item="F" wx:key="form"
+                hover-class="hover-dim" hover-stay-time="120"
+                data-text="{{F.form}}" catchtap="onSpeakWfToday">{{F.label}} {{F.form}}</view>
+        </view>
         <!-- 变体标注（v1.1.75）：搜索结果卡上的「『took』是它的过去式」随跳转带到定位行下，
              与高亮同生共死（2s 自动清空），用户不会忘了自己查的是哪种形式 -->
         <view class="hl-via" wx:if="{{hlWord === item.w && hlVia}}">「{{hlQ}}」是它的{{hlVia}}</view>

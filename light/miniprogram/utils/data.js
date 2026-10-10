@@ -168,6 +168,7 @@ function getDay(day) {
 
 // 由开始日期计算今天对应计划第几天（1 起；0 表示尚未开始）
 function currentDayFromStart(startDateStr) {
+  if (!startDateStr) return 0;   // v1.1.77 空串 = 未开学（准备期）
   const sd = new Date(startDateStr + 'T00:00:00');
   const now = new Date();
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());

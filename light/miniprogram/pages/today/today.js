@@ -3,6 +3,7 @@ const plan = require('../../utils/data.js');
 const store = require('../../utils/store.js');
 const theme = require('../../utils/theme.js');
 const speech = require('../../utils/speech.js');
+const wordforms = require('../../utils/wordforms.js');
 
 Page({
   data: {
@@ -124,6 +125,13 @@ Page({
   // 从搜索页跳来时的定位（v1.1.46）：等渲染上屏 → 量目标行位置 → 滚进视口 → 闪一下。
   // renderDay 的 setData 是异步的，量不到（还没上屏）就重试，最多 5 次（v1.1.49 由 3 次放宽，
   // 低端机上首屏渲染慢于 360ms 时不会再把定位丢掉）；高亮只在首次进入时设，重试不重复设。
+  // 词形标签点读（v1.1.77）：与工具页 onSpeakWf 同构，变体音频走 g/ 桶（按文本哈希）
+  onSpeakWfToday(e) {
+    const t = e.currentTarget.dataset.text;
+    if (!t) return;
+    speech.speak(t, { kind: 'g' });
+  },
+
   _scrollToWord(w, tries, via) {
     const n = tries || 0;
     const idx = (this.data.vocab || []).findIndex(v => v.w === w);
@@ -170,7 +178,7 @@ Page({
     // dayData 里剔除词汇数组 v，避免与 vocab 重复 setData 两份（传输量翻倍）
     const dayData = raw ? Object.assign({}, raw) : null;
     if (dayData) delete dayData.v;
-    const list = (raw && raw.v ? raw.v : []).map(v => Object.assign({}, v, { starred: store.isStarred(v.w) }));
+    const list = (raw && raw.v ? raw.v : []).map(v => Object.assign({}, v, { starred: store.isStarred(v.w), wf: wordforms.noteFor(v.w) }));
     const coreCount = dayData ? dayData.coreCount || 0 : 0;
     // 练习任务按 "1) 2) 3)" 编号拆行（数据源里是一整段，无换行符）
     const prLines = dayData && dayData.pr ? String(dayData.pr).split(/(?=\d\)\s)/).map(s => { const m = s.match(/^(\d+)\)\s*/); return { no: m ? m[1] : '', text: m ? s.slice(m[0].length) : s }; }) : [];

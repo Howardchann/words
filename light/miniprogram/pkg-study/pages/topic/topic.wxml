@@ -45,7 +45,7 @@
      v1.1.75：播放态从「整行铺背景」（.ex--on）改为歌词式卡拉OK染色 —— 与今日页/工具页统一，
      大面积色块与全站风格不符（用户真机反馈）。 -->
 <view class="card" wx:if="{{t.ex.length}}">
-  <view class="section-label">例句</view>
+  <view class="section-label">例句 · 点整句听朗读</view>
   <view class="ex" wx:for="{{t.ex}}" wx:key="en"
         data-text="{{item.en}}" hover-class="ex--press" hover-stay-time="60" bindtap="onSpeakEx">
     <view class="ex__main">

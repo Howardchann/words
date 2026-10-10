@@ -75,7 +75,7 @@ Page({
     const MODES={auto:['自动（当前云端音频可用，优先预生成）','优先预生成高清音频（美音），失败自动切在线。'],pregen:['仅预生成高清音频','只用预生成音频（美音），失败不切在线。'],online:['仅在线 TTS（有道 / 百度）','全部在线朗读，口音切换只在此音源生效。']};
     const m=MODES[engineMode]||MODES.auto;
     // 同值守卫：onShow 每次进设置页都调 refresh，数值没变就不再整树 setData（切 tab 闪屏）
-    theme.sameSet(this,{startDate:store.get('startDate')||plan.DEFAULT_START,rate,rateText:Number(rate).toFixed(2)+'×',accent,accentIndex:Math.max(0,ACCENTS.indexOf(accent)),engineIndex:Math.max(0,this.data.engineOptions.findIndex(o=>o.value===engineMode)),starredCount:(store.get('starredWords')||[]).length,reviewCount:store.activeReviewCount(),
+    theme.sameSet(this,{startDate:store.get('startDate')||'',rate,rateText:Number(rate).toFixed(2)+'×',accent,accentIndex:Math.max(0,ACCENTS.indexOf(accent)),engineIndex:Math.max(0,this.data.engineOptions.findIndex(o=>o.value===engineMode)),starredCount:(store.get('starredWords')||[]).length,reviewCount:store.activeReviewCount(),
       engineLabel:m[0],
       engineHint:(pre?'':'⚠️ 云端音频不可用，预生成将自动降级在线。')+m[1]});this.refreshCloud();},
   openEngineSheet(){this.setData({sheet:{show:true,title:'朗读方式',options:this.data.engineOptions,index:this.data.engineIndex,key:'engine'}});},
@@ -135,7 +135,7 @@ Page({
   onHideBackup(){this.setData({showBackup:false});},onShowImport(){this.setData({showImport:true,showBackup:false,importText:''});},onHideImport(){this.setData({showImport:false,importText:''});},onImportInput(e){this.setData({importText:e.detail.value});},
   doImport(mode){const text=(this.data.importText||'').trim();if(!text){this.fb().toast('请先粘贴备份内容');return;}let r;try{r=store.importBackup(text,mode);}catch(e){this.fb().modal({title:'导入失败',content:e.message||String(e),showCancel:false});return;}this.setData({showImport:false,importText:''});getCurrentPages().forEach(pg=>{if(pg.resetView)pg.resetView();});this.refresh();const bs=this.backupSummaryOf(text);const head=mode==='merge'?'合并完成':'覆盖完成';const detail=(bs?('该备份：'+bs+'\n\n'):'')+(mode==='merge'?('新增 '+r.addedDays+' 天打卡、'+r.addedWords+' 个重点词\n合并后共 '+r.totalDays+' 天、'+r.totalWords+' 个重点词\n已恢复 '+r.reviewWords+' 个复习记录'):('已替换为备份中的 '+r.totalDays+' 天打卡、'+r.totalWords+' 个重点词、'+r.reviewWords+' 个复习记录'));this.fb().modal({title:head,content:detail,showCancel:false});},
   onImportMerge(){this.doImport('merge');},onImportReplace(){this.doImport('replace');},
-  onResetProgress(){this.fb().modal({title:'清除学习记录',content:'将清空全部打卡、收藏与复习记录，云端一并清除，其他设备同步后同样清空——无法撤销。建议先「导出备份」，确定从 0 开始吗？\n清空后按上方「计划开始日期」重新计数——想先看「准备期」，把它设到未来的某天即可。',confirmText:'清除',danger:true,onConfirm:()=>{store.resetProgress();getCurrentPages().forEach(p=>{if(p.resetView)p.resetView();});this.refresh();this.fb().toast('已清除，重新开始',1500);}});},
+  onResetProgress(){this.fb().modal({title:'清除学习记录',content:'将清空全部打卡、收藏与复习记录，云端一并清除，其他设备同步后同样清空——无法撤销。建议先「导出备份」，确定从 0 开始吗？\n清空后回到「准备期」，各页面恢复初始状态；想开学，把上方开始日期设为今天或未来某天即可。',confirmText:'清除',danger:true,onConfirm:()=>{store.resetProgress();getCurrentPages().forEach(p=>{if(p.resetView)p.resetView();});this.refresh();this.fb().toast('已清除，重新开始',1500);}});},
   // 云同步状态：只更新这一小块，避免每次 store 变更都整页 refresh
   refreshCloud(){
     const sr=store.cloudStatus();const p=n=>String(n).padStart(2,'0');

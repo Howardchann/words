@@ -65,6 +65,18 @@
 /* 变体标注（v1.1.75）：搜索跳转定位行下的小字，与工具页 .wf-via 同款式 */
 .hl-via { font-size: 22rpx; color: var(--muted3); padding: 4rpx 16rpx 0; line-height: 1.6; }
 
+/* 其他词形（v1.1.77）：固定常驻小标签（只有不规则形式的词才有），点词形即朗读；
+   口径与工具页搜索结果卡的 .wf-note__t 一致（绿字 + 点状下划线），view 实现保证 hover 只亮自身 */
+.wf-line { padding: 6rpx 16rpx 0; }
+.wf-line__t {
+  display: inline-block;
+  margin: 0 18rpx 6rpx 0;
+  font-size: 22rpx;
+  color: var(--green);
+  border-bottom: 2rpx dotted var(--green);
+  padding-bottom: 2rpx;
+}
+
 /* 从搜索页跳来的定位高亮：底色闪一下再淡出（forwards 保持终态全透明，不残留底色） */
 .word-row--hl { border-radius: 14rpx; animation: word-hl 1.9s ease-out forwards; }
 @keyframes word-hl {

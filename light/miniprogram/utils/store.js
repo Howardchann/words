@@ -345,7 +345,9 @@ function applyMerged(r, sentWords, sentVersions) {
   data.starredWords = sm.starredWords;
   data.unstarredWords = sm.unstarredWords;
 
-  if (c.startDate) data.startDate = c.startDate;
+  // v1.1.77：startDate 改 settingsAt 新者胜 —— 空串（清空=未开学）也要能从云端同步过来；
+  // 相等说明本地就是最新（自己刚上送），不必采纳
+  if (c.startDate !== undefined && (Number(c.settingsAt) || 0) > (Number(data.settingsAt) || 0)) data.startDate = c.startDate;
   if (c.rate) data.rate = c.rate;
   if (c.accent) data.accent = c.accent;
   if (c.engineMode) data.engineMode = c.engineMode;
@@ -681,7 +683,7 @@ function resetProgress() {
   data.reviewStats = zero;
   data.reviewDirty = {};
   Object.keys(zero).forEach(w => { data.reviewDirty[w] = 1; });
-  data.startDate = plan.DEFAULT_START;
+  data.startDate = '';   // v1.1.77 清空 = 回到「未开学」（今日页准备期）；开学由用户在设置里重选日期
   data.settingsAt = now;            // startDate 走 settingsAt 更晚者胜的合并规则
   data.updatedAt = now;
   saveLocal(); schedulePush(); emit();
