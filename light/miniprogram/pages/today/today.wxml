@@ -71,7 +71,7 @@
         </view></view>
         <!-- 其他词形（v1.1.77）：固定常驻（不再只跟 2s 跳转高亮），点词形即朗读该形式 -->
         <view class="wf-line" wx:if="{{item.wf.length}}">
-          <view class="wf-line__t" wx:for="{{item.wf}}" wx:for-item="F" wx:key="form"
+          <view class="wf-line__t {{wfText === F.form ? 'wf-line__t--on' : ''}}" wx:for="{{item.wf}}" wx:for-item="F" wx:key="form"
                 hover-class="hover-dim" hover-stay-time="120"
                 data-text="{{F.form}}" catchtap="onSpeakWfToday">{{F.label}} {{F.form}}</view>
         </view>

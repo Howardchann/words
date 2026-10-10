@@ -76,6 +76,8 @@
   border-bottom: 2rpx dotted var(--green);
   padding-bottom: 2rpx;
 }
+/* 词形标签播放态（v1.1.78）：与工具页 .wf-note__t--on 同款；误亮词卡已由 wfText 态隔离修复 */
+.wf-line__t--on { color: var(--green-press); background: var(--press-green); border-bottom-color: var(--green-press); border-radius: 6rpx; }
 
 /* 从搜索页跳来的定位高亮：底色闪一下再淡出（forwards 保持终态全透明，不残留底色） */
 .word-row--hl { border-radius: 14rpx; animation: word-hl 1.9s ease-out forwards; }

@@ -44,8 +44,11 @@ page { padding-bottom: env(safe-area-inset-bottom); }
 .tp--press { opacity: .55; }
 .tp__head { display: flex; align-items: baseline; }
 .tp__t { flex: 1; min-width: 0; font-size: 28rpx; font-weight: 700; color: var(--ink); }
-.tp__cat { flex-shrink: 0; margin-left: 14rpx; font-size: 21rpx; color: var(--uk-ink);
-  background: var(--uk-bg); border-radius: 8rpx; padding: 2rpx 10rpx; }
+/* 分类小字（v1.1.78）：原为英音蓝胶囊（--uk-ink/--uk-bg），与全站浅色绿语言不合群（用户真机指出）
+   → 改中性纯文字小字，信息保留、视觉减重 */
+.tp__cat { flex-shrink: 0; margin-left: 14rpx; font-size: 21rpx; color: var(--muted3); }
+/* 可点指引（v1.1.78）：第二层展开行加 chevron —— 展开列表此前无任何可点暗示（用户真机反馈） */
+.tp__go { flex-shrink: 0; margin-left: 14rpx; color: var(--muted3); font-size: 30rpx; line-height: 1; }
 .tp__def { margin-top: 6rpx; font-size: 24rpx; color: var(--muted3); line-height: 1.6; }
 
 /* 自绘轻提示（不引组件，分包零依赖） */

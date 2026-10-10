@@ -54,7 +54,7 @@
           </view></view>
         <view class="wf-via" wx:if="{{item.via}}">「{{kw}}」是它的{{item.via}}</view>
         <view class="wf-note" wx:if="{{item.wf.length}}">
-          <view class="wf-note__t" wx:for="{{item.wf}}" wx:for-item="F" wx:key="form"
+          <view class="wf-note__t {{wfText === F.form ? 'wf-note__t--on' : ''}}" wx:for="{{item.wf}}" wx:for-item="F" wx:key="form"
                 hover-class="hover-dim" hover-stay-time="120" hover-stop-propagation="{{true}}"
                 data-text="{{F.form}}" catchtap="onSpeakWf">{{F.label}} {{F.form}}</view>
         </view>

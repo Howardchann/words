@@ -2,8 +2,10 @@
 /* 本页是普通页面（非 tab）：撤掉 app.wxss 给 tabBar 预留的底部内边距 */
 page { padding-bottom: env(safe-area-inset-bottom); }
 
-.head__cat { font-size: 22rpx; color: var(--uk-ink); background: var(--uk-bg);
-  border-radius: 8rpx; padding: 2rpx 12rpx; align-self: flex-start; display: inline-block; }
+/* 分类小字（v1.1.78）：原为英音蓝胶囊，与全站浅色绿语言不合群（用户真机指出）→ 中性纯文字。
+   不与下方模块卡的 section-label（绿色粗体）同款是有意的：head 是「语法点本体」，
+   用法/易错点/例句是「附属模块」，本体卡的导航信息用最轻的小字呈现，标题才是主角。 */
+.head__cat { font-size: 22rpx; color: var(--muted3); letter-spacing: 1rpx; }
 .head__t { margin-top: 12rpx; font-size: 38rpx; font-weight: 800; color: var(--ink); line-height: 1.35; }
 /* 人话开场白（v1.1.68）：零基础学习者先看这一句 ——「这东西帮你解决什么问题」，再往下才是术语式讲解 */
 .head__plain { margin-top: 14rpx; padding: 14rpx 18rpx; border-radius: 12rpx; background: var(--soft);
@@ -11,8 +13,10 @@ page { padding-bottom: env(safe-area-inset-bottom); }
 .head__def { margin-top: 12rpx; font-size: 27rpx; color: var(--ink3); line-height: 1.7; }
 
 .li { display: flex; align-items: flex-start; margin-top: 14rpx; }
+/* 圆点对齐（v1.1.78）：27rpx × 1.75 行高的首行视觉中心 ≈ 23.5rpx，圆点半径 6rpx
+   → margin-top 应为 17~18rpx；原 14rpx 偏高约 4rpx（用户真机截图指出） */
 .li__dot { flex-shrink: 0; width: 12rpx; height: 12rpx; border-radius: 50%; background: var(--green);
-  margin: 14rpx 14rpx 0 0; }
+  margin: 17rpx 14rpx 0 0; }
 .li__tx { flex: 1; min-width: 0; font-size: 27rpx; color: var(--ink4); line-height: 1.75; word-break: break-word; }
 .li--note .li__dot { background: var(--red); }
 .li--note .li__tx { color: var(--ink3); }

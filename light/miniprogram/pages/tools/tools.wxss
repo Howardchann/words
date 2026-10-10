@@ -46,6 +46,8 @@
   padding-bottom: 2rpx;
 }
 .tk-day__go { color: var(--muted); }
+/* 词形标签播放态（v1.1.78）：朗读中加深底色作即时反馈；误亮结果卡已由 wfText 态隔离修复 */
+.wf-note__t--on { color: var(--green-press); background: var(--press-green); border-bottom-color: var(--green-press); border-radius: 6rpx; }
 .tk-empty { text-align: center; padding: 40rpx 24rpx 24rpx; }
 .tk-empty__sub { margin-top: 14rpx; font-size: 24rpx; color: var(--muted); line-height: 1.7; }
 .tk-note { margin-top: 16rpx; font-size: 23rpx; color: var(--muted2); line-height: 1.7; }
