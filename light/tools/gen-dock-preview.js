@@ -8,7 +8,9 @@ function pick(sel) {
   const re = new RegExp(sel.replace(/\./g, '\\.') + '\\{background-image:url\\("([^"]+)"\\)\\}');
   const m = wxss.match(re);
   if (!m) throw new Error('未命中 ' + sel);
-  return m[1];
+  // ⚠️ data-URI 内含单引号（xmlns='http://…'）。效果图模板用 url('…') 单引号包裹，
+  // 不转义的话浏览器在 xmlns= 后就把 URL 截断 → 图标整片空白（上一版就是这个坑）。
+  return m[1].replace(/'/g, '%27');
 }
 // 浮窗选中态可能要「整枚变绿」的效果，这里额外把灰版 SVG 的 stroke 换成品牌绿（仅效果图用）
 function toGreen(uri) { return uri.replace(/%238B9893/g, '%23176B5B'); }
