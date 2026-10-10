@@ -31,6 +31,8 @@ Page({
     extraCount: 0,
     checked: false,
     hlWord: '',       // 从搜索页跳来时的定位高亮词（v1.1.46），2s 后自动清空
+    hlVia: '',        // 变体标注（v1.1.75）：『took』是它的过去式 —— 搜索结果卡的标注在定位行下延续
+    hlQ: '',          // 用户当时输入的查询词（标注主语）
     playingText: '',
     playingAccent: '',
     playingMode: 'idle',
@@ -68,8 +70,10 @@ Page({
     const app = getApp();
     const jump = app.globalData.jumpDay || 0;
     const jumpWord = app.globalData.jumpWord || '';
+    const jumpVia = app.globalData.jumpVia || null;
     app.globalData.jumpDay = 0;
     app.globalData.jumpWord = '';
+    app.globalData.jumpVia = null;
     const todayNum = plan.currentDayFromStart(store.get('startDate'));
     // 切 tab 返回（无 jump 且页面未销毁）：保持离开时的浏览位置与准备期预览态，仅刷新打卡/同步数据。
     // 重新冷启动小程序才回到默认落点（第一个未完成日 / 准备期卡片）。
@@ -79,7 +83,7 @@ Page({
       this.renderDay(this.data.viewDay);
       // 防御：理论上 jump 与 jumpWord 同生共死，走不到这条分支；万一 jumpDay 被别的入口清了，
       // jumpWord 仍应生效（搜索页的定位不该因为绕路而丢）
-      if (jumpWord) this._scrollToWord(jumpWord);
+      if (jumpWord) this._scrollToWord(jumpWord, 0, jumpVia);
       return;
     }
     // 默认落点 = 第一个未完成的学习日（打卡驱动）：没学/没学完，第二天仍停在这一天；
@@ -93,7 +97,7 @@ Page({
     if (viewDay < 1) viewDay = 1;
     if (viewDay > plan.TOTAL_DAYS) viewDay = plan.TOTAL_DAYS;
     this.renderDay(viewDay);
-    if (jumpWord) this._scrollToWord(jumpWord);
+    if (jumpWord) this._scrollToWord(jumpWord, 0, jumpVia);
   },
 
   onUnload() {
@@ -120,15 +124,15 @@ Page({
   // 从搜索页跳来时的定位（v1.1.46）：等渲染上屏 → 量目标行位置 → 滚进视口 → 闪一下。
   // renderDay 的 setData 是异步的，量不到（还没上屏）就重试，最多 5 次（v1.1.49 由 3 次放宽，
   // 低端机上首屏渲染慢于 360ms 时不会再把定位丢掉）；高亮只在首次进入时设，重试不重复设。
-  _scrollToWord(w, tries) {
+  _scrollToWord(w, tries, via) {
     const n = tries || 0;
     const idx = (this.data.vocab || []).findIndex(v => v.w === w);
     // 词还没上屏（renderDay 的 setData 尚未落到视图层）→ 稍后重试，别静默放弃（v1.1.48）
     if (idx < 0) { if (n < 5) setTimeout(() => this._scrollToWord(w, n + 1), 120); return; }
     if (n === 0) {
       this._clearHl();
-      this.setData({ hlWord: w });
-      this._hlTimer = setTimeout(() => { this._hlTimer = null; this.setData({ hlWord: '' }); }, 2000);
+      this.setData({ hlWord: w, hlVia: (via && via.via) || '', hlQ: (via && via.q) || '' });
+      this._hlTimer = setTimeout(() => { this._hlTimer = null; this.setData({ hlWord: '', hlVia: '', hlQ: '' }); }, 2000);
     }
     setTimeout(() => {
       wx.createSelectorQuery()

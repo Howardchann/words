@@ -24,9 +24,8 @@ page { padding-bottom: env(safe-area-inset-bottom); }
 .ex { display: flex; align-items: baseline; padding: 18rpx 16rpx; border-radius: 14rpx; border-bottom: 1rpx solid var(--line); }
 .ex:last-child { border-bottom: none; }
 /* 按压反馈（v1.1.71）：整行变色 → 喇叭缩放变淡，与今日页 .ex-speak.speak-hover 同款；
-   行底色留给播放态（.ex--on，卡拉OK 高亮的一部分），按压不再动行背景。 */
+   播放态（v1.1.75）：不再铺整行背景（原 .ex--on），改卡拉OK染绿（.kara-lit，app.wxss 全局类）。 */
 .ex--press .spk-ico { transform: scale(.85); opacity: .6; }
-.ex--on { background: var(--soft2); }
 .ex__main { flex: 1; min-width: 0; }
 .ex__en { font-size: 28rpx; color: var(--ink3); line-height: 1.7; word-break: break-word; }
 .ex__cn { margin-top: 4rpx; font-size: 24rpx; color: var(--muted3); line-height: 1.6; }

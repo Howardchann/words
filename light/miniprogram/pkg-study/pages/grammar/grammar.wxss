@@ -26,7 +26,8 @@ page { padding-bottom: env(safe-area-inset-bottom); }
 /* 分类卡（手风琴） */
 .cat { padding: 6rpx 28rpx; }
 .cat__head { display: flex; align-items: center; padding: 22rpx 0; }
-.cat__head--press { background: var(--soft); border-radius: 12rpx; }
+/* 按压反馈（v1.1.75 统一口径）：无底色行改「变淡」，与今日页/工具页一致，不再整行铺背景 */
+.cat__head--press { opacity: .55; }
 .cat__l { flex: 1; min-width: 0; }
 .cat__name { font-size: 30rpx; font-weight: 700; color: var(--ink); }
 .cat__intro { margin-top: 6rpx; font-size: 23rpx; color: var(--muted3); line-height: 1.6; }
@@ -38,7 +39,7 @@ page { padding-bottom: env(safe-area-inset-bottom); }
 
 /* 语法点行 */
 .tp { padding: 20rpx 0; border-top: 1rpx solid var(--line); }
-.tp--press { background: var(--soft); border-radius: 12rpx; }
+.tp--press { opacity: .55; }
 .tp__head { display: flex; align-items: baseline; }
 .tp__t { flex: 1; min-width: 0; font-size: 28rpx; font-weight: 700; color: var(--ink); }
 .tp__cat { flex-shrink: 0; margin-left: 14rpx; font-size: 21rpx; color: var(--uk-ink);

@@ -26,7 +26,8 @@
 .tk-meta { margin-top: 16rpx; font-size: 25rpx; color: var(--muted3); }
 .tk-meta__n { color: var(--green); font-weight: 700; }
 .tk-row { border-radius: 14rpx; }
-.tk-row--press { background: var(--soft); }
+/* 按压反馈（v1.1.75 统一口径）：无底色行改「变淡」，不再整行铺 --soft 背景 */
+.tk-row--press { opacity: .55; }
 .tk-day { font-size: 22rpx; color: var(--green); margin-top: 10rpx; }
 
 /* 词形归一提示 + 不规则形式标注（v1.1.73）

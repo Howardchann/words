@@ -39,7 +39,7 @@
 
   <!-- 结果行与今日页词行同构：图标 = 朗读，其它位置 = 跳到该词所在的 Day -->
   <block wx:for="{{list}}" wx:key="w">
-    <view class="word-row tk-row" data-w="{{item.w}}" data-day="{{item.day}}"
+    <view class="word-row tk-row" data-w="{{item.w}}" data-day="{{item.day}}" data-via="{{item.via}}"
           hover-class="tk-row--press" hover-start-time="0" hover-stay-time="60" bindtap="onJump">
       <view class="word-main">
         <view class="word-head"><text class="word-en"><text wx:if="{{playingText === item.w}}" class="kara-lit">{{karaLit}}</text>{{playingText === item.w ? karaRest : item.w}}</text><text class="word-pos">{{item.p}}</text><view class="word-zh">{{item.m}}</view>

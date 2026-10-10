@@ -52,6 +52,8 @@ Page({
     days: [],
     dayMore: 0,
     playingText: '',
+    karaLit: '',
+    karaRest: '',
     toast: '',
   },
 
@@ -62,9 +64,23 @@ Page({
     speech.setEngineMode(store.get('engineMode') || 'auto');
     // 朗读状态订阅（v1.1.68 修复）：此前只在点击时 setData({playingText})，播完没有任何回调复位 →
     // 例句整行常驻深色（用户真机反馈）。现在与今日页/工具页一致，订阅回调、播完自动还原。
+    // v1.1.75：补卡拉OK —— 播放态从「整行铺背景」改为按进度的歌词式染色（与今日页/工具页同构）。
     this._offSpeech = speech.onStateChange((p) => {
       const t = p.playing ? p.text : '';
-      if (t !== this.data.playingText) this.setData({ playingText: t });
+      const upd = {};
+      if (t !== this.data.playingText) upd.playingText = t;
+      if (p.playing && p.text) {
+        const lit = Math.round((p.progress || 0) * p.text.length);
+        // 守卫键 = 文本 + 已亮字符数（同工具页）：播完归零后新一轮 lit 也是 0，只比 lit 会漏更新
+        if (p.text !== this._karaText || lit !== this._lit) {
+          this._karaText = p.text; this._lit = lit;
+          upd.karaLit = p.text.slice(0, lit); upd.karaRest = p.text.slice(lit);
+        }
+      } else if (this._karaText) {
+        this._karaText = ''; this._lit = 0;
+        upd.karaLit = ''; upd.karaRest = '';
+      }
+      if (upd.playingText !== undefined || upd.karaLit !== undefined) this.setData(upd);
     });
     const cat = GRAMMAR.filter(c => c.id === (query && query.c))[0];
     const t = cat && cat.topics[Number(query && query.i) || 0];

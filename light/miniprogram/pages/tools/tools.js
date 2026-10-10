@@ -170,6 +170,10 @@ Page({
     const app = getApp();
     if (app && app.globalData && app.globalData.toolsFocus) {
       app.globalData.toolsFocus = false;
+      // 先把页面无动画瞬移回顶部、再聚焦弹键盘（v1.1.75）：
+      // 否则上一次浏览停在页面底部，切回来先绘制底部、再被键盘顶回搜索框，
+      // 视觉上就是「从底部滑上来」（与当年复习页跳转残影同族）。
+      wx.pageScrollTo({ scrollTop: 0, duration: 0 });
       this.setData({ focus: true });
     }
   },
@@ -238,6 +242,9 @@ Page({
     const app = getApp();
     app.globalData.jumpDay = day;
     app.globalData.jumpWord = w;
+    // 变体标注随行携带（v1.1.75）：结果卡上的「『took』是它的过去式」在今日页定位行下延续显示，
+    // 用户点过去之后不至于忘了自己查的是什么形式。消费后由今日页清空。
+    app.globalData.jumpVia = ds.via ? { via: ds.via, q: this.data.kw } : null;
     this.setData({ jumpingW: w });
     const release = () => {
       this._jumping = false; this._jumpAt = 0;

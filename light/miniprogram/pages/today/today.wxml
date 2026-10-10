@@ -68,6 +68,9 @@
                 hover-class="speak-hover" hover-stay-time="120"
                 data-text="{{item.w}}" data-ai="{{item.ai}}" data-kind="w" data-accent="uk" bindtap="onSpeakWord"><view class="spk-ico {{playingText === item.w && playingAccent === 'uk' ? 'spk-ico--on' : ''}}"></view><text class="ipa-txt">{{item.uk}}</text></view>
         </view></view>
+        <!-- 变体标注（v1.1.75）：搜索结果卡上的「『took』是它的过去式」随跳转带到定位行下，
+             与高亮同生共死（2s 自动清空），用户不会忘了自己查的是哪种形式 -->
+        <view class="hl-via" wx:if="{{hlWord === item.w && hlVia}}">「{{hlQ}}」是它的{{hlVia}}</view>
         <view class="word-example-row">
           <view class="word-example"
                 data-text="{{item.e}}" data-ai="{{item.ai}}" data-kind="s" bindtap="onSpeakWord"><text wx:if="{{playingText === item.e}}" class="kara-lit">{{karaLit}}</text>{{playingText === item.e ? karaRest : item.e}}</view>
