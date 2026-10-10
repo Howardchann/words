@@ -196,7 +196,8 @@ Page({
     if (list.length) {
       const items = [];
       list.forEach(v => { items.push({ ai: v.ai, kind: 'w' }); items.push({ ai: v.ai, kind: 's' }); });
-      speech.prefetch(items.slice(0, 40));
+      speech.prefetch(items.slice(0, 40), 0);   // 全天只签链接（v1.1.72），落盘交给滑动窗口
+      this._prefetchWindow(0);
     }
   },
 
@@ -252,7 +253,11 @@ Page({
       this.setData({ playingText: r === 'paused' ? '' : text, playingAccent: r === 'paused' ? '' : accent });
       return;
     }
-    speech.speak(text, { ai: Number(ds.ai) || 0, kind: ds.kind || 's', accent: accent });
+    const ai = Number(ds.ai) || 0;
+    speech.speak(text, { ai: ai, kind: ds.kind || 's', accent: accent });
+    // 滑动窗口（v1.1.72）：以正在播的词为基点，往后备 2 个词的音频
+    const vi = this.data.vocab.findIndex(v => v.ai === ai);
+    if (vi >= 0) this._prefetchWindow(vi);
   },
 
   onSpeakAll() {
@@ -264,6 +269,7 @@ Page({
       if (v.e) items.push({ text: v.e, ai: v.ai, kind: 's' });
     });
     speech.speakQueue(items);
+    this._prefetchWindow(0);
   },
 
   onStar(e) {
@@ -274,6 +280,23 @@ Page({
     const patch = {};
     patch['vocab[' + i + '].starred'] = starred;
     this.setData(patch);
+  },
+
+  // 滑动窗口预取（v1.1.72）：从 startIdx 起连 3 个词，各备 3 个文件 =
+  // 单词正常速 + 单词慢速 + 例句（例句速度跟全局慢速开关）。约 150KB，失败静默。
+  // 用户往下听时窗口跟着滚 —— 连续听不打断，慢速首播也不走网络。
+  _prefetchWindow(startIdx) {
+    const list = this.data.vocab;
+    if (!list.length) return;
+    const items = [];
+    for (let i = startIdx; i < Math.min(startIdx + 3, list.length); i++) {
+      const v = list[i];
+      if (!v || !v.ai) continue;
+      items.push({ ai: v.ai, kind: 'w', slow: false });
+      items.push({ ai: v.ai, kind: 'w', slow: true });
+      if (v.e) items.push({ ai: v.ai, kind: 's' });
+    }
+    speech.prefetch(items);
   },
 
   // 例句中文眼睛开关（v1.1.53）：按词记展开态，默认不显示。

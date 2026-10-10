@@ -2,6 +2,16 @@
 
 > 本实例由 cloud 实例 v1.1.38（仓库提交 `dbe76dc` 的 cloud/ 树）派生，**共享全部产品与机制历史**——完整变更史见 `../cloud/CHANGELOG.md`，此处只记录本实例自身的差异与后续变更。
 
+## 2026-10-11 · 滑动窗口音频预取（v1.1.72）
+
+- **背景**：原「预取三音频」挂账项。现状核实 = 今日页进页面已签全天前 40 条链接 + 落盘前 10 个（`today.js` renderDay → `speech.prefetch`），但 ①慢速变体完全没预取（点慢速首播必走网络，顿一下）；②落盘固定是当天头 5 个词，用户听到后面就没了。
+- **方案（用户拍板「走你的建议」）= 滑动窗口 3 词**：以正在播的词为基点，连 3 个词各备 3 个文件（单词正常速 + 单词慢速 + 例句，例句速度跟全局慢速开关），约 150KB；用户往下听窗口跟着滚。全天签链接保留但改为**只签不落盘**（`prefetch` 新增 `diskLimit` 参数，全天调用传 0），落盘全权交给窗口。
+- **触发点**：进页面（窗口 0）/ 点播任意词条（窗口滚到该词）/ 开队列连听（窗口 0）。
+- **实现**：`speech.js` `prefetch(items, diskLimit)` + item 可带 `slow:true/false` 显式指定速度（缺省才看全局 rate 门槛——窗口预取要两种速度都备好）；`today.js` 新增 `_prefetchWindow(startIdx)`（CRLF 文件，node 脚本改，CR/LF=312 保全），ai 唯一性已有全量验证 → 用 `findIndex(v=>v.ai===ai)` 定位基点。BAD_PREGEN_AI（ai=15 come）与英音无例句音频两条跳过规则对窗口同样生效。
+- **顺带**：情态动词缺口核实 —— **can/will/could/would/may/might/must/should/shall 全部不在 8000 词表**（零基础学习者最高频的一批词），已向用户报告，处置方式（补词 vs 查词兜底 vs 语法区补课）待拍板。
+- 浮窗 dock 效果图脚本 `tools/gen-dock-preview.js`（4 版 × 明暗，图标实抽自 custom-tab-bar/index.wxss）→ 效果图发布 https://p6-rewrite-review.app.workbuddy.host/ ，**仅为探讨，未动 tabBar 代码**。
+- 校验：2 JS 编译过、verify-structure 全过、today.js CRLF 保全。
+
 ## 2026-10-11 · tabBar 英文化（复数）+ toast 勾线稿化 + 朗读行按压统一（v1.1.71）
 
 > **范围**：`custom-tab-bar/index.js`、`app.json`、`components/feedback/feedback.js|wxml|wxss`、`pages/tools/tools.wxss`、`pkg-study/pages/topic/topic.wxss`，共 7 文件。

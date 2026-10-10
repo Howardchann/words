@@ -357,8 +357,11 @@ function playItem(item, onDone) {
   chain[0].run(step);
 }
 
-// 预热：把某天要用的音频链接提前签好（后台静默执行，失败不影响播放）
-function prefetch(items) {
+// 预热：把某天要用的音频链接提前签好（后台静默执行，失败不影响播放）。
+// v1.1.72 滑动窗口配合：①item 可带 slow:true/false 显式指定速度（缺省才看全局 rate 门槛）——
+// 窗口预取要「单词正常速+慢速都备好」，不能跟着全局 rate 走；②diskLimit 控制每批落盘上限，
+// 默认 10（老行为）；传 0 = 只签链接不落盘（今日页全天签链接走这个，落盘交给窗口）。
+function prefetch(items, diskLimit) {
   if (!cloudCfg.ready()) return;
   const need = [];
   (items || []).forEach(it => {
@@ -369,19 +372,20 @@ function prefetch(items) {
     const ukWord = (accent === 'uk' && kind === 'w');
     if (accent === 'uk' && !ukWord) return;                        // 英音无例句/语法例句音频
     if (!ukWord && kind === 'w' && BAD_PREGEN_AI.has(ai)) return;
-    const slow = state.rate <= SLOW_GATE;
+    const slow = it.slow != null ? !!it.slow : (state.rate <= SLOW_GATE);
     const rel = relPath(kind, ai, slow, accent);
     if (exists(localPath(kind, ai, slow, accent))) return;
     if (urlOf(rel)) return;
     if (need.indexOf(rel) < 0) need.push(rel);
   });
   if (!need.length) return;
+  const keep = diskLimit == null ? 10 : diskLimit;
   for (let i = 0; i < need.length; i += SIGN_BATCH) {
     const chunk = need.slice(i, i + SIGN_BATCH);
     signPaths(chunk).then(ok => {
       if (!ok) return;
       // 顺手把前几条落盘，减少下次播放的网络请求（失败静默）
-      chunk.slice(0, 10).forEach(rel => {
+      chunk.slice(0, keep).forEach(rel => {
         const url = urlOf(rel);
         if (url) cacheInBackground(url, rel, CACHE_ROOT + '/' + rel);
       });
