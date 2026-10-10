@@ -321,7 +321,7 @@ Page({
     this.setData({ ph: ph });
   },
   // 音标例词朗读：走 g/ 桶（按文本哈希预生成的 Azure 音频），与今日页/语法例句同一套音色。
-  // ⚠️ ai 必须传 0 —— 132 个音标例词里有 20 个（ten/my/five/out/here…）不在 8000 词表内，
+  // ⚠️ ai 必须传 0 —— 132 个音标例词里有 20 个（ten/my/five/out/here…）原先不在词表（v1.1.74 功能词包已补入大部分），
   //    原先 ai=0 直接掉到在线合成（有道/百度），所以用户听出「音色和今日页不一样」。
   onSpeakPhonEx(e) {
     const w = e.currentTarget.dataset.w;

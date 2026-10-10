@@ -2,6 +2,17 @@
 
 > 本实例由 cloud 实例 v1.1.38（仓库提交 `dbe76dc` 的 cloud/ 树）派生，**共享全部产品与机制历史**——完整变更史见 `../cloud/CHANGELOG.md`，此处只记录本实例自身的差异与后续变更。
 
+## 2026-10-11 · 功能词包 115 词插入词表最前 + 三桶双速音频（v1.1.74）
+
+> **触发**：用户拍板「反正都要补词不如都补上，正好做相互的映射注释；我清空学习记录重看准备期」。114 词清单过目后执行插入；用户确认清单页只是审阅工具、版式无需优化。
+
+- **115 词整体插入 words.js 最前**（ai 8001~8115，占前 8 个学习日，Day 1 = bye/be/am/is/are/was/were/been/being/I…）：114 词清单 + 补 1 词凑 5 的整除。补位词 = **bye**（maybe 词表已有 ai=238，bye 为问候语族缺口，插在块首）；词性/释义/英例/中例沿用清单口径。
+- **双音标全量补齐**：ipa-dict 本地源（en_US/en_UK.txt）+ us_norm/uk_norm 归一化；en_UK 源缺收的 8 个超高频词（am/are/he/do/does/have/a/no/bye）人工按 OALD 补进 `uk_norm.js` UK_FIX 正式修正表；另修 9 处源数据小毛病（between/eleven/before 的 ɪ 误作 i、already 的 lr 重音错位、a/the 取弱读、than/because/near/here 等），美音口径与词表一致（/hw/ 保留、r 化、ɔ 无 ː）。
+- **数据闭环重排**：`data.js` `WORD_TOTAL` 8000→8115；`RAMP` 前 23 组每日 +1 词（sum 1600→1623，×5=8115 闭环）——新课组 15→20 词/天起步，功能词块消化后回到原坡道。390 学习日/546 天/468 打卡日全不变。验证：sum(RAMP)×5 = WORD_TOTAL = allWords().length 三者相等；搜 was→be（v1.1.73 归一遗留的 wash 误归自动消失）、taken→take、better→good 回归全过；搜 hello 落第 10 天（整体后移符合预期）。
+- **音频 690 个（115 词 × 6 文件）**：`_ipa_build/gen_fw_audio.py`——美音单词 w/8、美音例句 s/8（Ava +0%/-32%，ffmpeg 44100 单声道 96k）、英音单词 wuk/8（Sonia -4%/-33%，与 gen_uk 管线同构 raw 直存）；135s 零失败；tcb 分三桶整目录上传 230×3，抽验 6 文件 ETag==本地 MD5 全一致。
+- **文案**：设置页关于「共 8000 词」→「共 8115 词，每天约 15~20 个新词」；tools.js 音标例词注释同步。构建产物 words.js 体积 +10KB（主包预算充足）。
+- **说明**：清单页版式（用户嫌长）确认为纯审阅工具不优化；插入平移对清空记录的用户无缝，公众新用户上线前插入零影响。
+
 ## 2026-10-11 · 浮窗 dock V1 + 词形归一与不规则形式标注（v1.1.73）
 
 - **浮窗 dock（用户从 4 版效果图定稿 V1）**：`custom-tab-bar/index.wxss` 壳改悬浮圆角（bottom 抬 safe-area+16rpx、左右 24rpx、radius 40rpx、阴影加肿、去 border-top），深色模式同步；**选中态图标复用现有 .on 变体，红点缀（时钟指针/工具提手/红心/设置钮）全保留**。页面底部预留：app.wxss page 132→168rpx（宽屏 66→84px）、settings sheet 150→168rpx。
