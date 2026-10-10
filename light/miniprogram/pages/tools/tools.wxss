@@ -79,12 +79,17 @@
 .ph-block__t { font-size: 24rpx; font-weight: 700; color: var(--green); margin-bottom: 8rpx; letter-spacing: 1rpx; }
 .ph-block__b { font-size: 27rpx; color: var(--ink4); line-height: 1.75; }
 
-/* 例词行：与今日页例句行同构（flex + baseline，文字 flex:1，喇叭 .ex-speak 在最右）。
-   ⚠️ 喇叭盒一律复用全局 .ex-speak（零宽空格 strut + 内部 .spk-ico vertical-align:middle），
-   不要自己写 flex 居中容器 —— 那会让喇叭与单词错位约 10rpx。 */
+/* 例词行（v1.1.69 方案A「左列喇叭」）：喇叭在行首成一列，文字左对齐、自然宽度。
+   —— 原方案是「文字 flex:1 撑满 + 喇叭钉最右」，但例词很短（sit·i·坐），撑满后中间空出
+      行宽 49%~72% 的空白（用户真机反馈）。喇叭前移后，右侧不再有元素把空白"框"出来，
+      末尾留白变成看不见的自然行尾空白，三行文字与三枚喇叭各成一条竖线，长短词都不跳版。
+   ⚠️ 垂直对齐仍走全站铁律：.ex-speak 的零宽空格 strut + .spk-ico vertical-align:middle
+      （x-height 锚定），对 .ph-ex 的 align-items:baseline 生效；绝不自建 flex 居中盒。 */
 .ph-ex { display: flex; align-items: baseline; padding: 16rpx 14rpx; border-bottom: 1rpx solid var(--line); }
 .ph-ex:last-child { border-bottom: none; }
 .ph-ex--press { background: var(--card); border-radius: 14rpx; }
+/* 行首喇叭：取消 margin-left，盒宽收到 44rpx（图标仍是 36rpx 定值不变，只少一点左侧缩进） */
+.ex-speak--lead { margin-left: 0; margin-right: 14rpx; width: 44rpx; height: 44rpx; }
 .ph-ex__txt { flex: 1; min-width: 0; }
 .ph-ex__w { font-size: 29rpx; font-weight: 700; color: var(--ink); }
 .ph-ex__hit { font-size: 24rpx; color: var(--uk-ink); margin-left: 8rpx; }
@@ -104,4 +109,6 @@
   .ph-subchip { padding: 4px 10px; border-radius: 12px; font-size: 12px; }
   .ph-panel { margin-top: 12px; padding: 11px 13px 9px; border-radius: 8px; }
   .ph-big { font-size: 28px; }
+  /* 行首喇叭（v1.1.69）：尺寸 = rpx × 0.5，必须显式 px 化，否则 44rpx 在 700px+ 窗口被放大 3 倍 */
+  .ex-speak--lead { margin-left: 0; margin-right: 7px; width: 22px; height: 22px; }
 }

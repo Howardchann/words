@@ -37,7 +37,11 @@
   </block>
 </view>
 
-<!-- 例句：点整行朗读 -->
+<!-- 例句：点整行朗读。
+     喇叭按钮（v1.1.69 收口）改回全站同款 .ex-speak —— 56×56 热区 + 36rpx 图标 + 零宽空格 strut，
+     容器改 align-items:baseline 让喇叭贴英文首行基线。
+     原实现是本页私有的 .ex__spk（40rpx 裸背景块 + 整行垂直居中）：图标比全站小一号，且例句折行时
+     喇叭会跑到两行中间，与今日页/工具页的观感不一致（2026-10-10 一致性核查发现的唯一无理由例外）。 -->
 <view class="card" wx:if="{{t.ex.length}}">
   <view class="section-label">例句</view>
   <view class="ex {{playingText === item.en ? 'ex--on' : ''}}" wx:for="{{t.ex}}" wx:key="en"
@@ -46,7 +50,7 @@
       <view class="ex__en">{{item.en}}</view>
       <view class="ex__cn">{{item.cn}}</view>
     </view>
-    <view class="ex__spk"></view>
+    <view class="ex-speak"><view class="spk-ico {{playingText === item.en ? 'spk-ico--on' : ''}}"></view></view>
   </view>
 </view>
 
