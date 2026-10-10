@@ -1,16 +1,16 @@
-// utils/data.js —— 课程数据汇总 + 词表装配（18 个月 / 78 周版）
+// utils/data.js —— 课程数据汇总 + 词表装配（等级制：4 个等级 / 546 天 / 8000 词）
 //
 // 结构说明
 // ────────
-// · utils/data-p1..p6.js  只存**教学内容**：周主题、每日标题/目标、语法或技能点、练习、技巧、周日自检
+// · utils/data-p1..p6.js  只存**教学内容**：主题、每日标题/目标、语法或技能点、练习、技巧、自检
 // · utils/words.js        8000 词表，顺序＝课程顺序（每天：核心主题词 → 扩展词）
-// · 每周词量由 RAMP 决定
+// · 每天词量由 RAMP 决定
 //
-// 18 个月排法
+// 546 天排法（对外不再出现「周」，内部仍以 7 天为一组）
 // ───────────
-// 原 52 周课程每 2 周后插 1 个「巩固周」，共 52 + 26 = 78 周（546 天，390 个学习日）。
-// 巩固周不引入新语法，专注复习前两周的词 + 一个词汇/输出技能点。
-// 两条坡道：新课周 14→30 词/天，巩固周 11→25 词/天，合计恰好 8000。
+// 原 52 段课程每 2 段后插 1 个「巩固段」，共 52 + 26 = 78 组（546 天，390 个学习日）。
+// 巩固段不引入新语法，专注复习前两段的词 + 一个词汇/输出技能点。
+// 两条坡道：新课组 14→30 词/天，巩固组 11→25 词/天，合计恰好 8000。
 //
 // 为什么词表按课程顺序排列：这样「某一天要用哪些词」就是一整段连续区间，
 // 偏移量在启动时一次算好（DAY_OFF），运行时零查表开销。
@@ -29,18 +29,16 @@ const TOTAL_DAYS = 546;
 // shortName 由 '：' 之后的部分截取（见 weeks.js），改格式务必同步。
 const PHASE_NAMES = ['', '阶段一：入门词', '阶段二：常用词', '阶段三：进阶词', '阶段四：高阶词'];
 const DOW = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
-// 默认开始日期：动态取「下一个周一」（今天恰为周一则取今天）。
-// 上线后新用户进「准备期」，从最近的整周开始；老用户已存有 startDate，不受影响。
-// （历史默认值 2026-09-21 为开发者私有计划日，已废弃，见 CHANGELOG 09-25）
+// 默认开始日期（v1.1.66 等级制）：改为「今天」。
+// 旧版取「下一个周一」——那是「周」还作为对外单位时的遗留，会让新用户先等几天才能开学。
+// 等级制下第 1 天就是开始日，无需对齐星期；老用户已存有 startDate，不受影响。
 const DEFAULT_START = (() => {
   const n = new Date();
-  const d = new Date(n.getFullYear(), n.getMonth(), n.getDate());
-  d.setDate(d.getDate() + ((8 - d.getDay()) % 7)); // getDay(): 周日=0 → 距下周一 (8-getDay())%7 天
   const p = x => ('0' + x).slice(-2);
-  return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate());
+  return n.getFullYear() + '-' + p(n.getMonth() + 1) + '-' + p(n.getDate());
 })();
 
-// 每周每日新词数（双坡道：新课周 14→30，巩固周 11→25，总量 8000）
+// 每组的每日新词数（双坡道：新课组 14→30，巩固组 11→25，总量 8000）
 const RAMP = [
   14, 14, 11, 15, 15, 12, 15, 16, 12, 16, 16, 13, 17,
   17, 13, 17, 17, 14, 18, 18, 14, 18, 19, 15, 19, 19,
@@ -51,7 +49,7 @@ const RAMP = [
 ];
 
 // 390 个学习日的核心词数（原有主题词；其余为扩展词。合计 1125）
-// 巩固周全部为扩展词，故对应位置为 0
+// 巩固组全部为扩展词，故对应位置为 0
 const CORE_CNT = [
   5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 0, 0, 0, 0, 0, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 0, 0, 0, 0, 0, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
   0, 0, 0, 0, 0, 5, 5, 5, 3, 4, 5, 5, 5, 5, 4, 0, 0, 0, 0, 0, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 0, 0, 0, 0, 0, 5, 4, 5, 5, 3,
@@ -67,7 +65,46 @@ const CORE_CNT = [
 
 const WORD_TOTAL = 8000;
 const WEEK_COUNT = 78;
-const P1_TOTAL = RAMP.slice(0, 13).reduce((a, b) => a + b, 0) * 5;   // 前 13 周累计词数
+const P1_TOTAL = RAMP.slice(0, 13).reduce((a, b) => a + b, 0) * 5;   // 前 13 组（L1 入门词）累计词数
+
+// ── 等级制（v1.1.66）───────────────────────────────────────────────────
+// 对外单位由「周」改为「天」：4 个等级沿用原四阶段的词量边界，
+// 原 13/13/26/26 组 × 7 天 = 91/91/182/182 天（合计 546）；词量 930/1090/2660/3320（合计 8000）。
+// 「周」退化为纯内部实现细节（RAMP / CORE_CNT / DAY_OFF / 打卡键 wNdK 都按 7 天一组），不再对外出现。
+const LEVEL_NAMES = ['', '入门词', '常用词', '进阶词', '高阶词'];
+const LEVELS = (function () {
+  const RANGES = [[1, 13], [14, 26], [27, 52], [53, 78]];   // 每级对应的组区间
+  const out = [];
+  let dayStart = 1, wordFrom = 1;
+  for (let i = 0; i < RANGES.length; i++) {
+    const groups = RANGES[i][1] - RANGES[i][0] + 1;
+    let words = 0;
+    for (let w = RANGES[i][0] - 1; w < RANGES[i][1]; w++) words += RAMP[w] * 5;
+    out.push({
+      lv: i + 1,
+      name: LEVEL_NAMES[i + 1],
+      label: 'L' + (i + 1) + ' ' + LEVEL_NAMES[i + 1],
+      startDay: dayStart,
+      endDay: dayStart + groups * 7 - 1,
+      days: groups * 7,
+      groups: groups,
+      wordFrom: wordFrom,
+      wordTo: wordFrom + words - 1,
+      words: words,
+      rangeText: '第 ' + dayStart + '–' + (dayStart + groups * 7 - 1) + ' 天',
+    });
+    dayStart += groups * 7;
+    wordFrom += words;
+  }
+  return out;
+})();
+
+// 某天（1..546）所属等级；越界按最近端处理
+function levelOfDay(day) {
+  const d = Math.max(1, Math.min(TOTAL_DAYS, parseInt(day, 10) || 1));
+  for (let i = 0; i < LEVELS.length; i++) if (d <= LEVELS[i].endDay) return LEVELS[i];
+  return LEVELS[LEVELS.length - 1];
+}
 
 // 每个学习日的词表起始偏移（0 基），启动时算一次
 const DAY_OFF = [];
@@ -92,7 +129,7 @@ function allWords() {
   return out;
 }
 
-// 占位符替换：{D} 当日词数 {W} 本周词数 {Wp} 上周词数 {P1} 前 13 周累计
+// 占位符替换：{D} 当日词数 {W} 本组词数 {Wp} 上一组词数 {P1} 前 13 组累计
 function fill(s, n, wk, wp) {
   if (!s) return s;
   return String(s)
@@ -108,11 +145,12 @@ function fillBlock(o, n, wk, wp) {
   return r;
 }
 
-// 周六弹性日固定内容（词数为相对当周的占位符）
+// 弹性复习日固定内容（词数为相对本组 5 天新词总量的占位符）
+// v1.1.66：文案去「周」——每 7 天里的第 6 天固定为弹性日，不再对应「周六」。
 const SATURDAY = {
   t: '弹性复习日',
-  obj: '不安排新内容——补进度、巩固本周词汇、或好好休息，三选一。',
-  pr: '1) 补进度：本周有落下的学习日就今天补上。2) 巩固：听写本周 {W} 词 + 朗读全部例句。3) 休息：只做 10 分钟随机复习，其余放空。三选一即可，休息不丢人。',
+  obj: '不安排新内容——补进度、巩固这一轮的词、或好好休息，三选一。',
+  pr: '1) 补进度：这一轮里有落下的学习日，就今天补上。2) 巩固：听写这一轮 {W} 词 + 朗读全部例句。3) 休息：只做 10 分钟随机复习，其余放空。三选一即可，休息不丢人。',
   tip: '语言学习靠的是"持续在场"而非"每天高强度"。弹性日是计划的一部分，不是偷懒——休息也是复习曲线的一环。',
 };
 
@@ -133,7 +171,7 @@ function wordsOfStudyDay(di, perDay) {
   return ws;
 }
 
-// 取某一天的学习数据（含周六/周日特殊处理）
+// 取某一天的学习数据（含弹性日/收尾日特殊处理）
 function getDay(day) {
   const info = dayInfo(day);
   const week = WEEKS[info.wIdx];
@@ -204,9 +242,9 @@ function demo() {
 
 // ── 全库搜索（v1.1.46 搜索页）────────────────────────────────────────
 // 词下标 → 所属学习日的「日历天」序号：词表按学习日顺序平铺，DAY_OFF[di] 是第 di 个
-// 学习日的起点。二分定位所属学习日，再按「每周 5 个学习日 + 周末 2 天」换算日历天
-// （di=0 → Day 1 周一；di=4 → Day 5 周五；di=5 → Day 8 下周一）。
-// ⚠️ 口径必须与 App 的 Day 一致：App 里 Day N = 自然日（每周 7 天），不是学习日序号。
+// 学习日的起点。二分定位所属学习日，再按「每组 5 个学习日 + 复习 2 天」换算日历天
+// （di=0 → 第 1 天；di=4 → 第 5 天；di=5 → 第 8 天）。
+// ⚠️ 口径必须与 App 一致：App 里「第 N 天」= 自然日序号（7 天一组），不是学习日序号。
 function dayOfWordIndex(i) {
   let lo = 0, hi = DAY_OFF.length - 1;
   while (lo < hi) {
@@ -241,7 +279,7 @@ function searchWords(kw, limit) {
     const info = dayInfo(day);
     return {
       w: it.w, p: it.p, m: it.m, e: it.e, ai: it.ai, ipa: it.ipa || '', uk: it.uk || '', cn: it.cn || '',
-      day: day, dow: DOW[info.k - 1], wn: info.wIdx + 1,
+      day: day, dow: DOW[info.k - 1], wn: info.wIdx + 1, lvName: levelOfDay(day).label,
     };
   });
   return { total: total, list: list };
@@ -285,6 +323,7 @@ function clozeOptions(target, pool, n) {
 
 module.exports = {
   WEEKS, TOTAL_DAYS, PHASE_NAMES, DOW, DEFAULT_START, SATURDAY,
+  LEVELS, LEVEL_NAMES, levelOfDay,
   RAMP, CORE_CNT, WORD_TOTAL, WEEK_COUNT, P1_TOTAL, SEARCH_LIMIT,
   dayInfo, getDay, currentDayFromStart, learnedWords, allWords, demo, clozeOptions, clozeSentence,
   searchWords, dayOfWordIndex,

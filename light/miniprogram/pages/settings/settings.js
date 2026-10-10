@@ -18,7 +18,7 @@ const ABOUT_MODAL_TITLE = '关于开溜';
 // ⑤ 弹窗正文：\n 表示换行。行首不要留空格，否则手机弹窗里会出现空档
 const ABOUT_TEXT =
   '2026 年 9 月 21 日开始开发。初衷：给自己一套能坚持下来的零基础单词学习节奏——每天 30 分钟左右，先养习惯，再上强度。\n' +
-  '计划共 4 个阶段、78 周、546 天、8000 词：1125 个主题核心词 + 6875 个词频扩展词，每 2 周安排 1 个巩固周。\n' +
+  '计划共 4 个等级、546 天、8000 词：1125 个主题核心词 + 6875 个词频扩展词，每 7 天里安排 1 天弹性复习。\n' +
   '进度自动云同步，也可在「备份与重置」导出文本存档；语音预生成，播过即缓存，离线可听。';
 // ========================================================================================
 
@@ -83,19 +83,17 @@ Page({
   closeSheet(){this.setData({'sheet.show':false});},noop(){},
   onSheetPick(e){const i=Number(e.currentTarget.dataset.i),k=this.data.sheet.key;this.setData({'sheet.show':false});if(k==='engine'){const m=this.data.engineOptions[i].value;store.set('engineMode',m);speech.setEngineMode(m);this.refresh();}else{const accent=this.data.accentOptions[i].value;store.set('accent',accent);speech.setAccent(accent);this.setData({accent,accentIndex:i});}},
   onStartDate(){this.openCal();},
-  /* 自绘月历弹层（替代系统 date picker 深色滚轮）：周一开头，范围 2025-01 ~ 2028-12，选非周一对齐当周周一 */
+  /* 自绘月历弹层（替代系统 date picker 深色滚轮）：周一开头，范围 2025-01 ~ 2028-12；任选一天即为第 1 天（v1.1.66 取消「非周一自动顺延」限制） */
   openCal(){const d=(this.data.startDate||plan.DEFAULT_START).split('-').map(Number);const y=d[0],m=d[1]-1;const g=this._buildCal(y,m);this.setData({cal:{show:true,y,m,label:g.label,grid:g.grid,canPrev:g.canPrev,canNext:g.canNext}});},
   _buildCal(y,m){const first=new Date(y,m,1),lead=(first.getDay()+6)%7,days=new Date(y,m+1,0).getDate();const p=n=>('0'+n).slice(-2);const t=new Date(),tIso=t.getFullYear()+'-'+p(t.getMonth()+1)+'-'+p(t.getDate());const grid=[];for(let i=0;i<lead;i++)grid.push({blank:true,iso:'b'+i});for(let d=1;d<=days;d++){const iso=y+'-'+p(m+1)+'-'+p(d);grid.push({d,iso,dis:iso<tIso||iso>'2028-12-31',sel:iso===this.data.startDate,today:iso===tIso});}return{grid,label:y+' 年 '+(m+1)+' 月',canPrev:!(y===2025&&m===0),canNext:!(y===2028&&m===11)};},
   shiftMonth(e){const dir=Number(e.currentTarget.dataset.dir);let{y,m}=this.data.cal;m+=dir;if(m<0){m=11;y--;}if(m>11){m=0;y++;}if((dir<0&&(y===2025&&m===0))||(dir>0&&(y===2028&&m===11))){return;}const g=this._buildCal(y,m);this.setData({'cal.y':y,'cal.m':m,'cal.label':g.label,'cal.grid':g.grid,'cal.canPrev':g.canPrev,'cal.canNext':g.canNext});},
   closeCal(){this.setData({'cal.show':false});},
-  pickDay(e){const ds=e.currentTarget.dataset;if(ds.dis==='true'||ds.dis===true)return;const iso=ds.iso;let d=new Date(iso+'T00:00:00');const off=(d.getDay()+6)%7;
-  // 09-26 定稿：非周一 → 顺延到「所选日期之后的第一个周一」（只向后、不回退）。
-  // 日历已禁选今天之前的日期，startDate 恒 ≥ 今天，倒计时天数恒 ≥ 0，
-  // 不再有「还有 -5 天开学」的负数态；补课语义随之废除（过去的周一已选不到）。
-  if(off)d.setDate(d.getDate()+(7-off));
-  const p=n=>('0'+n).slice(-2),ms=p(d.getMonth()+1)+'-'+p(d.getDate());const fin=d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate());store.set('startDate',fin);getCurrentPages().forEach(pg=>{if(pg.resetView)pg.resetView();});this.setData({'cal.show':false,startDate:fin});this.refresh();this.fb().toast(off?'已顺延到周一 '+ms:'开始日期已更新');},
+  pickDay(e){const ds=e.currentTarget.dataset;if(ds.dis==='true'||ds.dis===true)return;const iso=ds.iso;
+  // v1.1.66：不再强制对齐周一——等级制下第 1 天就是所选当天，「周」不再是计划单位。
+  // 日历仍禁选今天之前的日期，startDate 恒 ≥ 今天；开始日设到未来时进入准备期倒计时。
+  store.set('startDate',iso);getCurrentPages().forEach(pg=>{if(pg.resetView)pg.resetView();});this.setData({'cal.show':false,startDate:iso});this.refresh();this.fb().toast('开始日期已更新');},
   // 学习进度数字跳转（v1.1.26 方案B → v1.1.27 二轮修）：①原生 hover-class 切 tab 返回后残影
-  // （微信清理不可靠，与周计划页同病）→ 改 data.statPress 手动按压态：touchstart 亮 / touchmove 灭
+  // （微信清理不可靠，与等级页同病）→ 改 data.statPress 手动按压态：touchstart 亮 / touchmove 灭
   // （滚动不拖亮块）/ touchend 不灭灯（tap 紧随跳转）/ tap 未派发 350ms 兜底 / onShow·onHide 双兜底。
   // ②跳转前清态 + 延迟 100ms switchTab（v1.1.21 铁律，防返回残影）。
   // ③重点词→复习页 starred tab、复习记录→random tab：经 globalData.reviewTab 传递（switchTab

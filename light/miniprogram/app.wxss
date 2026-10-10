@@ -78,7 +78,7 @@ page {
 /* 学习提示卡（v1.1.42 · 方案B「区分改走线条」）：浅绿底与窗口底色 Δ≈3 本就不闪，
    再加 1rpx 细描边 + 左侧 8rpx 绿竖条强化识别；竖条/描边是细长元素，自身几乎不产生
    冷启动首绘帧的闪现感知。只作用于「学习提示」卡（.card.tip-box），
-   页面顶部/周计划的纯提示条（.tip-box 单独使用）不在此列。 */
+   页面顶部/等级页的纯提示条（.tip-box 单独使用）不在此列。 */
 .card.tip-box { border:1rpx solid var(--card-line); border-left:8rpx solid var(--green); padding-left:20rpx; }
 .tip-text { color:var(--ink3); font-size:26rpx; }
 /* 行内小图标（文案里指代真实控件，替代"小喇叭/♡"文字）：em 跟随容器字号
@@ -180,7 +180,10 @@ page {
 .ex-eye .eye-ico{display:inline-block;vertical-align:middle;width:34rpx;height:34rpx;background-position:center;background-size:contain;background-repeat:no-repeat}
 .ex-eye.speak-hover{transform:scale(.85);opacity:.6}
 /* 例句中文：比英文例句小一号、弱一档；默认不渲染（wx:if），展开后出现在例句行下方 */
-.ex-cn{font-size:24rpx;color:var(--muted2);line-height:1.6;margin-top:2rpx;padding-left:4rpx}
+/* 2026-10-10 配色修订（用户真机定稿）：--muted2 #82908B 白底仅 3.33:1，12px 小字偏浅难读；
+   改用 --muted3 #66736E（白底 4.95:1 / 深色 6.37:1，两主题均达 WCAG AA），
+   与英文例句 --ink3（6.58:1）仍保留一档主次层次。 */
+.ex-cn{font-size:24rpx;color:var(--muted3);line-height:1.6;margin-top:2rpx;padding-left:4rpx}
 .checkin-btn { margin:24rpx 0; }
 .done-state { display:flex; align-items:center; justify-content:center; color:var(--green); font-size:28rpx; font-weight:700; padding:16rpx 0; }
 
@@ -198,7 +201,7 @@ page {
 .hover-dim{opacity:.55;transform:scale(.96)}
 /* 磁贴/卡片类按压：背景变色（重绘属性）。⚠️ v1.1.19 起该类由 weeks 页手动按压态驱动
    （data.pressed + touchstart/end/cancel/move + onShow 兜底清零），不再走原生 hover-class——
-   原生 hover 会沿节点链激活（点日格连父级周卡一起亮），且 switchTab 跳转时清理不可靠、
+   原生 hover 会沿节点链激活（点日格连父级一起亮），且 switchTab 跳转时清理不可靠、
    返回后按压底色残留（实机翻车）。给其他页面接按压态时照 weeks.js 的 onTileDown/onTileUp 模式。 */
 .hover-tint{background:var(--soft)}
 .btn-press{transform:scale(.96)}

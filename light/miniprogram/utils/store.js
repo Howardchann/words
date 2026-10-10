@@ -30,7 +30,7 @@ const MAX_DIRTY_PER_SYNC = 400; // 单次最多上送多少个单词的复习记
 const SETTINGS_KEYS = { startDate: 1, rate: 1, accent: 1, engineMode: 1 };
 
 const defaults = () => ({
-  startDate: plan.DEFAULT_START,   // 计划开始日（周一）
+  startDate: plan.DEFAULT_START,   // 计划开始日（v1.1.66 起默认为今天）
   checkedDays: {},                 // { 'w1d1': 打卡时间戳 }   ← 旧版值是 1，两个都能用
   uncheckedDays: {},               // { 'w1d1': 取消打卡时间戳 } 防止另一端把取消掉的打卡复活
   starredWords: [],                // [ { w, m, p, e, ts } ]
@@ -79,7 +79,7 @@ function init() {
   if (data.syncEnabled) sync();     // 启动即与云端对齐
 }
 
-// 页面 onShow 会调这里（今日 / 周计划 / 复习三个页面都调），必须节流
+// 页面 onShow 会调这里（今日 / 等级 / 复习三个页面都调），必须节流
 function onResume() {
   if (!data.syncEnabled || !cloudSupported()) return;
   if (syncing) return;
@@ -136,7 +136,7 @@ function checkedCount() { return Object.keys(data.checkedDays || {}).length; }
 // 进度游标：第一个「需要打卡且未打卡」的学习日。
 // 没学 / 没学完，第二天打开仍停在这一天 —— 进度由打卡驱动，不由自然日驱动
 // （自然日只作「回到今天 Day N」的参照，见 today 页）。
-// 周六弹性日（type='sat'）没有打卡按钮，跳过；无内容的天也跳过。
+// 弹性日（type='sat'）没有打卡按钮，跳过；无内容的天也跳过。
 // 返回 0 = 全部完成，由调用方回退自然日。
 function firstUnfinishedDay() {
   for (let day = 1; day <= plan.TOTAL_DAYS; day++) {
@@ -661,7 +661,7 @@ function activeReviewCount() {
 //    · 复习   → 每个有记录的词写一条 lastReviewedAt=now 的零记录（云端按 lastReviewedAt 新者胜）
 //    墓碑/零记录走常规 dirty 通道分轮上送；其他设备下次同步会一并收敛到空。
 //    之后重新打卡/收藏/复习都从零开始累计（旧墓碑被更晚的时间戳自然压过，无需清理）。
-//    startDate 回到默认（下一个周一，进准备期）；语速/口音/朗读方式等偏好保留。
+//    startDate 回到默认（v1.1.66 起为「今天」，即重新从第 1 天开始）；语速/口音/朗读方式等偏好保留。
 function resetProgress() {
   const now = Date.now();
   Object.keys(data.checkedDays || {}).forEach(k => { data.uncheckedDays[k] = now; });

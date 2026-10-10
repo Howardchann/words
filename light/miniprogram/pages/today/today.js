@@ -21,10 +21,8 @@ Page({
     preStart: false,
     daysToStart: 0,
     dayNum: 1,
-    dowText: '',
-    phaseName: '',
+    levelText: '',     // 当前等级名（如「L2 常用词」，v1.1.66 取代原「周一 · 第N周」）
     theme: '',
-    weekNum: 0,
     dayData: null,
     vocab: [],
     zhOpen: {},        // 例句中文展开表 { 单词: 1 }（v1.1.53，默认不显示）
@@ -65,7 +63,7 @@ Page({
     theme.syncTabBar(this, 0);
     this.applyTheme();
     store.onResume();
-    // 跨页跳天（周计划点某天 / 搜索页点结果）：switchTab 不能带参，一律走 globalData 中转。
+    // 跨页跳天（等级页点某天 / 搜索页点结果）：switchTab 不能带参，一律走 globalData 中转。
     // jumpWord 只有搜索页会设，消费后立即清掉 —— 否则下次切 tab 回来会再定位一次。
     const app = getApp();
     const jump = app.globalData.jumpDay || 0;
@@ -85,11 +83,11 @@ Page({
       return;
     }
     // 默认落点 = 第一个未完成的学习日（打卡驱动）：没学/没学完，第二天仍停在这一天；
-    // 全部完成时回退自然日 todayNum。从周表跳转（jump）或手动翻页不受影响。
+    // 全部完成时回退自然日 todayNum。从等级页跳转（jump）或手动翻页不受影响。
     const preStart = todayNum === 0 && !jump;
     theme.sameSet(this, { todayNum, preStart, daysToStart: this._daysToStart() });
-    // 准备期不渲染日内容：renderDay 会把标题改成「Day N · 周X」，
-    // 准备期标题应保持「今日单词」；日数据由「先看看 Day 1」入口按需渲染
+    // 准备期不渲染日内容：renderDay 会把标题改成「第 N 天 · 等级」，
+    // 准备期标题应保持「今日单词」；日数据由「先看看第 1 天」入口按需渲染
     if (preStart) { this._setTitle(null); return; }
     let viewDay = jump || store.firstUnfinishedDay() || todayNum || 1;
     if (viewDay < 1) viewDay = 1;
@@ -137,10 +135,10 @@ Page({
   _clearHl() { if (this._hlTimer) { clearTimeout(this._hlTimer); this._hlTimer = null; } },
 
   // 导航标题统一出口（v1.1.33 起为自定义导航栏）：day=null → 「今日单词」（准备期）；
-  // 否则「Day N · 周X」。标题是 data 字段，经 sameSet 同值守卫绑定到 <nav-bar>，
+  // 否则「第 N 天 · 等级名」。标题是 data 字段，经 sameSet 同值守卫绑定到 <nav-bar>，
   // 换 tab 不会串（旧「原生标题为空」防御只对仍在用原生栏的 weeks/review 有意义）。
   _setTitle(day) {
-    const t = day ? 'Day ' + day + ' · ' + plan.DOW[plan.dayInfo(day).k - 1] : '今日单词';
+    const t = day ? '第 ' + day + ' 天 · ' + plan.levelOfDay(day).label : '今日单词';
     theme.sameSet(this, { navTitle: t });
   },
 
@@ -173,10 +171,8 @@ Page({
     this.setData({
       viewDay: day,
       dayNum: day,
-      dowText: plan.DOW[info.k - 1],
-      phaseName: plan.PHASE_NAMES[week.p] || '',
+      levelText: plan.levelOfDay(day).label,
       theme: week.theme,
-      weekNum: week.w,
       dayData,
       prLines,
       vocab: list,
@@ -201,14 +197,14 @@ Page({
   backToToday() {
     const t = this.data.todayNum || 1;
     speech.stop();
-    // 准备期（preStart）点「先看看 Day 1」：必须退出准备期卡片，否则 renderDay 渲染了也被 wx:if 盖住
+    // 准备期（preStart）点「先看看第 1 天」：必须退出准备期卡片，否则 renderDay 渲染了也被 wx:if 盖住
     this.setData({ preStart: false });
     this.renderDay(t);
   },
 
   resetView() {
     // 清除记录/改开始日期后由设置页调用：丢弃浏览位置，下次 onShow 走默认落点
-    // （startDate 已重置为下一个周一 → todayNum=0 → 自动进准备期倒计时卡片）
+    // （startDate 重置为今天 → todayNum=1，直接进第 1 天；开始日被设到未来时才进准备期倒计时卡）
     this._daySig = null;
     this.setData({ viewDay: 0 });
   },
@@ -218,7 +214,7 @@ Page({
     speech.stop();
     this._daySig = null;
     this.setData({ preStart: true, viewDay: 0 });
-    this._setTitle(null); // 标题同步回「今日计划」，否则残留「Day N · 周X」
+    this._setTitle(null); // 标题同步回「今日单词」，否则残留「第 N 天 · 等级」
   },
 
   fb() { return this.selectComponent('#fb'); },

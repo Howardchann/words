@@ -135,7 +135,7 @@ Page({
   },
 
   // 点卡片 → 跳到该词所在的 Day 并定位高亮（整张卡片除两个喇叭图标外都是跳转区）。
-  // switchTab 不能带参，走 globalData 中转（与周计划点日期跳今日页同一套机制）。
+  // switchTab 不能带参，走 globalData 中转（与等级页点日期跳今日页同一套机制）。
   // 跳转所需数据全部取自 dataset，**不再回头查 this.data.list**：
   // 列表随时可能被防抖、朗读回调 setData 重写，依赖 list 状态是「点了没反应」的隐患之一。
   onJump(e) {

@@ -8,9 +8,9 @@
   <view class="prestart-sub">计划开始日前，可先熟悉操作</view>
   <view class="prestart-days">还有 {{daysToStart}} 天开始学单词</view>
   <view class="tip-box">
-    <view class="tip-text">可以先看看 Day 1 的单词，熟悉一下操作：点音标模块听发音（美音 / 英音各读各的），点<view class="ico-inline ico-heart"></view>收藏重点词</view>
+    <view class="tip-text">可以先看看第 1 天的单词，熟悉一下操作：点音标模块听发音（美音 / 英音各读各的），点<view class="ico-inline ico-heart"></view>收藏重点词</view>
   </view>
-  <button class="btn-primary btn-fit" hover-class="btn-press" bindtap="backToToday" style="margin-top:24rpx;">先看看 Day 1</button>
+  <button class="btn-primary btn-fit" hover-class="btn-press" bindtap="backToToday" style="margin-top:24rpx;">先看看第 1 天</button>
 </view>
 
 <block wx:else>
@@ -22,13 +22,13 @@
     <view class="day-nav">
       <view class="nav-btn {{viewDay > 1 ? '' : 'nav-btn--dis'}}" hover-class="{{viewDay > 1 ? 'nav-btn--press' : 'none'}}" hover-stay-time="120" bindtap="prevDay">‹ 前一天</view>
       <view class="day-title">
-        <view class="day-num">Day {{dayNum}}</view>
-        <view class="day-dow">{{dowText}} · 第{{weekNum}}周</view>
+        <view class="day-num">第 {{dayNum}} 天</view>
+        <view class="day-dow">{{levelText}}</view>
       </view>
       <view class="nav-btn {{viewDay < totalDays ? '' : 'nav-btn--dis'}}" hover-class="{{viewDay < totalDays ? 'nav-btn--press' : 'none'}}" hover-stay-time="120" bindtap="nextDay">后一天 ›</view>
     </view>
-    <view class="phase-line">{{phaseName}} · {{theme}}</view>
-    <view class="is-today" wx:if="{{dayNum !== todayNum && todayNum > 0}}" hover-class="hover-dim" hover-stay-time="120" bindtap="backToToday">回到今天（Day {{todayNum}}）</view>
+    <view class="phase-line">{{theme}}</view>
+    <view class="is-today" wx:if="{{dayNum !== todayNum && todayNum > 0}}" hover-class="hover-dim" hover-stay-time="120" bindtap="backToToday">回到今天（第 {{todayNum}} 天）</view>
   </view>
 
   <!-- 标题与目标 -->
@@ -96,8 +96,8 @@
     </view>
   </view>
 
-  <!-- 周六/周日不再单独渲染卡片：标题与目标卡已显示 dayData.t + obj，
-       旧版这里再渲染一次「周六弹性日/周日自检 + 同一段 obj」，造成整段文字重复 -->
+  <!-- 弹性日/收尾日不再单独渲染卡片：标题与目标卡已显示 dayData.t + obj，
+       旧版这里再渲染一次「弹性复习日/收尾自检 + 同一段 obj」，造成整段文字重复 -->
 
   <!-- 练习任务 -->
   <view class="card" wx:if="{{dayData.pr}}">

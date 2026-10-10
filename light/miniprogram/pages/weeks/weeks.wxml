@@ -1,61 +1,45 @@
 <page-meta page-style="{{pageStyle}}" />
 <view class="page-root {{dark ? 'theme-dark' : ''}}">
 <nav-bar title="{{navTitle}}" />
-<!-- 词表总览（78 周 / 18 个月 · 8000 词的进度地图） -->
+<!-- 学习等级总览（4 级 / 546 天 / 8000 词的进度地图） -->
 <!-- 准备期横幅：计划未开始时解释为何进度全为 0 -->
 <view class="card" wx:if="{{todayNum === 0}}">
   <view class="tip-box" style="margin-top:0;">
     <view class="tip-text">计划 {{startDateText}} 开始——还有 {{daysToStart}} 天开始学单词。进度从开始当天起累计，现在可以先浏览全表熟悉节奏</view>
   </view>
 </view>
-<view class="card stat-card">
-  <view class="stat-row">
-    <view class="stat-item">
-      <view class="stat-num">{{totalChecked}}</view>
-      <view class="stat-label">已完成天数</view>
-    </view>
-    <view class="stat-item">
-      <view class="stat-num">{{totalDays - totalChecked}}</view>
-      <view class="stat-label">剩余天数</view>
-    </view>
-    <view class="stat-item">
-      <view class="stat-num">{{totalPercent}}%</view>
-      <view class="stat-label">总进度</view>
-    </view>
+
+<!-- 当前等级卡：大字本等级进度，小字全程进度（弱化） -->
+<view class="card cur-card">
+  <view class="cur-head">
+    <view class="cur-label">{{curLabel}}</view>
+    <view class="cur-day">{{curDayText}}</view>
+  </view>
+  <view class="cur-bar"><view class="cur-fill" style="width:{{curPercent}}%"></view></view>
+  <view class="cur-meta">本等级 {{curDone}}/{{curDays}} 天 · 全程 {{totalChecked}}/{{totalDays}} 天（{{totalPercent}}%）</view>
+</view>
+
+<!-- 四个等级磁贴（2×2）：点磁贴展开该等级的日格 -->
+<view class="level-grid">
+  <view class="level-tile {{openLevel === L.lv ? 'level-tile--open' : ''}} {{L.isCurrent ? 'level-tile--cur' : ''}} {{pressed === 'l' + L.lv ? 'hover-tint' : ''}}"
+        wx:for="{{levels}}" wx:key="lv" wx:for-item="L"
+        data-lv="{{L.lv}}" data-pk="l{{L.lv}}" bindtouchstart="onTileDown" bindtouchend="onTileUp" bindtouchcancel="onTileUp" bindtouchmove="onTileUp" bindtap="onLevelTap">
+    <view class="tile-name">{{L.label}}</view>
+    <view class="tile-meta">{{L.rangeText}} · {{L.words}} 词</view>
+    <view class="tile-bar"><view class="tile-fill" style="width:{{L.percent}}%"></view></view>
+    <view class="tile-done">{{L.doneCount}}/{{L.days}} 天</view>
   </view>
 </view>
 
-<!-- 方案C：四阶段 2×2 磁贴总览（收起态），点磁贴展开该阶段周列表 -->
-<view class="phase-grid">
-  <view class="phase-tile {{openPhase === phase.p ? 'phase-tile--open' : ''}} {{phase.isCurrentPhase ? 'phase-tile--cur' : ''}} {{pressed === 'p' + phase.p ? 'hover-tint' : ''}}"
-        wx:for="{{phases}}" wx:key="p" wx:for-item="phase"
-        data-p="{{phase.p}}" data-pk="p{{phase.p}}" bindtouchstart="onTileDown" bindtouchend="onTileUp" bindtouchcancel="onTileUp" bindtouchmove="onTileUp" bindtap="onPhaseTap">
-    <view class="tile-name">{{phase.shortName}}</view>
-    <view class="tile-meta">第 {{phase.range}} 周 · {{phase.doneCount}}/{{phase.totalWeeks}} 周</view>
-    <view class="tile-bar"><view class="tile-fill" style="width:{{phase.percent}}%"></view></view>
-  </view>
-</view>
-
-<block wx:for="{{phases}}" wx:key="p" wx:for-item="phase">
-  <block wx:if="{{openPhase === phase.p}}">
-    <view class="card week-card {{week.isCurrent ? 'week-card--current' : ''}}"
-          wx:for="{{phase.weeks}}" wx:key="w" wx:for-item="week">
-      <!-- 周卡整块纯展示、不可点（09-26 用户定稿）：日格已覆盖一周每一天，整卡跳转多余；
-           这同时让日格 touch 冒泡失去父级 handler，v1.1.19 的「点日格整卡亮」从结构上根除 -->
-      <view class="week-line">
-        <view class="week-ring" style="background: conic-gradient(#176B5B {{week.checked / 7 * 100}}%, #E9F0EC 0)"><view class="week-ring-num {{week.isCurrent ? 'week-ring-num--current' : (week.isPast ? 'week-ring-num--past' : '')}}">{{week.w}}</view></view>
-        <view class="week-info">
-          <view class="week-theme">{{week.theme}}</view>
-          <view class="week-words">每日 {{week.perDay}} 词 · 本周 {{week.weekTotal}} 词</view>
-        </view>
-        <view class="week-tag" wx:if="{{week.isCurrent}}">本周</view>
-      </view>
-      <view class="week-days">
-        <view class="day-chip {{item.done ? 'day-chip--done' : ''}} {{pressed === 'd' + week.w + 'k' + item.k ? 'hover-tint' : ''}}"
-              wx:for="{{week.days}}" wx:key="k"
-              data-w="{{week.w}}" data-k="{{item.k}}" data-pk="d{{week.w}}k{{item.k}}" bindtouchstart="onChipDown" bindtouchmove="onChipMove" bindtouchend="onChipEnd" bindtouchcancel="onChipCancel" catchtap="onDayTap">{{item.k}}</view>
-      </view>
+<!-- 展开的等级：连续日格（每 7 格一组，第 6、7 格为复习日） -->
+<view class="card day-card" wx:if="{{openLevel}}">
+  <view class="day-card-title">{{openTitle}}</view>
+  <view class="day-grid">
+    <view class="day-cell" wx:for="{{openDays}}" wx:key="d"
+          data-d="{{item.d}}" data-pk="d{{item.d}}" bindtouchstart="onChipDown" bindtouchmove="onChipMove" bindtouchend="onChipEnd" bindtouchcancel="onChipCancel" catchtap="onDayTap">
+      <view class="day-inner {{item.done ? 'day-inner--done' : ''}} {{item.rest && !item.done ? 'day-inner--rest' : ''}} {{pressed === 'd' + item.d ? 'hover-tint' : ''}}">{{item.d}}</view>
     </view>
-  </block>
-</block>
+  </view>
+  <view class="day-legend">数字为全程第几天 · 虚线格为复习日</view>
+</view>
 </view>

@@ -233,7 +233,8 @@ Page({
     this.setData({ currentRandom: Object.assign({}, item, { starred: store.isStarred(item.w) }), showZh: false });
   },
 
-  onShowZh() { this.setData({ showZh: true }); },
+  // 释义/例句中文显隐开关（v1.1.64 用户定稿）：点击在「显示/隐藏」之间切换（对应卡片底部的眼睛图标，闭上=未显示、睁开=已显示）
+  onShowZh() { this.setData({ showZh: !this.data.showZh }); },
 
   // 例句中文眼睛开关（v1.1.53）：按词记展开态，切词后各自独立；默认不显示。
   onToggleExZh(e) {

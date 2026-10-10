@@ -49,7 +49,7 @@
                   hover-class="speak-hover" hover-stay-time="120" hover-stop-propagation="{{true}}"
                   data-text="{{item.e}}" data-ai="{{item.ai}}" data-kind="s" catchtap="onSpeakWord"><view class="spk-ico {{playingText === item.e ? 'spk-ico--on' : ''}}"></view></view>
           </view>
-          <view class="search-day">Day {{item.day}} · 第{{item.wn}}周 {{item.dow}}<text class="search-day__go">{{jumpingW === item.w ? ' 跳转中…' : ' ›'}}</text></view>
+          <view class="search-day">第 {{item.day}} 天 · {{item.lvName}}<text class="search-day__go">{{jumpingW === item.w ? ' 跳转中…' : ' ›'}}</text></view>
         </view>
       </view>
     </block>
