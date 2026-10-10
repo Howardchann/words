@@ -69,25 +69,35 @@
   </view>
 </view>
 
-<!-- ③ 音标（常驻面板：上面点音标，下方详情固定在原位；无弹层、无遮罩） -->
+<!-- ③ 音标（分组筛选 + 常驻面板）
+     v1.1.68 改版：原来 44 个音标平铺 2 屏、讲解排在最末 → 点最上面那个音标要滚到底才看得到讲解（用户真机反馈）。
+     现在：大类（元音/辅音）→ 子类（短元音/双元音…）两级筛选，屏幕上最多 3 行音标，面板紧跟其下；
+     说明文字也移到最前，不再吊在最底。 -->
 <view class="card">
   <view class="section-label">音标（{{phonTotal}} 个）</view>
-  <view class="ph-title">元音</view>
-  <block wx:for="{{vowelGroups}}" wx:key="name" wx:for-item="G">
-    <view class="ph-grp">{{G.name}}</view>
-    <view class="ph-grid">
-      <view class="ph-chip {{ph.s === item.s ? 'on' : ''}}" wx:for="{{G.items}}" wx:key="s" data-s="{{item.s}}"
-            hover-class="ph-chip--press" hover-stay-time="80" bindtap="onPhonTap">/{{item.s}}/</view>
-    </view>
-  </block>
-  <view class="ph-title ph-title--gap">辅音</view>
-  <block wx:for="{{consGroups}}" wx:key="name" wx:for-item="G">
-    <view class="ph-grp">{{G.name}}</view>
-    <view class="ph-grid">
-      <view class="ph-chip {{ph.s === item.s ? 'on' : ''}}" wx:for="{{G.items}}" wx:key="s" data-s="{{item.s}}"
-            hover-class="ph-chip--press" hover-stay-time="80" bindtap="onPhonTap">/{{item.s}}/</view>
-    </view>
-  </block>
+  <view class="ph-hint">点音标看讲解；例词可直接点读（词表里有的词离线也能听）。</view>
+
+  <!-- 大类：元音 / 辅音 -->
+  <view class="ph-class">
+    <view class="ph-cls {{phCls === 'vowel' ? 'on' : ''}}" data-c="vowel"
+          hover-class="ph-cls--press" hover-stay-time="60" bindtap="onPhCls">元音<text class="ph-cls__n">{{vowelCount}}</text></view>
+    <view class="ph-cls {{phCls === 'consonant' ? 'on' : ''}}" data-c="consonant"
+          hover-class="ph-cls--press" hover-stay-time="60" bindtap="onPhCls">辅音<text class="ph-cls__n">{{consCount}}</text></view>
+  </view>
+
+  <!-- 子类筛选：全部 + 当前大类的子类 -->
+  <view class="ph-sub">
+    <view class="ph-subchip {{phGrp === '' ? 'on' : ''}}" data-g=""
+          hover-class="ph-subchip--press" hover-stay-time="60" bindtap="onPhGrp">全部</view>
+    <view class="ph-subchip {{phGrp === item ? 'on' : ''}}" wx:for="{{phGrps}}" wx:key="*this" data-g="{{item}}"
+          hover-class="ph-subchip--press" hover-stay-time="60" bindtap="onPhGrp">{{item}}</view>
+  </view>
+
+  <!-- 音标网格（只渲染当前筛选结果） -->
+  <view class="ph-grid">
+    <view class="ph-chip {{ph.s === item.s ? 'on' : ''}}" wx:for="{{phList}}" wx:key="s" data-s="{{item.s}}"
+          hover-class="ph-chip--press" hover-stay-time="80" bindtap="onPhonTap">/{{item.s}}/</view>
+  </view>
 
   <view class="ph-panel" wx:if="{{ph}}">
     <view class="ph-head">
@@ -104,16 +114,19 @@
     </view>
     <view class="ph-block">
       <view class="ph-block__t">例词</view>
+      <!-- 例词行：与今日页例句行完全同构（文字占满在左 + .ex-speak 在最右，靠 strut + vertical-align:middle
+           取 x-height 基线；绝不改 flex 居中——那会让喇叭整体抬高 10rpx，见 app.wxss .ex-eye 注释） -->
       <view class="ph-ex" wx:for="{{ph.ex}}" wx:key="w" data-w="{{item.w}}"
-            hover-class="tk-row--press" hover-stay-time="80" bindtap="onSpeakPhonEx">
-        <view class="spk-ico {{playingText === item.w ? 'spk-ico--on' : ''}}"></view>
-        <text class="ph-ex__w">{{item.w}}</text>
-        <text class="ph-ex__hit">{{item.hit}}</text>
-        <text class="ph-ex__cn">{{item.cn}}</text>
+            hover-class="ph-ex--press" hover-stay-time="80" bindtap="onSpeakPhonEx">
+        <view class="ph-ex__txt">
+          <text class="ph-ex__w"><text wx:if="{{playingText === item.w}}" class="kara-lit">{{karaLit}}</text>{{playingText === item.w ? karaRest : item.w}}</text>
+          <text class="ph-ex__hit">{{item.hit}}</text>
+          <text class="ph-ex__cn">{{item.cn}}</text>
+        </view>
+        <view class="ex-speak"><view class="spk-ico {{playingText === item.w ? 'spk-ico--on' : ''}}"></view></view>
       </view>
     </view>
   </view>
-  <view class="tk-note">点任意音标，下面的讲解随即切换；例词可直接点读（词表里有的词离线也能听）。</view>
 </view>
 
 <!-- ④ 语法速查：本页只给目录（全文在分包，避免撑大启动包） -->
@@ -126,7 +139,7 @@
       <view class="cat-count">{{item.count}} 个</view>
     </view>
   </view>
-  <view class="tk-note">共 {{catTotal}} 个语法点：一句话定义 + 用法 + 易错点 + 例句，能对应上课程的还会挂出「课程里讲过哪几天」。点分类进入。</view>
+  <view class="tk-note">共 {{catTotal}} 个语法点：一句人话开场白 + 定义 + 用法 + 易错点 + 例句，能对应上课程的还会挂出「课程里讲过哪几天」。点分类进入；也可以进速查页按「用在什么场合」筛。</view>
 </view>
 
 <feedback id="fb"/>

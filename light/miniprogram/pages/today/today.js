@@ -145,12 +145,11 @@ Page({
 
   _clearHl() { if (this._hlTimer) { clearTimeout(this._hlTimer); this._hlTimer = null; } },
 
-  // 导航标题统一出口（v1.1.33 起为自定义导航栏）：day=null → 「今日单词」（准备期）；
-  // 否则「第 N 天 · 等级名」。标题是 data 字段，经 sameSet 同值守卫绑定到 <nav-bar>，
-  // 换 tab 不会串（旧「原生标题为空」防御只对仍在用原生栏的 weeks/review 有意义）。
-  _setTitle(day) {
-    const t = day ? '第 ' + day + ' 天' : '今日单词';
-    theme.sameSet(this, { navTitle: t });
+  // 导航标题统一出口（v1.1.33 起为自定义导航栏）：恒为「今日单词」。
+  // v1.1.68：不再随天数变化 —— 导航栏的「第 N 天」与下方 day-head 卡里的「第 N 天」是同一个数，
+  // 并排显示属重复（用户真机指出）。标题是 data 字段，经 sameSet 同值守卫绑定到 <nav-bar>，换 tab 不会串。
+  _setTitle() {
+    theme.sameSet(this, { navTitle: '今日单词' });
   },
 
   _daysToStart() {

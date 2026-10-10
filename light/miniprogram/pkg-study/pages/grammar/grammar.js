@@ -10,12 +10,28 @@ const theme = require('../../../utils/theme.js');
 const speech = require('../../../utils/speech.js');
 const store = require('../../../utils/store.js');
 
+// 场景标签（v1.1.68）：8 类使用场合，顺序按内容量排（多的在前）。
+// short 用于筛选条展示（2 字更整齐），full 是数据里的标签原值。
+const TAG_LIST = [
+  { full: '日常生活', short: '日常' },
+  { full: '社交闲聊', short: '闲聊' },
+  { full: '书面表达', short: '书面' },
+  { full: '工作职场', short: '职场' },
+  { full: '学习成长', short: '学习' },
+  { full: '出行游玩', short: '出行' },
+  { full: '购物消费', short: '购物' },
+  { full: '商务沟通', short: '商务' },
+];
+
 Page({
   data: {
     cats: GRAMMAR,
     open: '',        // 展开的分类 id
     q: '',           // 过滤关键词
     hits: [],        // 过滤命中 [{t, def, c, i, catName}]
+    tagList: TAG_LIST,
+    tag: '',         // 当前场景（'' = 全部）
+    tagHits: [],     // 场景命中 [{t, def, c, i, catName}]
     total: GRAMMAR.reduce((a, c) => a + c.topics.length, 0),
     toast: '',
   },
@@ -54,6 +70,22 @@ Page({
     this.setData({ q: q, hits: hits });
   },
   onClear() { this.setData({ q: '', hits: [] }); },
+
+  // 场景筛选：跨体系分类聚合「这种场合会用到的语法点」
+  onTag(e) {
+    const t = e.currentTarget.dataset.t || '';
+    if (t === this.data.tag) return;
+    const hits = [];
+    if (t) {
+      this.data.cats.forEach(c => {
+        c.topics.forEach((x, i) => {
+          if ((x.tags || []).indexOf(t) >= 0) hits.push({ t: x.t, def: x.def, c: c.id, i: i, catName: c.name });
+        });
+      });
+    }
+    speech.stop();
+    this.setData({ tag: t, tagHits: hits });
+  },
 
   onTopic(e) {
     const ds = e.currentTarget.dataset;

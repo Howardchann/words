@@ -27,18 +27,17 @@ const DEBOUNCE = 160;
 const JUMP_LOCK_MS = 1200;
 const JUMP_WATCHDOG = 1600;
 
-// 音标分组：保留「短元音 → 长元音 → 双元音」「爆破 → 摩擦 → 破擦 → 鼻音 → 舌侧 → 近音」的教学顺序，
-// 不按字母排（字母序对学习者毫无帮助）
-function groupBy(arr) {
-  const out = [], idx = {};
-  arr.forEach(p => {
-    if (!(p.grp in idx)) { idx[p.grp] = out.length; out.push({ name: p.grp, items: [] }); }
-    out[idx[p.grp]].items.push(p);
-  });
-  return out;
+// 音标（v1.1.68 两级筛选）：大类 元音/辅音 → 子类（短元音/长元音/双元音 · 爆破音/摩擦音/…）。
+// 原来 44 个音标平铺 2 屏、讲解面板排在最末 → 点最上面那个音标要滑到底才看得到讲解（用户真机反馈）。
+const PH_VOWEL = PHONETIC.filter(p => p.cls === 'vowel');
+const PH_CONS = PHONETIC.filter(p => p.cls === 'consonant');
+// 子类顺序 = 数据里的自然顺序（短元音 → 长元音 → 双元音；爆破 → 摩擦 → 破擦 → 鼻音 → 舌侧 → 近音），
+// 符合教学顺序，不按字母排（字母序对学习者毫无帮助）
+function grpsOf(list) { const out = []; list.forEach(p => { if (out.indexOf(p.grp) < 0) out.push(p.grp); }); return out; }
+function listOf(cls, grp) {
+  const base = cls === 'consonant' ? PH_CONS : PH_VOWEL;
+  return base.filter(p => !grp || p.grp === grp);
 }
-const VOWEL_GROUPS = groupBy(PHONETIC.filter(p => p.cls === 'vowel'));
-const CONS_GROUPS = groupBy(PHONETIC.filter(p => p.cls === 'consonant'));
 
 Page({
   data: {
@@ -72,9 +71,13 @@ Page({
     cats: STUDY_CATS,
     catTotal: STUDY_CATS.reduce((a, c) => a + c.count, 0),
 
-    // ③ 音标（常驻面板：上面选音标，下方详情固定在原位）
-    vowelGroups: VOWEL_GROUPS,
-    consGroups: CONS_GROUPS,
+    // ③ 音标（大类 + 子类筛选；面板紧跟网格下方，永不排到屏外）
+    phCls: 'vowel',
+    phGrp: '',
+    phGrps: grpsOf(PH_VOWEL),
+    phList: PH_VOWEL,
+    vowelCount: PH_VOWEL.length,
+    consCount: PH_CONS.length,
     phonTotal: PHONETIC.length,
     ph: PHONETIC[0],   // 当前选中音标：默认第一个 → 面板永不为空
   },
@@ -246,7 +249,23 @@ Page({
     });
   },
 
-  // ---------- ③ 音标（常驻面板：点 chip 就地切换下方详情，无弹层） ----------
+  // ---------- ③ 音标（两级筛选 + 常驻面板：点 chip 就地切换下方详情，无弹层） ----------
+  // 切大类：子类筛选重置为「全部」，选中音标重置为该大类第一个
+  onPhCls(e) {
+    const c = e.currentTarget.dataset.c;
+    if (!c || c === this.data.phCls) return;
+    const list = listOf(c, '');
+    speech.stop();
+    this.setData({ phCls: c, phGrp: '', phGrps: grpsOf(list), phList: list, ph: list[0] || null });
+  },
+  // 切子类（'' = 全部）
+  onPhGrp(e) {
+    const g = e.currentTarget.dataset.g || '';
+    if (g === this.data.phGrp) return;
+    const list = listOf(this.data.phCls, g);
+    speech.stop();
+    this.setData({ phGrp: g, phList: list, ph: list[0] || null });
+  },
   onPhonTap(e) {
     const s = e.currentTarget.dataset.s;
     if (!s || (this.data.ph && this.data.ph.s === s)) return;
@@ -255,12 +274,18 @@ Page({
     speech.stop();
     this.setData({ ph: ph });
   },
-  // 音标例词：词表里有同形词就用它的预生成音频（可离线），否则退回在线朗读
+  // 音标例词朗读：走 g/ 桶（按文本哈希预生成的 Azure 音频），与今日页/语法例句同一套音色。
+  // ⚠️ ai 必须传 0 —— 132 个音标例词里有 20 个（ten/my/five/out/here…）不在 8000 词表内，
+  //    原先 ai=0 直接掉到在线合成（有道/百度），所以用户听出「音色和今日页不一样」。
   onSpeakPhonEx(e) {
     const w = e.currentTarget.dataset.w;
     if (!w) return;
-    if (this.data.playingText === w) { speech.togglePause(); this.setData({ playingText: '' }); return; }
-    speech.speak(w, { ai: plan.wordAi(w), kind: 'w' });
+    if (this.data.playingText === w) {
+      const r = speech.togglePause();
+      this.setData({ playingText: r === 'paused' ? '' : w });
+      return;
+    }
+    speech.speak(w, { ai: 0, kind: 'g' });
   },
 
   fb() { return this.selectComponent('#fb'); },

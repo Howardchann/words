@@ -1,8 +1,9 @@
 <view class="page-root" wx:if="{{t}}">
-<!-- 标题区 -->
+<!-- 标题区：分类标签 / 标题 / 人话开场白（零基础先看这句）/ 一句话定义 -->
 <view class="card head">
   <view class="head__cat">{{catName}}</view>
   <view class="head__t">{{t.t}}</view>
+  <view class="head__plain" wx:if="{{t.plain}}">{{t.plain}}</view>
   <view class="head__def">{{t.def}}</view>
 </view>
 
@@ -14,12 +15,26 @@
   </view>
 </view>
 
-<!-- 易错点 -->
-<view class="card" wx:if="{{t.note.length}}">
+<!-- 易错点
+     数据源是一整串自由文本（「❌ 错句 ✅ 对句（原因）」/ 纯提示句 混排），进页面时已在 JS 里解析成结构化片段。
+     对错标记由 tools/gen 时期的系统 emoji ❌✅ 改为自绘字符 ✗/✓ —— emoji 与全站线稿图标不是一套，
+     且部分机型字号/基线不稳；✗/✓（U+2717/U+2713）无 emoji 呈现变体，任何字体下都是文字形态。
+     对齐：.fix__row 用 align-items:baseline，图标盒与右侧文字同基线（与全站「图标跟随文字基线」同一口径）。 -->
+<view class="card" wx:if="{{notes.length}}">
   <view class="section-label">易错点</view>
-  <view class="li li--note" wx:for="{{t.note}}" wx:key="*this">
-    <text class="li__dot"></text><text class="li__tx">{{item}}</text>
-  </view>
+  <block wx:for="{{notes}}" wx:key="k" wx:for-item="N">
+    <view class="fix" wx:if="{{N.kind === 'fix'}}">
+      <view class="fix__head" wx:if="{{N.head}}">{{N.head}}</view>
+      <view class="fix__row" wx:for="{{N.segs}}" wx:key="i" wx:for-item="S">
+        <view class="fix__ico fix__ico--{{S.t}}">{{S.t === 'bad' ? '✗' : '✓'}}</view>
+        <view class="fix__tx">{{S.v}}</view>
+      </view>
+      <view class="fix__why" wx:if="{{N.why}}">{{N.why}}</view>
+    </view>
+    <view class="li li--note" wx:else>
+      <text class="li__dot"></text><text class="li__tx">{{N.v}}</text>
+    </view>
+  </block>
 </view>
 
 <!-- 例句：点整行朗读 -->
@@ -44,8 +59,6 @@
   </view>
   <view class="note">这些天的「例句精读」讲的就是这个语法点，点一下跳到当天原文。<block wx:if="{{dayMore}}">另有 {{dayMore}} 天也涉及它，未一一列出。</block></view>
 </view>
-
-<view class="foot">讲解为速查用的精简版；要看完整上下文，回课程里那一天读原文。</view>
 
 <view class="toast" wx:if="{{toast}}">{{toast}}</view>
 </view>

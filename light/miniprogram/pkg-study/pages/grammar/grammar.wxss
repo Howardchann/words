@@ -15,7 +15,13 @@ page { padding-bottom: env(safe-area-inset-bottom); }
 .meta { margin: 20rpx 32rpx 0; font-size: 25rpx; color: var(--muted3); }
 .intro { margin: 22rpx 32rpx 0; font-size: 24rpx; color: var(--muted3); line-height: 1.8; }
 .empty { text-align: center; padding: 80rpx 48rpx; font-size: 27rpx; color: var(--muted); }
-.foot { text-align: center; font-size: 22rpx; color: var(--muted2); padding: 10rpx 48rpx 40rpx; }
+
+/* 场景筛选条（v1.1.68）：8 个场景 + 全部；胶囊 chips 自动换行 */
+.tagbar { display: flex; flex-wrap: wrap; gap: 12rpx; margin: 16rpx 24rpx 0; }
+.tagchip { padding: 10rpx 22rpx; border-radius: 26rpx; font-size: 25rpx;
+  background: var(--soft); color: var(--muted3); }
+.tagchip.on { background: var(--green); color: #FFFFFF; font-weight: 700; }
+.tagchip--press { opacity: .8; }
 
 /* 分类卡（手风琴） */
 .cat { padding: 6rpx 28rpx; }
@@ -24,7 +30,8 @@ page { padding-bottom: env(safe-area-inset-bottom); }
 .cat__l { flex: 1; min-width: 0; }
 .cat__name { font-size: 30rpx; font-weight: 700; color: var(--ink); }
 .cat__intro { margin-top: 6rpx; font-size: 23rpx; color: var(--muted3); line-height: 1.6; }
-.cat__n { flex-shrink: 0; font-size: 23rpx; color: var(--green); margin-left: 14rpx; }
+/* 数量列：定宽 + 右对齐（v1.1.68）—— 原来不定宽挤在标题与箭头之间，随标题长短左右浮动、也对不齐 */
+.cat__n { flex-shrink: 0; width: 96rpx; text-align: right; font-size: 25rpx; color: var(--green); margin-left: 12rpx; }
 .cat__arrow { flex-shrink: 0; width: 40rpx; text-align: center; font-size: 34rpx; color: var(--muted2);
   transition: transform .18s; margin-left: 6rpx; }
 .cat__arrow.on { transform: rotate(90deg); }
@@ -46,6 +53,7 @@ page { padding-bottom: env(safe-area-inset-bottom); }
 @media (min-width:700px) {
   .sb { height: 38px; border-radius: 19px; margin: 9px 12px 2px; padding: 0 11px; }
   .sb__input { height: 38px; font-size: 14px; }
+  .tagchip { padding: 5px 11px; border-radius: 13px; font-size: 12.5px; }
   .cat__name { font-size: 15px; }
   .tp__t { font-size: 14px; }
 }

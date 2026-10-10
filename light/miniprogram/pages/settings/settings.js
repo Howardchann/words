@@ -18,8 +18,8 @@ const ABOUT_MODAL_TITLE = '关于开溜';
 // ⑤ 弹窗正文：\n 表示换行。行首不要留空格，否则手机弹窗里会出现空档
 const ABOUT_TEXT =
   '2026 年 9 月 21 日开始开发。初衷：给自己一套能坚持下来的零基础单词学习节奏——每天 30 分钟左右，先养习惯，再上强度。\n' +
-  '计划共 546 天、8000 词：1125 个主题核心词 + 6875 个词频扩展词，每 7 天里安排 1 天弹性复习。\n' +
-  '进度自动云同步，也可在「备份与重置」导出文本存档；语音预生成，播过即缓存，离线可听。';
+  '共 8000 词，按天推进：每天约 20 个新词配例句精读，每 7 天里安排 1 天弹性复习，那天不用打卡。\n' +
+  '「工具」页可随时查单词、翻语法速查和音标；进度自动云同步，也能在「备份与重置」导出存档。语音预生成，播过即缓存，离线可听。';
 // ========================================================================================
 
 // ---------- 构建标识（为什么需要：小程序运行时无法调用 git，"跑的是哪一版"只能在上传前固化） ----------
@@ -58,7 +58,7 @@ Page({
   data:{startDate:plan.DEFAULT_START,today:'',rate:0.9,rateText:'0.90×',accent:'us',
     accentOptions:[{value:'us',label:'美式发音（默认）'},{value:'uk',label:'英式发音'}],accentIndex:0,
     engineOptions:[{value:'auto',label:'自动（推荐）：优先预生成，失败切在线'},{value:'pregen',label:'仅预生成高清音频'},{value:'online',label:'仅在线 TTS（有道/百度）'}],engineIndex:0,
-    totalChecked:0,totalDays:plan.TOTAL_DAYS,starredCount:0,reviewCount:0,appVersion:buildLabel(),aboutCardLabel:ABOUT_CARD_LABEL,aboutTitle:ABOUT_TITLE,engineLabel:'',engineHint:'',backupText:'',showBackup:false,importText:'',showImport:false,voiceTesting:false,voiceLabel:'试听发音',
+    starredCount:0,reviewCount:0,appVersion:buildLabel(),aboutCardLabel:ABOUT_CARD_LABEL,aboutTitle:ABOUT_TITLE,engineLabel:'',engineHint:'',backupText:'',showBackup:false,importText:'',showImport:false,voiceTesting:false,voiceLabel:'试听发音',
     cloudOn:true,cloudMeta:'',cloudErr:'',cloudTip:'',syncing:false,sheet:{show:false,title:'',options:[],index:0,key:''},cal:{show:false,y:0,m:0,label:'',grid:[],canPrev:true,canNext:true},
     // 主题 data 初始化（与 tabBar 同款）：首帧即正确深浅，见 today.js 注释
     dark:theme.isDark(),pageStyle:theme.isDark()?'background-color:#0E1618;':'',
@@ -75,7 +75,7 @@ Page({
     const MODES={auto:['自动（当前云端音频可用，优先预生成）','优先预生成高清音频（美音），失败自动切在线。'],pregen:['仅预生成高清音频','只用预生成音频（美音），失败不切在线。'],online:['仅在线 TTS（有道 / 百度）','全部在线朗读，口音切换只在此音源生效。']};
     const m=MODES[engineMode]||MODES.auto;
     // 同值守卫：onShow 每次进设置页都调 refresh，数值没变就不再整树 setData（切 tab 闪屏）
-    theme.sameSet(this,{startDate:store.get('startDate')||plan.DEFAULT_START,rate,rateText:Number(rate).toFixed(2)+'×',accent,accentIndex:Math.max(0,ACCENTS.indexOf(accent)),engineIndex:Math.max(0,this.data.engineOptions.findIndex(o=>o.value===engineMode)),totalChecked:store.checkedCount(),totalDays:plan.TOTAL_DAYS,starredCount:(store.get('starredWords')||[]).length,reviewCount:store.activeReviewCount(),
+    theme.sameSet(this,{startDate:store.get('startDate')||plan.DEFAULT_START,rate,rateText:Number(rate).toFixed(2)+'×',accent,accentIndex:Math.max(0,ACCENTS.indexOf(accent)),engineIndex:Math.max(0,this.data.engineOptions.findIndex(o=>o.value===engineMode)),starredCount:(store.get('starredWords')||[]).length,reviewCount:store.activeReviewCount(),
       engineLabel:m[0],
       engineHint:(pre?'':'⚠️ 云端音频不可用，预生成将自动降级在线。')+m[1]});this.refreshCloud();},
   openEngineSheet(){this.setData({sheet:{show:true,title:'朗读方式',options:this.data.engineOptions,index:this.data.engineIndex,key:'engine'}});},

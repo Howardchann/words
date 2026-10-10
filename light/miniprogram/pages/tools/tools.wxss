@@ -41,11 +41,25 @@
 .cat-name { font-size: 27rpx; font-weight: 700; color: var(--ink); }
 .cat-count { font-size: 22rpx; color: var(--green); }
 
-/* ③ 音标（分组 chips + 常驻详情面板） */
-.ph-title { font-size: 24rpx; font-weight: 700; color: var(--ink3); margin-top: 6rpx; letter-spacing: 1rpx; }
-.ph-title--gap { margin-top: 26rpx; }
-.ph-grp { font-size: 22rpx; color: var(--muted2); margin: 16rpx 0 8rpx; }
-.ph-grid { display: flex; flex-wrap: wrap; gap: 12rpx; }
+/* ③ 音标（大类 + 子类两级筛选 → 音标网格 → 常驻详情面板） */
+.ph-hint { margin: 8rpx 0 14rpx; font-size: 23rpx; color: var(--muted2); line-height: 1.7; }
+
+/* 大类切换（元音 / 辅音）：两个等宽段控 */
+.ph-class { display: flex; gap: 14rpx; }
+.ph-cls { flex: 1; text-align: center; height: 68rpx; line-height: 68rpx; border-radius: 14rpx;
+  background: var(--soft); font-size: 28rpx; font-weight: 700; color: var(--muted3); }
+.ph-cls.on { background: var(--green); color: #FFFFFF; }
+.ph-cls--press { opacity: .85; }
+.ph-cls__n { font-size: 22rpx; font-weight: 600; margin-left: 8rpx; opacity: .8; }
+
+/* 子类筛选（全部 / 短元音 …）：胶囊 chips，自动换行 */
+.ph-sub { display: flex; flex-wrap: wrap; gap: 12rpx; margin-top: 14rpx; }
+.ph-subchip { padding: 8rpx 20rpx; border-radius: 24rpx; font-size: 24rpx;
+  background: var(--soft); color: var(--muted3); }
+.ph-subchip.on { background: var(--soft2); color: var(--green); font-weight: 700; }
+.ph-subchip--press { opacity: .8; }
+
+.ph-grid { display: flex; flex-wrap: wrap; gap: 12rpx; margin-top: 16rpx; }
 .ph-chip { min-width: 96rpx; padding: 12rpx 16rpx; box-sizing: border-box; text-align: center;
   background: var(--soft); border-radius: 14rpx; font-size: 28rpx; font-weight: 700; color: var(--green);
   font-family: 'Times New Roman', Georgia, serif; }
@@ -54,7 +68,7 @@
 .ph-chip.on { background: var(--green); color: #FFFFFF; }
 .ph-chip.on.ph-chip--press { opacity: .88; }
 
-/* 常驻详情面板：位置固定不动，避免弹层「整片白遮罩」观感；默认选中第一个音标所以永不留白 */
+/* 常驻详情面板：紧跟网格下方（不再排到 2 屏之外），位置随筛选结果自动上移 */
 .ph-panel { margin-top: 24rpx; padding: 22rpx 26rpx 18rpx; border-radius: 16rpx;
   background: var(--soft); border: 1rpx solid var(--line); }
 .ph-head { display: flex; align-items: baseline; }
@@ -64,11 +78,17 @@
 .ph-block { margin-top: 20rpx; }
 .ph-block__t { font-size: 24rpx; font-weight: 700; color: var(--green); margin-bottom: 8rpx; letter-spacing: 1rpx; }
 .ph-block__b { font-size: 27rpx; color: var(--ink4); line-height: 1.75; }
-.ph-ex { display: flex; align-items: center; padding: 16rpx 14rpx; border-radius: 14rpx; border-bottom: 1rpx solid var(--line); }
+
+/* 例词行：与今日页例句行同构（flex + baseline，文字 flex:1，喇叭 .ex-speak 在最右）。
+   ⚠️ 喇叭盒一律复用全局 .ex-speak（零宽空格 strut + 内部 .spk-ico vertical-align:middle），
+   不要自己写 flex 居中容器 —— 那会让喇叭与单词错位约 10rpx。 */
+.ph-ex { display: flex; align-items: baseline; padding: 16rpx 14rpx; border-bottom: 1rpx solid var(--line); }
 .ph-ex:last-child { border-bottom: none; }
-.ph-ex__w { font-size: 29rpx; font-weight: 700; color: var(--ink); margin-left: 12rpx; }
-.ph-ex__hit { font-size: 22rpx; color: var(--uk-ink); margin-left: 10rpx; }
-.ph-ex__cn { flex: 1; text-align: right; font-size: 24rpx; color: var(--muted3); }
+.ph-ex--press { background: var(--card); border-radius: 14rpx; }
+.ph-ex__txt { flex: 1; min-width: 0; }
+.ph-ex__w { font-size: 29rpx; font-weight: 700; color: var(--ink); }
+.ph-ex__hit { font-size: 24rpx; color: var(--uk-ink); margin-left: 8rpx; }
+.ph-ex__cn { font-size: 24rpx; color: var(--muted3); margin-left: 14rpx; }
 
 /* iPad / 宽屏覆盖（纯追加，手机端不受影响），尺寸 = rpx × 0.5 */
 @media (min-width:700px) {
@@ -80,6 +100,8 @@
   .cat-grid { gap: 7px; }
   .cat-cell { padding: 10px 11px; border-radius: 8px; }
   .ph-chip { min-width: 48px; padding: 6px 8px; font-size: 14px; }
+  .ph-cls { height: 34px; line-height: 34px; border-radius: 7px; font-size: 14px; }
+  .ph-subchip { padding: 4px 10px; border-radius: 12px; font-size: 12px; }
   .ph-panel { margin-top: 12px; padding: 11px 13px 9px; border-radius: 8px; }
   .ph-big { font-size: 28px; }
 }
