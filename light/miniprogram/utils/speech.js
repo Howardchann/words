@@ -31,7 +31,12 @@ const state = {
 };
 let playToken = 0, audioTimeout = null, audioOptDone = false;
 
-const CACHE_ROOT = (wx.env && wx.env.USER_DATA_PATH ? wx.env.USER_DATA_PATH : '') + '/au';
+// v1.1.76 缓存版本化：v1.1.74 功能词音频生成事故期间，预取把污染文件落进了旧缓存目录；
+// 云端已全量替换，但本地缓存优先播放、设备无从感知内容已更新 → 换新根目录强制全量重取。
+// 旧 /au 目录在模块加载时一次性清除（失败静默，下次启动再试）。
+const CACHE_ROOT = (wx.env && wx.env.USER_DATA_PATH ? wx.env.USER_DATA_PATH : '') + '/au2';
+const CACHE_ROOT_OLD = (wx.env && wx.env.USER_DATA_PATH ? wx.env.USER_DATA_PATH : '') + '/au';
+try { wx.getFileSystemManager().rmdirSync(CACHE_ROOT_OLD, true); } catch (e) {}
 const CACHE_MAX = 2000;      // 缓存文件数上限，超出按最久未用淘汰
 const SLOW_GATE = 0.85;      // ≤ 此速率使用慢速音频
 const URL_TTL = 60 * 60 * 1000;   // 签名链接按 2 小时有效估算，取一半留余量

@@ -65,7 +65,8 @@
 .ph-class { display: flex; gap: 14rpx; }
 .ph-cls { flex: 1; text-align: center; height: 68rpx; line-height: 68rpx; border-radius: 14rpx;
   background: var(--soft); font-size: 28rpx; font-weight: 700; color: var(--muted3); }
-.ph-cls.on { background: var(--green); color: #FFFFFF; }
+/* 选中态：浅绿底 + 深绿字（v1.1.76 由实心绿白字浅色化，与 .ph-subchip.on 同风格；按压不掉色） */
+.ph-cls.on { background: var(--press-green); color: var(--green-press); }
 .ph-cls--press { opacity: .85; }
 .ph-cls__n { font-size: 22rpx; font-weight: 600; margin-left: 8rpx; opacity: .8; }
 
@@ -81,8 +82,8 @@
   background: var(--soft); border-radius: 14rpx; font-size: 28rpx; font-weight: 700; color: var(--green);
   font-family: 'Times New Roman', Georgia, serif; }
 .ph-chip--press { background: var(--press-green); }
-/* 选中态：绿底白字（两个类选择器，优先级高于单类的 --press，按压时不会掉色） */
-.ph-chip.on { background: var(--green); color: #FFFFFF; }
+/* 选中态：浅绿底 + 深绿字（v1.1.76 浅色化；两个类选择器优先级高于单类 --press，按压不掉色） */
+.ph-chip.on { background: var(--press-green); color: var(--green-press); }
 .ph-chip.on.ph-chip--press { opacity: .88; }
 
 /* 常驻详情面板：紧跟网格下方（不再排到 2 屏之外），位置随筛选结果自动上移 */
