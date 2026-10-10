@@ -2,6 +2,16 @@
 
 > 本实例由 cloud 实例 v1.1.38（仓库提交 `dbe76dc` 的 cloud/ 树）派生，**共享全部产品与机制历史**——完整变更史见 `../cloud/CHANGELOG.md`，此处只记录本实例自身的差异与后续变更。
 
+## 2026-10-11 · tabBar 英文化（复数）+ toast 勾线稿化 + 朗读行按压统一（v1.1.71）
+
+> **范围**：`custom-tab-bar/index.js`、`app.json`、`components/feedback/feedback.js|wxml|wxss`、`pages/tools/tools.wxss`、`pkg-study/pages/topic/topic.wxss`，共 7 文件。
+> **触发**：用户真机验收 v1.1.70——①toast 勾仍有大面积色块（绿圆底），与全站线稿图标不统一；②音标例词/语法例句按压是整行变色，与今日页/查单词行不一致；③拍板 tab 文字改英文复数形式。
+
+- **tabBar → Today / Review / Tools / Settings**：`custom-tab-bar/index.js` list text + `app.json` tabBar.list.text 两处同步。图标零改动；顶部导航保持中文（今日单词/复习巩固/工具/设置）。背景：today/review/tool/setting 四词均在 8000 词表内；用户选复数（英语软件习惯），词表无 tools/settings 屈折变体（词表全为原形）。
+- **toast 勾去大色块**：`fb-toast-ico` 从「绿圆底+白勾」整枚 SVG 改为**纯线稿勾**（stroke 2.6 圆头，与 settings 的 `.sheet-check`、topic 易错点 ✓ 同一张图）；深色主题由 `feedback.js` 在 toast 弹出时读 `theme.isDark()` 挂 `fb-dark` 类切亮绿变体——组件 `styleIsolation:'isolated'`，页面根类 `.theme-dark` 穿透不进组件，只能 JS 挂类。
+- **朗读行按压统一**：tools 音标例词行 `.ph-ex--press` 与 topic 例句行 `.ex--press` 从「整行变底色」改为**喇叭 scale(.85)+opacity .6**（与今日页 `.ex-speak.speak-hover` 同款）。语义分离：行底色=选中跳转（查单词结果行保留），按压发声=喇叭反馈；播放态卡拉OK 高亮（`.ex--on`）不动。
+- 校验：2 个 JS 编译过、verify-structure 全过、换行符未破坏（js/json 保持 CRLF、wxss 纯 LF）。效果图发布于预览链接（tab-en 目录）。
+
 ## 2026-10-11 · 目标字母染进单词 + 对错/播放图标全站收口为自绘 SVG（v1.1.70）
 
 > **范围**：`pages/tools/tools.js|wxml|wxss`、`pkg-study/pages/topic/topic.js|wxml|wxss`、`components/feedback/feedback.wxml|wxss`、`pages/settings/settings.wxml|wxss`、`tools/gen-tools-preview.js`，共 10 文件 +229/-67 行。

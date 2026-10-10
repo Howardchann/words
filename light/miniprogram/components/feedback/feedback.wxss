@@ -17,15 +17,18 @@
   box-shadow:0 8rpx 32rpx rgba(23, 107, 91, 0.16);
   max-width:80vw;
 }
-/* 勾 = 整枚 SVG（绿圆 + 白勾同图，v1.1.70）。勾的 path 与 pkg-study/pages/topic/topic.wxss
-   的 .fix__mk--good 同源（同 stroke-width / 圆头 / 24 格网格），三处勾形一致。
-   ⚠️ 原先靠 border-radius + flex 居中一个 ✓ 字符，字符本体大小随机型字体变；改图后完全确定。 */
+/* 勾 = 纯线稿 SVG（v1.1.71）：与 pages/settings 的 .sheet-check 同一张图（stroke 2.6 圆头、
+   24 格网格、无底色），深色主题换 .fb-dark 变体（亮绿描边）。绿色块版本已废——
+   用户真机反馈「勾有大面积颜色」，与全站线稿图标观感不符。 */
 .fb-toast-ico {
   flex-shrink:0;
   width:34rpx;
   height:34rpx;
   background:center/contain no-repeat;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='11' fill='%232E8B72'/%3E%3Cpath d='M6.9 12.2l3.5 3.5L17.1 8.7' fill='none' stroke='%23FFFFFF' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23176B5B' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4.9 12.4l4.9 4.9L19 6.9'/%3E%3C/svg%3E");
+}
+.fb-toast.fb-dark .fb-toast-ico {
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2358B394' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4.9 12.4l4.9 4.9L19 6.9'/%3E%3C/svg%3E");
 }
 .fb-toast-msg { line-height:1.5; }
 

@@ -23,7 +23,9 @@ page { padding-bottom: env(safe-area-inset-bottom); }
    播放态深绿由 .spk-ico--on（wxml 三元）承担，不再需要本页私有的 .ex__spk 规则。 */
 .ex { display: flex; align-items: baseline; padding: 18rpx 16rpx; border-radius: 14rpx; border-bottom: 1rpx solid var(--line); }
 .ex:last-child { border-bottom: none; }
-.ex--press { background: var(--soft); }
+/* 按压反馈（v1.1.71）：整行变色 → 喇叭缩放变淡，与今日页 .ex-speak.speak-hover 同款；
+   行底色留给播放态（.ex--on，卡拉OK 高亮的一部分），按压不再动行背景。 */
+.ex--press .spk-ico { transform: scale(.85); opacity: .6; }
 .ex--on { background: var(--soft2); }
 .ex__main { flex: 1; min-width: 0; }
 .ex__en { font-size: 28rpx; color: var(--ink3); line-height: 1.7; word-break: break-word; }

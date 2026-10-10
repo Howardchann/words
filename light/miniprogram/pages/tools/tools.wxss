@@ -87,7 +87,10 @@
       （x-height 锚定），对 .ph-ex 的 align-items:baseline 生效；绝不自建 flex 居中盒。 */
 .ph-ex { display: flex; align-items: baseline; padding: 16rpx 14rpx; border-bottom: 1rpx solid var(--line); }
 .ph-ex:last-child { border-bottom: none; }
-.ph-ex--press { background: var(--card); border-radius: 14rpx; }
+/* 按压反馈（v1.1.71）：整行变色 → 喇叭缩放变淡，与今日页 .ex-speak.speak-hover 完全同款
+   （app.wxss：scale(.85) + opacity:.6）。行本体不再有视觉变化——朗读行的"点"是发音，
+   反馈落在喇叭上；行变底色是"选中跳转"的语言（查单词结果行才是），两种语义不混用。 */
+.ph-ex--press .spk-ico { transform: scale(.85); opacity: .6; }
 /* 行首喇叭：取消 margin-left，盒宽收到 44rpx（图标仍是 36rpx 定值不变，只少一点左侧缩进） */
 .ex-speak--lead { margin-left: 0; margin-right: 14rpx; width: 44rpx; height: 44rpx; }
 .ph-ex__txt { flex: 1; min-width: 0; }

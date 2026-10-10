@@ -30,25 +30,25 @@
     "list": [
       {
         "pagePath": "pages/today/today",
-        "text": "今日",
+        "text": "Today",
         "iconPath": "images/today.png",
         "selectedIconPath": "images/today-active.png"
       },
       {
         "pagePath": "pages/review/review",
-        "text": "复习",
+        "text": "Review",
         "iconPath": "images/review.png",
         "selectedIconPath": "images/review-active.png"
       },
       {
         "pagePath": "pages/tools/tools",
-        "text": "工具",
+        "text": "Tools",
         "iconPath": "images/weeks.png",
         "selectedIconPath": "images/weeks-active.png"
       },
       {
         "pagePath": "pages/settings/settings",
-        "text": "设置",
+        "text": "Settings",
         "iconPath": "images/settings.png",
         "selectedIconPath": "images/settings-active.png"
       }
