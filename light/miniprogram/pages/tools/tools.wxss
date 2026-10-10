@@ -28,6 +28,22 @@
 .tk-row { border-radius: 14rpx; }
 .tk-row--press { background: var(--soft); }
 .tk-day { font-size: 22rpx; color: var(--green); margin-top: 10rpx; }
+
+/* 词形归一提示 + 不规则形式标注（v1.1.73）
+   via = 「taken」是它的过去分词（查词归一到原形时的说明）；
+   wf  = 词条本身的 irregular 形式小字（过去式 took · 过去分词 taken），每个标签可点读。
+   读音走 kind:'g'（g/ 桶预生成，Azure Ava 与全站同音色），不引第二音色。
+   排版：自然折行、行高不变——最短 go 一行放下，最长 understand 自动折两行，不破版。 */
+.wf-via { margin-top: 6rpx; font-size: 22rpx; color: var(--muted3); line-height: 1.6; }
+.wf-note { margin-top: 8rpx; }
+.wf-note__t {
+  display: inline-block;
+  margin: 0 18rpx 6rpx 0;
+  font-size: 22rpx;
+  color: var(--green);
+  border-bottom: 2rpx dotted var(--green);
+  padding-bottom: 2rpx;
+}
 .tk-day__go { color: var(--muted); }
 .tk-empty { text-align: center; padding: 40rpx 24rpx 24rpx; }
 .tk-empty__sub { margin-top: 14rpx; font-size: 24rpx; color: var(--muted); line-height: 1.7; }

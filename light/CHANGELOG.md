@@ -2,6 +2,15 @@
 
 > 本实例由 cloud 实例 v1.1.38（仓库提交 `dbe76dc` 的 cloud/ 树）派生，**共享全部产品与机制历史**——完整变更史见 `../cloud/CHANGELOG.md`，此处只记录本实例自身的差异与后续变更。
 
+## 2026-10-11 · 浮窗 dock V1 + 词形归一与不规则形式标注（v1.1.73）
+
+- **浮窗 dock（用户从 4 版效果图定稿 V1）**：`custom-tab-bar/index.wxss` 壳改悬浮圆角（bottom 抬 safe-area+16rpx、左右 24rpx、radius 40rpx、阴影加肿、去 border-top），深色模式同步；**选中态图标复用现有 .on 变体，红点缀（时钟指针/工具提手/红心/设置钮）全保留**。页面底部预留：app.wxss page 132→168rpx（宽屏 66→84px）、settings sheet 150→168rpx。
+- **词形归一（lemmatization）**：新增 `utils/wordforms.js`——不规则动词表（~80 词，含情态 can→could 词形关系）、不规则复数（children/men/feet…）、不规则比较级（better/worse/more…）；规则变化（-s/-es/-ies/-ed/-ing，含 e 还原与双写辅音还原）现场推导，候选必须真实命中词表才生效。`data.js searchWords` 接入：**归一与直查共存，原形排最前带 via 标签**（查 taken → take「过去分词」置顶；making/better/used 自身也是词条的，原形在前、词条在后）；-s 变体按词性修标签（run v. → 「第三人称单数」，tool n. → 「复数」）。20 例端到端回归全过。
+- **词条不规则形式标注**：查单词结果卡 IPA 行下加小字（如 take：`过去式 took · 过去分词 taken`，绿色虚线底线标签），每个标签可点读——走 `kind:'g'` g/ 桶预生成音频，与全站同音色；was/were 双写法拆独立标签保证音频逐字一致；自然折行不破版（go 一行、understand 两行）。**今日页词卡暂不加**（学习页保持轻）。
+- **g/ 桶音频 +370**：`_g_extra.json` 写入 185 个变体形式，mk_g_tasks → gen_g_audio（正常速 + 慢速各 185，105s 零失败），tcb 整目录上传 832 文件（462 旧 + 370 新），抽检 went ETag==本地 MD5。
+- **功能词包清单（未写入 words.js）**：`tools/gen-funcwords-list.js` 产出 114 词清单（be/代词/助动/情态/冠词/疑问/介词/连词/副词/数词 11 步，含释义与例句；词表已有 17 词自动剔除），发布预览链接待用户过目后插入。
+- 校验：verify-structure 全过；新文件纯 LF、data.js CRLF 保全（CR=334）；编译检查过。
+
 ## 2026-10-11 · 滑动窗口音频预取（v1.1.72）
 
 - **背景**：原「预取三音频」挂账项。现状核实 = 今日页进页面已签全天前 40 条链接 + 落盘前 10 个（`today.js` renderDay → `speech.prefetch`），但 ①慢速变体完全没预取（点慢速首播必走网络，顿一下）；②落盘固定是当天头 5 个词，用户听到后面就没了。

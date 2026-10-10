@@ -277,6 +277,14 @@ Page({
     speech.speak(text, { ai: Number(ds.ai) || 0, kind: ds.kind || 'w', accent: accent });
   },
 
+  // 朗读不规则变体小字（v1.1.73）：文本 = 单词本身（was、took…），走 g/ 桶预生成音频。
+  // 不接卡拉 OK：playingText 是主词行的状态机，小字标签点读只做即时反馈，不搅动主行。
+  onSpeakWf(e) {
+    const t = e.currentTarget.dataset.text;
+    if (!t) return;
+    speech.speak(t, { kind: 'g' });
+  },
+
   // ---------- ④ 语法速查 ----------
   // 本页只做「目录」：点分类进分包页看完整讲解与例句
   onCatTap(e) {

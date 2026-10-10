@@ -7,8 +7,8 @@
 
 /* 自绘底部选择弹层（替代系统 picker 面板，风格统一） */
 .sheet-mask{position:fixed;inset:0;z-index:9990;background:rgba(0,0,0,.45);display:flex;align-items:flex-end}
-/* sheet 底部留出自定义 tabBar 原生层的高度（112rpx+safe-area），否则最后一项被 tabBar 盖住 */
-.sheet{width:100%;background:var(--card);border-radius:28rpx 28rpx 0 0;padding:10rpx 0 calc(150rpx + env(safe-area-inset-bottom));box-sizing:border-box;max-height:78vh;overflow-y:auto}
+/* sheet 底部留出浮窗 dock 的高度（16rpx 抬升 + 112rpx 本体 + 余量），否则最后一项被 dock 盖住 */
+.sheet{width:100%;background:var(--card);border-radius:28rpx 28rpx 0 0;padding:10rpx 0 calc(168rpx + env(safe-area-inset-bottom));box-sizing:border-box;max-height:78vh;overflow-y:auto}
 .sheet-title{font-size:24rpx;color:var(--muted);text-align:center;padding:18rpx 0 8rpx}
 .sheet-opt{display:flex;align-items:center;justify-content:space-between;gap:16rpx;font-size:28rpx;color:var(--ink);padding:24rpx 36rpx;border-bottom:1rpx solid var(--line)}
 .sheet-opt:last-child{border-bottom:none}
@@ -93,7 +93,7 @@
   .stat-label { font-size:11px; margin-top:2px; }
   .btn-row { gap:8px; }
   .btn-reset { font-size:14px; }
-  .sheet { border-radius:14px 14px 0 0; padding:5px 0 calc(75px + env(safe-area-inset-bottom)); max-height:80vh; }
+  .sheet { border-radius:14px 14px 0 0; padding:5px 0 calc(84px + env(safe-area-inset-bottom)); max-height:80vh; }
   .sheet-title { font-size:12px; padding:9px 0 4px; }
   .sheet-opt { font-size:14px; padding:12px 18px; }
   .sheet-check { width:15px; height:15px; }

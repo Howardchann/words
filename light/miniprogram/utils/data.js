@@ -15,6 +15,7 @@
 // 为什么词表按课程顺序排列：这样「某一天要用哪些词」就是一整段连续区间，
 // 偏移量在启动时一次算好（DAY_OFF），运行时零查表开销。
 // 每个词带 ai（音频编号）——音频文件名用的是词频序排名，与本表顺序不同，故必须显式携带。
+const wordforms = require('./wordforms.js');
 const p1 = require('./data-p1.js');
 const p2 = require('./data-p2.js');
 const p3 = require('./data-p3.js');
@@ -224,7 +225,7 @@ function searchWords(kw, limit) {
   const q = String(kw || '').trim().toLowerCase();
   if (!q) return { total: 0, list: [] };
   const ws = allWords();
-  const exact = [], pre = [], inc = [], zh = [];
+  let exact = [], pre = [], inc = [], zh = [];
   for (let i = 0; i < ws.length; i++) {
     const it = ws[i];
     const lw = it.w.toLowerCase();
@@ -232,6 +233,31 @@ function searchWords(kw, limit) {
     else if (lw.indexOf(q) === 0) pre.push(i);
     else if (lw.indexOf(q) > 0) inc.push(i);
     else if (it.m && it.m.indexOf(q) >= 0) zh.push(i);
+  }
+  // 词形归一（v1.1.73）：完全匹配缺失时，把查询词当变体归一回原形（查 taken -> take）。
+  // 归一命中排最前，并带 via 标签（「是 xx 的过去分词」类提示），行首显示一条 muted 小字。
+  const viaMap = {};
+  // 词形归一与直查共存（v1.1.73）：making/better/used 这类词本身也是词条（直查命中），
+  // 但用户多半想看原形 —— 归一到的原形排最前并带 via 标签，词条自身照常显示在后。
+  // 完全未命中时同理（taken -> take）。could/would 指向的情态动词暂不在词表，功能词包补入后自动生效。
+  {
+    const cands = wordforms.lemma(q);
+    for (let c = 0; c < cands.length; c++) {
+      const base = cands[c].base;
+      if (base === q) break;                 // 原形就是查询词本身，无需归一
+      let hit = -1;
+      for (let i = 0; i < ws.length; i++) {
+        if (ws[i].w.toLowerCase() === base) { hit = i; break; }
+      }
+      if (hit < 0) continue;
+      // -s 类变体：原形是动词开头（v./n. 混性词除外）时，标签应是「第三人称单数」不是「复数」
+      let lb = cands[c].label;
+      if (lb === wordforms.LBL.pl && ws[hit].p.indexOf('v.') === 0) lb = wordforms.LBL.s;
+      viaMap[hit] = lb;
+      exact = exact.filter(function (j) { return j !== hit; });
+      exact.unshift(hit);                    // 原形排最前
+      break;                                 // 只要最可信的一个候选
+    }
   }
   const total = exact.length + pre.length + inc.length + zh.length;
   const cap = limit > 0 ? limit : SEARCH_LIMIT;
@@ -242,6 +268,8 @@ function searchWords(kw, limit) {
     return {
       w: it.w, p: it.p, m: it.m, e: it.e, ai: it.ai, ipa: it.ipa || '', uk: it.uk || '', cn: it.cn || '',
       day: day, dow: DOW[info.k - 1], wn: info.wIdx + 1,
+      via: viaMap[i] || '',
+      wf: wordforms.noteFor(it.w),   // [{label:'过去式',form:'took'},...]，无不规则形式为 []
     };
   });
   return { total: total, list: list };

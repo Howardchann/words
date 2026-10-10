@@ -52,6 +52,12 @@
                   hover-class="speak-hover" hover-stay-time="120" hover-stop-propagation="{{true}}"
                   data-text="{{item.w}}" data-ai="{{item.ai}}" data-kind="w" data-accent="uk" catchtap="onSpeak"><view class="spk-ico {{playingText === item.w && playingAccent === 'uk' ? 'spk-ico--on' : ''}}"></view><text class="ipa-txt">{{item.uk}}</text></view>
           </view></view>
+        <view class="wf-via" wx:if="{{item.via}}">「{{kw}}」是它的{{item.via}}</view>
+        <view class="wf-note" wx:if="{{item.wf.length}}">
+          <text class="wf-note__t" wx:for="{{item.wf}}" wx:for-item="F" wx:key="form"
+                hover-class="hover-dim" hover-stay-time="120"
+                data-text="{{F.form}}" catchtap="onSpeakWf">{{F.label}} {{F.form}}</text>
+        </view>
         <view class="word-example-row">
           <view class="word-example"><text wx:if="{{playingText === item.e}}" class="kara-lit">{{karaLit}}</text>{{playingText === item.e ? karaRest : item.e}}</view>
           <view class="ex-speak {{playingText === item.e ? 'playing' : ''}}"

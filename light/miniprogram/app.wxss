@@ -23,8 +23,8 @@ page {
   font-size:28rpx;
   line-height:1.6;
   font-family:-apple-system, BlinkMacSystemFont, 'PingFang SC', 'Helvetica Neue', sans-serif;
-  /* 自定义 tabBar 高度约 112rpx：预留底部空间，避免最后一张卡片被导航栏遮住 */
-  padding-bottom:calc(132rpx + env(safe-area-inset-bottom));
+  /* 浮窗 dock（v1.1.73）：tabBar 抬离底边，页面底部预留随之加大 */
+  padding-bottom:calc(168rpx + env(safe-area-inset-bottom));
 }
 /* 页面根 view：铺 --bg 到整屏（page 本底在深色下仍是浅色，由根 view 覆盖；
    导航栏/窗口背景由 theme.js 运行时覆盖） */
@@ -252,7 +252,7 @@ page {
    rpx 按「窗口宽度/750」换算，iPad Pro 窗口宽 1000px+ 时所有尺寸被放大约 3 倍。
    ≥700px 时改用固定 px 并把内容限宽居中，字号取手机端 ×0.5rpx 值。 */
 @media (min-width:700px) {
-  page { font-size:15px; padding-bottom:calc(66px + env(safe-area-inset-bottom)); }
+  page { font-size:15px; padding-bottom:calc(84px + env(safe-area-inset-bottom)); }
   .card { max-width:640px; margin:12px auto; border-radius:12px; padding:14px; box-sizing:border-box; }
   .section-label { font-size:14px; margin-bottom:7px; }
   .btn-primary { border-radius:22px; font-size:15px; }

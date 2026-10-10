@@ -1,22 +1,27 @@
+/* V1 浮窗 dock（2026-10-11 用户定稿）：不贴底、左右留边、整枚圆角 + 阴影。
+   ⚠️ 组件本身仍占满底部一层（微信 custom-tab-bar 机制），视觉浮起来靠这三件事：
+   ① bottom 抬高 safe-area + 16rpx ② 左右 24rpx 边距 ③ 整块 border-radius。
+   选中态图标 = 复用现有 .on 变体（红点缀全保留），不加任何底色块。
+   页面底部预留见 app.wxss 的 page{padding-bottom}（132→168rpx 已同步）。 */
 .tabbar {
   position:fixed;
-  left:0;
-  right:0;
-  bottom:0;
-  height:calc(112rpx + env(safe-area-inset-bottom));
-  padding:8rpx 18rpx env(safe-area-inset-bottom);
+  left:24rpx;
+  right:24rpx;
+  bottom:calc(16rpx + env(safe-area-inset-bottom));
+  height:112rpx;
+  padding:8rpx 12rpx;
   box-sizing:border-box;
   display:flex;
-  align-items:flex-start;
+  align-items:stretch;
   background:var(--card, #FFFFFF);
-  border-top:1rpx solid var(--line, #E8EFEB);
-  box-shadow:0 -6rpx 24rpx rgba(23,107,91,.06);
+  border-radius:40rpx;
+  box-shadow:0 10rpx 34rpx rgba(15,58,49,.16);
   z-index:999;
 }
 
 .tab-item {
   flex:1;
-  height:96rpx;
+  height:auto;
   display:flex;
   align-items:center;
   justify-content:center;
@@ -66,11 +71,12 @@
 /* iPad / 宽屏覆盖（纯追加，手机端不受影响），尺寸 = rpx × 0.5 */
 @media (min-width:700px) {
   .tabbar {
-    height:calc(56px + env(safe-area-inset-bottom));
-    padding:4px 9px env(safe-area-inset-bottom);
-    border-top-width:1px;
+    left:12px; right:12px;
+    bottom:calc(8px + env(safe-area-inset-bottom));
+    height:56px;
+    padding:4px 6px;
+    border-radius:20px;
   }
-  .tab-item { height:48px; }
   .tab-item-inner { width:66px; height:41px; border-radius:11px; }
   .tab-icon { width:23px; height:23px; margin-bottom:1px; }
   .tab-item.is-active .tab-icon { width:24px; height:24px; }
@@ -80,8 +86,7 @@
 /* 深色模式（.tabbar-dark 由组件 data.dark 驱动；token 不从 page 继承深色组，这里直接给值） */
 .tabbar-dark {
   background: #131F21;
-  border-top-color: #223430;
-  box-shadow: 0 -6rpx 24rpx rgba(0, 0, 0, 0.4);
+  box-shadow: 0 10rpx 34rpx rgba(0, 0, 0, 0.55);
 }
 .tabbar-dark .tab-text { color: #7E938B; }
 .tabbar-dark .tab-item.is-active .tab-text { color: #7CD6B4; }
