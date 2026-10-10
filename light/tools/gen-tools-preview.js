@@ -5,7 +5,7 @@ const fs = require('fs');
 const path = require('path');
 
 const MP = 'D:/idea/ielts-365/light/miniprogram';
-const OUT = 'D:/idea/_reviews/工具页效果图_v1.1.68.html';
+const OUT = 'D:/idea/_reviews/工具页效果图_v1.1.70.html';
 
 const PH = require(MP + '/utils/phonetic.js');
 const CATS = require(MP + '/utils/study-cats.js');
@@ -28,6 +28,37 @@ const ICO = {
 };
 // 已生成脚本里没有 book 了，兜底用历史 data-URI（对照用）
 if (!ICO.book) ICO.book = "data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Cpath%20d='M12,6.6C10.2,5.1%207.6,4.4%204.6,4.7V17.4C7.6,17.1%2010.2,17.8%2012,19.3C13.8,17.8%2016.4,17.1%2019.4,17.4V4.7C16.4,4.4%2013.8,5.1%2012,6.6Z'%20stroke-width='1.8'%20fill='none'%20stroke='%238B9893'%20stroke-linejoin='round'/%3E%3Cpath%20d='M12,6.6V19.3'%20stroke-width='1.8'%20fill='none'%20stroke='%238B9893'%20stroke-linecap='round'/%3E%3C/svg%3E";
+
+// ── 从 app.wxss 抽真实图标（v1.1.70 起效果图一律用真 SVG，不再用 emoji）──
+// 上一版（v1.1.68）效果图里的喇叭是 emoji 🔊，而底栏图标是真 SVG → 同一张图里两套图标，
+// 用户看图时就会觉得「播放按钮不一致」。真机代码本身是统一的（喇叭 = .spk-ico 单一来源，
+// 只有绿/蓝、明/暗、30/36rpx 尺寸差），是效果图没对齐。这里全部改成从源文件抽。
+const appwxss = fs.readFileSync(MP + '/app.wxss', 'utf8');
+// ⚠️ 三个坑（都已踩过）：① 不能要求「规则里只含 background-image 一条」——.spk-ico 里有尺寸等声明；
+//    ② 不能用简单的子串正则——`.ipa-mod--uk .spk-ico{...}`（英音蓝）出现得比 `.spk-ico{...}`（品牌绿）更早；
+//    ③ 必须先剥离 /* */ 注释——否则注释文本会被 ([^{}]+) 吃进选择器串，主定义反而匹配不上，
+//       先命中的会变成 @media 里那条只含尺寸的同名规则（图标就空了）。
+const appcss = appwxss.replace(/\/\*[\s\S]*?\*\//g, '');
+function appIcon(sel) {
+  const re = /([^{}]+)\{([^{}]*)\}/g;
+  let m;
+  while ((m = re.exec(appcss)) !== null) {
+    if (m[1].split(',').map(s => s.trim()).indexOf(sel) < 0) continue;
+    const u = m[2].match(/background-image:url\("([^"]+)"\)/);
+    if (u) return u[1];
+  }
+  return '';
+}
+const SPK = appIcon('.spk-ico');            // 绿喇叭 #176B5B
+const SPK_UK = appIcon('.ipa-mod--uk .spk-ico') || SPK;   // 英音蓝喇叭
+const SEARCH = appIcon('.ico-search');
+
+// 对错图标（v1.1.70 起为自绘 SVG）：path 与 pkg-study/pages/topic/topic.wxss 的 .fix__mk--* 同源，
+// 三处勾形（易错点 / toast / 设置页）完全一致。字符 ✗/✓ 由不同字形族兜底、粗细不一，已是过去式。
+const mkUri = (d, color, extra) => 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'' + color + '\' stroke-width=\'2.6\' stroke-linecap=\'round\'' + (extra || '') + '%3E%3Cpath d=\'' + d + '\'/%3E%3C/svg%3E';
+const MK_CROSS = mkUri('M5.6 5.6l12.8 12.8M18.4 5.6L5.6 18.4', '%23C0392B');
+const MK_TICK = mkUri('M4.9 12.4l4.9 4.9L19 6.9', '%23176B5B', ' stroke-linejoin=\'round\'');
+const MK_TICK_W = 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\'%3E%3Ccircle cx=\'12\' cy=\'12\' r=\'11\' fill=\'%232E8B72\'/%3E%3Cpath d=\'M6.9 12.2l3.5 3.5L17.1 8.7\' fill=\'none\' stroke=\'%23FFFFFF\' stroke-width=\'2.6\' stroke-linecap=\'round\' stroke-linejoin=\'round\'/%3E%3C/svg%3E';
 
 // 「工具」图标：最终采用的方案（工具箱 + 红提手）
 function svgUri(inner) {
@@ -98,7 +129,7 @@ const searchCard = (withResults) => `<div class="card">
   <div class="wrow">
     <div class="wmain">
       <div class="whead"><span class="wen">achieve</span><span class="wpos">v.</span><span class="wzh">达到；实现</span></div>
-      <div class="iparow"><span class="ipamod us">🔊 /əˈtʃiːv/</span><span class="ipamod uk">🔊 /əˈtʃiːv/</span></div>
+      <div class="iparow"><span class="ipamod us"><span class="ipaspk" ${inlineIcon(SPK)}></span>/əˈtʃiːv/</span><span class="ipamod uk"><span class="ipaspk" ${inlineIcon(SPK_UK)}></span>/əˈtʃiːv/</span></div>
       <div class="wex">She worked hard to <b>achieve</b> her goal.</div>
       <div class="wday">第 132 天 ›</div>
     </div>
@@ -106,7 +137,7 @@ const searchCard = (withResults) => `<div class="card">
   <div class="wrow">
     <div class="wmain">
       <div class="whead"><span class="wen">achievement</span><span class="wpos">n.</span><span class="wzh">成就；成绩</span></div>
-      <div class="iparow"><span class="ipamod us">🔊 /əˈtʃiːvmənt/</span></div>
+      <div class="iparow"><span class="ipamod us"><span class="ipaspk" ${inlineIcon(SPK)}></span>/əˈtʃiːvmənt/</span></div>
       <div class="wex">Winning the prize was a great <b>achievement</b>.</div>
       <div class="wday">第 133 天 ›</div>
     </div>
@@ -121,8 +152,35 @@ const gramCard = `<div class="card">
   <div class="note">共 ${CATS.reduce((a, c) => a + c.count, 0)} 个语法点：一句人话开场白 + 定义 + 用法 + 易错点 + 例句，能对应上课程的还会挂出「课程里讲过哪几天」。点分类进入；也可以进速查页按「用在什么场合」筛。</div>
 </div>`;
 
+// 目标字母切进单词内部 —— 与 pages/tools/tools.js 的 hitSegs() 同源（改一处务必同步另一处）
+function hitSegs(w, hit) {
+  const src = String(w || ''), h = String(hit || '').toLowerCase();
+  if (!src) return [];
+  if (!h) return [{ v: src, h: 0 }];
+  const raw = [];
+  const push = (v, isHit) => {
+    if (!v) return;
+    const last = raw[raw.length - 1];
+    if (last && last.h === (isHit ? 1 : 0)) last.v += v; else raw.push({ v: v, h: isHit ? 1 : 0 });
+  };
+  if (h.indexOf('-') >= 0) {
+    const left = h.split('-').filter(Boolean);
+    for (let i = 0; i < src.length; i++) {
+      const c = src.charAt(i).toLowerCase();
+      const k = left.indexOf(c);
+      if (k >= 0) { left.splice(k, 1); push(src.charAt(i), true); } else push(src.charAt(i), false);
+    }
+  } else {
+    const at = src.toLowerCase().indexOf(h);
+    if (at < 0) return [{ v: src, h: 0 }];
+    push(src.slice(0, at), false); push(src.slice(at, at + h.length), true); push(src.slice(at + h.length), false);
+  }
+  return raw;
+}
+
 // 音标详情面板（两处复用：整卡 / 局部核对页）
-const exRow = e => `<div class="phex"><div class="phextxt"><span class="pexw">${e.w}</span><span class="pexhit">${esc(e.hit)}</span><span class="pexcn">${esc(e.cn)}</span></div><span class="pexspk">🔊</span></div>`;
+// 例词行 v1.1.70：喇叭在行首成一列（方案A）+ 目标字母就地染色（不再有独立蓝标签）。
+const exRow = e => `<div class="phex"><span class="pexspk" ${inlineIcon(SPK)}></span><span class="phextxt"><span class="pexw">${hitSegs(e.w, e.hit).map(s => s.h ? `<span class="pexhi">${esc(s.v)}</span>` : esc(s.v)).join('')}</span><span class="pexcn">${esc(e.cn)}</span></span></div>`;
 const phPanelInner = `<div class="phhead"><span class="phbig">/${phI.s}/</span><span class="phtag">${phI.grp}</span></div>
   <div class="blk"><div class="blkt">怎么读</div><div class="blkb">${esc(phI.tips)}</div></div>
   <div class="blk"><div class="blkt">易混音</div><div class="blkb">${esc(phI.mix)}</div></div>
@@ -164,7 +222,7 @@ GRAM.forEach(c => c.topics.forEach(t => {
 }));
 
 const gramPage = `<div class="navtop">‹ 语法速查</div>
-<div class="sb2"><span class="sb2i">🔍</span><span class="sb2ph">搜语法点，如 时态 / 从句 / 冠词</span></div>
+<div class="sb2"><span class="sb2i" ${inlineIcon(SEARCH)}></span><span class="sb2ph">搜语法点，如 时态 / 从句 / 冠词</span></div>
 ${tagbar('')}
 <div class="intro">共 ${gramTotal} 个语法点。两种找法：上面按「用在什么场合」筛，下面按 12 个体系分类翻。每个语法点含一句人话开场白、定义、用法、易错点、例句，能对应上课程的还会挂出「课程里讲过哪几天」。</div>
 <div class="card catcard">
@@ -176,7 +234,7 @@ ${tagbar('')}
 </div>`;
 
 const gramTagPage = `<div class="navtop">‹ 语法速查</div>
-<div class="sb2"><span class="sb2i">🔍</span><span class="sb2ph">搜语法点，如 时态 / 从句 / 冠词</span></div>
+<div class="sb2"><span class="sb2i" ${inlineIcon(SEARCH)}></span><span class="sb2ph">搜语法点，如 时态 / 从句 / 冠词</span></div>
 ${tagbar('职场')}
 <div class="intro meta2">「工作职场」场景下共 ${tagHit.length} 个语法点</div>
 <div class="card catcard">
@@ -218,10 +276,10 @@ const gramTopic = `<div class="navtop">‹ 现在完成时</div>
 <div class="card"><div class="slabel">易错点</div>
   ${parseNotes(gTopic.note).map(N => N.kind === 'text'
     ? `<div class="li note"><i></i><span>${esc(N.v)}</span></div>`
-    : `<div class="fix">${N.head ? `<div class="fixhead">${esc(N.head)}</div>` : ''}${N.segs.map(S => `<div class="fixrow"><span class="fixico ${S.t}">${S.t === 'bad' ? '✗' : '✓'}</span><span class="fixtx">${esc(S.v)}</span></div>`).join('')}${N.why ? `<div class="fixwhy">${esc(N.why)}</div>` : ''}</div>`).join('')}
+    : `<div class="fix">${N.head ? `<div class="fixhead">${esc(N.head)}</div>` : ''}${N.segs.map(S => `<div class="fixrow"><span class="fixico"><span class="fixmk" ${inlineIcon(S.t === 'bad' ? MK_CROSS : MK_TICK)}></span></span><span class="fixtx">${esc(S.v)}</span></div>`).join('')}${N.why ? `<div class="fixwhy">${esc(N.why)}</div>` : ''}</div>`).join('')}
 </div>
 <div class="card"><div class="slabel">例句</div>
-  ${gTopic.ex.map(e => `<div class="gex"><div><div class="gexen">${esc(e.en)}</div><div class="gexcn">${esc(e.cn)}</div></div><span class="spk">🔊</span></div>`).join('')}
+  ${gTopic.ex.map(e => `<div class="gex"><div><div class="gexen">${esc(e.en)}</div><div class="gexcn">${esc(e.cn)}</div></div><span class="gexspk" ${inlineIcon(SPK)}></span></div>`).join('')}
 </div>
 <div class="card"><div class="slabel">课程对应</div>
   <div class="dchips">${gTopic.days.map(d => `<span class="dchip">第 ${d} 天</span>`).join('')}</div>
@@ -250,10 +308,37 @@ const iconCompare = `<div class="card2">
   <div class="cmpnote">图标为真机尺寸 46rpx（23px），直接抽自 <code>custom-tab-bar/index.wxss</code> 的生成结果。四枚已做尺寸归一：外接宽全部 17.8 / 24 格（复习的弧径 7.8→7.6 + 箭头内收、设置的轨道 5~19→4~20 + 圆钮 r2.4→2.8），选中态才有红色。</div>
 </div>`;
 
+// 图标一致性收口（v1.1.70）：这里刻意**不画 emoji**，只展示改后的统一图标 ——
+// 上一版效果图正是因为「一部分图标用真 SVG、一部分用 emoji」才让用户看出不一致。
+const iconConsist = `<div class="card2">
+  <h3>⑦ 播放按钮 / 对错图标 · 一致性收口（本轮）</h3>
+  <div class="cmp">
+    <div class="cmpcol pick">
+      <div class="cmpk">播放按钮：全站同一枚 SVG</div>
+      <div class="cmprow">
+        <span class="ci" ${inlineIcon(SPK)}></span>
+        <span class="ci" ${inlineIcon(SPK_UK)}></span>
+        <span class="ci" ${inlineIcon(SEARCH)}></span>
+      </div>
+      <div class="cmpl">绿=例句 / 例词 / 音标(美) · 蓝=英音 · 搜索同一套线条语言 · 尺寸只有 <b>30 / 36rpx</b> 两档</div>
+    </div>
+    <div class="cmpcol pick">
+      <div class="cmpk">对错图标：同一套自绘 SVG</div>
+      <div class="cmprow">
+        <span class="ci" ${inlineIcon(MK_CROSS)}></span>
+        <span class="ci" ${inlineIcon(MK_TICK)}></span>
+        <span class="ci" ${inlineIcon(MK_TICK_W)}></span>
+      </div>
+      <div class="cmpl">易错点 ✗/✓ + toast 勾 + 设置页选中勾 —— 三处同 stroke、同圆头、同 24 格网格</div>
+    </div>
+  </div>
+  <div class="cmpnote">播放图标在真机本来就只有 <code>.spk-ico</code> 一个来源（尺寸 30/36rpx 是老早就定的），是<b>上一版效果图</b>里混用了 emoji 🔊 才显得两套；对错图标则是<b>真机也存在的</b>问题：✗(U+2717) 与 ✓(U+2713) 没有 emoji 变体，但会被不同字形族接管，各机型粗细/大小不一 —— 已全部换成自绘 SVG。</div>
+</div>`;
+
 const html = `<!DOCTYPE html>
 <html lang="zh-CN"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>工具页重构 v2 · 效果图 v1.1.67</title>
+<title>工具页重构 · 效果图 v1.1.70</title>
 <style>
 :root{--bg:#F3F8EF;--card:#FFF;--ink:#24332F;--ink2:#5F6D68;--ink3:#53605B;--ink4:#43504C;
 --muted:#8B9893;--muted2:#82908B;--muted3:#66736E;--muted4:#7B8A84;
@@ -317,6 +402,9 @@ h2{font-size:16px;margin:30px 0 12px;color:#0F4A3E;border-left:4px solid var(--g
 .ipamod{display:inline-flex;align-items:center;height:28px;padding:0 7px;border-radius:8px;font-size:12px;
   margin:3px 5px 0 0;background:var(--usbg);border:1px solid var(--usline);color:var(--usink)}
 .ipamod.uk{background:var(--ukbg);border-color:var(--ukline);color:var(--ukink)}
+/* 音标胶囊内的小喇叭：与真机 .ipa-mod .spk-ico 同规格（30rpx=15px，右距 6rpx=3px） */
+.ipaspk{display:inline-block;vertical-align:middle;width:15px;height:15px;margin-right:3px;
+  background-position:center;background-repeat:no-repeat;background-size:15px 15px}
 .wex{font-size:12.5px;color:var(--muted2);margin-top:3px}
 .wday{font-size:11px;color:var(--green);margin-top:5px}
 
@@ -343,18 +431,18 @@ h2{font-size:16px;margin:30px 0 12px;color:#0F4A3E;border-left:4px solid var(--g
 .blk{margin-top:11px}
 .blkt{font-size:12px;font-weight:700;color:var(--green);margin-bottom:4px}
 .blkb{font-size:13px;color:var(--ink4);line-height:1.75}
-.phex{display:flex;align-items:center;padding:9px 8px;border-bottom:1px solid var(--line)}
+.phex{display:flex;align-items:baseline;padding:8px 7px;border-bottom:1px solid var(--line)}
 .phex:last-child{border-bottom:none}
-.spk{font-size:14px;margin-right:6px}
 .pexw{font-size:14.5px;font-weight:700}
-.pexhit{font-size:11px;color:var(--ukink);margin-left:5px}
-.pexcn{flex:1;text-align:right;font-size:12px;color:var(--muted3)}
+.pexhi{color:var(--green);border-bottom:3px solid currentColor;padding-bottom:2px}   /* 目标字母就地染色+底线（v1.1.70；纯色对比度仅约2:1，补底线才可辨） */
+.pexcn{font-size:12px;color:var(--muted3);margin-left:7px}
 
 /* 语法页 */
 .navtop{background:#F3F8EF;padding:10px 16px;font-size:15px;font-weight:600;color:var(--ink);position:sticky;top:0}
 .sb2{display:flex;align-items:center;height:38px;background:#fff;border:1px solid var(--cardline);
   border-radius:19px;margin:9px 12px 2px;padding:0 11px}
-.sb2i{margin-right:7px;font-size:13px}
+.sb2i{flex-shrink:0;width:16px;height:16px;margin-right:7px;
+  background-position:center;background-repeat:no-repeat;background-size:16px 16px}
 .sb2ph{color:var(--muted);font-size:13px}
 .intro{margin:11px 16px 0;font-size:12px;color:var(--muted3);line-height:1.8}
 .catcard{padding:3px 14px}
@@ -377,10 +465,13 @@ h2{font-size:16px;margin:30px 0 12px;color:#0F4A3E;border-left:4px solid var(--g
 .li span{flex:1;font-size:13.5px;color:var(--ink4);line-height:1.75}
 .li.note i{background:#C0392B}
 .li.note span{color:var(--ink3)}
-.gex{display:flex;align-items:center;padding:9px 8px;border-bottom:1px solid var(--line)}
+/* 例句行：喇叭（v1.1.69 收口）= 56×56 热区（28px）+ 36rpx 图标（18px）+ baseline，与今日页同构 */
+.gex{display:flex;align-items:baseline;padding:9px 8px;border-bottom:1px solid var(--line)}
 .gex:last-child{border-bottom:none}
 .gexen{font-size:14px;color:var(--ink3);line-height:1.7}
 .gexcn{margin-top:2px;font-size:12px;color:var(--muted3)}
+.gexspk{flex-shrink:0;width:28px;height:28px;margin-left:6px;
+  background-position:center;background-repeat:no-repeat;background-size:18px 18px}
 .dchips{display:flex;flex-wrap:wrap;gap:6px}
 .dchip{background:var(--soft);color:var(--green);border-radius:7px;padding:6px 11px;font-size:12.5px;font-weight:700}
 
@@ -407,11 +498,13 @@ h2{font-size:16px;margin:30px 0 12px;color:#0F4A3E;border-left:4px solid var(--g
 .phgrid{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
 .phchip{min-width:48px;text-align:center;padding:6px 8px;background:var(--soft);border-radius:7px;font-size:14px;font-weight:700;color:var(--green);font-family:'Times New Roman',Georgia,serif}
 .phchip.on{background:var(--green);color:#fff}
-/* 例词行：文字在左 + 喇叭最右（与今日页例句行同构：文字 flex:1、喇叭盒 flex-shrink:0 + 基线对齐） */
+/* 例词行（v1.1.69 方案A「左列喇叭」+ v1.1.70 词内染色）：喇叭在行首独立成列，文字左对齐自然宽度。
+   喇叭盒 22px（=44rpx），图标仍是 18px（=36rpx，与 .ex-speak .spk-ico 同尺寸）——
+   这就是「各区域播放按钮一致」的落点：尺寸只在 30/36rpx 两档，形状/颜色全站同一枚 SVG。 */
 .phex{display:flex;align-items:baseline;padding:8px 7px;border-bottom:1px solid var(--line);margin:0;background:none;border-radius:0}
 .phex:last-child{border-bottom:none}
 .phextxt{flex:1;min-width:0}
-.pexspk{flex-shrink:0;width:28px;height:28px;font-size:14px;text-align:center;margin-left:6px}
+.pexspk{flex-shrink:0;width:22px;height:22px;margin-right:7px;background-position:center;background-repeat:no-repeat;background-size:18px 18px}
 /* 场景筛选条 */
 .tagbar{display:flex;flex-wrap:wrap;gap:6px;margin:8px 12px 0}
 .tagchip{padding:5px 11px;border-radius:13px;font-size:12.5px;background:var(--soft);color:var(--muted3)}
@@ -421,24 +514,28 @@ h2{font-size:16px;margin:30px 0 12px;color:#0F4A3E;border-left:4px solid var(--g
 .catnum{flex-shrink:0;width:48px;text-align:right;font-size:12.5px;color:var(--green);margin-left:6px}
 /* 人话开场白 */
 .gplain{margin-top:7px;padding:7px 9px;border-radius:6px;background:var(--soft);font-size:13px;color:var(--ink3);line-height:1.7}
-/* 易错点：自绘 ✗/✓（不用系统 emoji ❌✅）—— 对齐口径 align-items:baseline，图标盒与右侧文字同基线 */
+/* 易错点：对错标记 = 自绘 SVG（v1.1.70，取代 ❌✅ emoji 与 ✗/✓ 字符）——
+   字符方案在真机由不同字形族兜底、粗细/大小不一，看起来像两套图标；SVG 后同一套 stroke/圆头/24 格网格。
+   对齐与全站一致：.fixico 内放零宽空格 strut，.fixmk inline-block + vertical-align:middle。 */
 .fix{margin-top:9px}
 .fix:first-child{margin-top:2px}
 .fixhead{font-size:12px;color:var(--muted3);line-height:1.7}
 .fixrow{display:flex;align-items:baseline;margin-top:3px}
-.fixico{flex-shrink:0;width:17px;text-align:center;font-size:12.5px;font-weight:700}
-.fixico.bad{color:#D85A30}
-.fixico.good{color:var(--green)}
+.fixico{flex-shrink:0;width:17px;text-align:center;font-size:12.5px}
+.fixico::before{content:'\\200B'}
+.fixmk{display:inline-block;vertical-align:middle;width:13px;height:13px;background:center/contain no-repeat}
 .fixtx{flex:1;min-width:0;font-size:13.5px;color:var(--ink3);line-height:1.75}
 .fixwhy{margin-top:2px;padding-left:22px;font-size:11.5px;color:var(--muted2);line-height:1.7}
 .tpcat{flex-shrink:0;margin-left:7px;font-size:10.5px;color:var(--ukink);background:var(--ukbg);border-radius:4px;padding:1px 5px}
 @media(max-width:760px){.phones{gap:16px}.phone{width:100%}.screen{width:100%;height:600px}}
 </style></head>
 <body><div class="wrap">
-<h1>工具页重构 v3 · 高保真效果图</h1>
-<div class="sub">v1.1.68 ｜ 音标两级筛选 · 例词行同构 · 语法场景标签 · 人话开场白 · 易错点自绘 ✗✓ · 今日页标题与设置页收口 ｜ 数据全部取自小程序真实文件（音标 ${PH.length} 个 / 语法 <%= n1 %> 个 / 底栏图标 data-URI 实抽）</div>
+<h1>工具页重构 v4 · 高保真效果图</h1>
+<div class="sub">v1.1.70 ｜ 目标字母染进单词 · 播放按钮与对错图标全站统一（自绘 SVG）· 音标例词行左列喇叭 ｜ 数据全部取自小程序真实文件（音标 ${PH.length} 个 / 语法 <%= n1 %> 个 / 喇叭·搜索·勾叉的 data-URI 均从源文件实抽）</div>
 
 ${iconCompare}
+
+${iconConsist}
 
 <h2>② 工具页 · 上半（学习记录 + 查单词）</h2>
 <div class="phones">
@@ -460,24 +557,23 @@ ${phone('语法点详情 · 人话开场白 + 易错点自绘', gramTopic, 2)}
 </div>
 
 <div class="card2" style="margin-top:22px">
-<h3>⑤ 本轮改动（对应你上一条的 6 点拍板）</h3>
+<h3>⑤ 本轮改动（v1.1.70）</h3>
 <div style="font-size:13px;line-height:2;color:#3C4A46">
-① <b>音标区</b>（第 1 点）：44 个平铺两屏、讲解吊在最末 → <b>大类（元音/辅音）+ 子类两级筛选</b>，屏幕上最多 3 行音标，<b>讲解面板紧跟其下</b>；操作说明也移到最前<br>
-② <b>音标例词行</b>（第 1 点）：喇叭对齐改用与今日页例句行<b>完全同构</b>的机制（文字 flex:1 + <code>.ex-speak</code> 零宽空格 strut + <code>vertical-align:middle</code>）——不再用 flex 居中（那会让喇叭抬高约 10rpx）；排版改为「单词 + 命中字母 + 中文」连排在左、<b>喇叭最右</b>；补上<b>卡拉 OK</b> 进度变色；播放改走 g/ 桶预生成音频 → <b>音色与今日页统一</b>（此前 132 个例词里 20 个不在词表、掉在线合成，听感不同）<br>
-③ <b>语法区</b>（第 2 点）：分类数量 23rpx 无定位 → <b>25rpx「N 个」+ 定宽右对齐</b>；易错点系统 emoji ❌✅ → <b>自绘 ✗/✓</b>（与全站配色同一套，<b>对齐走 baseline</b>）；修掉<b>例句播完不复位</b>（详情页此前没订阅播放状态回调，整行常驻深色）；删掉与「课程对应」重复的底部说明<br>
-④ <b>场景标签 + 人话开场白</b>（第 2/3 点）：71 个语法点全部打上 <b>8 类场景</b>标签，速查页加一排筛选 chips；每个语法点新增一句<b>人话开场白</b>（零基础先看它，术语讲解保留在后）<br>
-⑤ <b>今日页标题</b>（第 3 点）：导航栏「第 N 天」→ <b>「今日单词」</b>（与下方卡片里的「第 N 天」是同一个数，重复）<br>
-⑥ <b>设置页 + 关于</b>（第 4/5 点）：删掉「已完成天数」格（与工具页记录卡重复），保留可跳转的「重点词 / 复习记录」；「关于」正文口径对齐当前版本，不写考试向历史
+① <b>目标字母染进单词</b>：原来在单词后面挂一个独立蓝色小标签（<code>sit i 坐</code>），现在直接让<b>发这个音的那几个字母在单词内部变绿</b>（s<span style="color:#176B5B">i</span>t）——由 <code>tools.js</code> 的 <code>hitSegs()</code> 预先切成分段，模板只负责 for 出来；4 条开音节（name/time/five/home）是「字母分别染色」<br>
+② <b>对错图标改自绘 SVG</b>：emoji ❌✅ → 字符 ✗/✓ → <b>SVG</b>。字符方案在真机由不同字形族接管，粗细/大小/边距都不一样（就是你说的「两个版本」）；顺手把 <b>toast 的绿勾</b>和<b>设置页的选中勾</b>也换成同一套（三处勾形同源）<br>
+③ <b>效果图自身的图标统一</b>：上一版效果图里喇叭用 emoji 🔊、底栏图标用真 SVG —— 同一张图两套图标，所以你会觉得「播放按钮不一致」。真机代码其实一直是统一的（喇叭只出自 <code>app.wxss</code> 的 <code>.spk-ico</code> 一个类）。本版效果图<b>喇叭/搜索/勾叉全部从源文件实抽</b>，且不再出现任何 emoji<br>
+④ <b>音标例词行</b>：喇叭在行首成一列（方案A），文字左对齐自然宽度 —— 消掉「单词与喇叭之间的大片空白」<br>
+⑤ <b>语法详情例句行喇叭</b>：本页私有的 40rpx 裸图标 + 整行垂直居中（全站唯一无理由例外）→ 与今日页同构的 <b>56×56 热区 + 36rpx + baseline</b>
 </div>
 </div>
 
 <div class="card2">
-<h3>⑥ 想请你过目的几处</h3>
+<h3>⑥ 遗留（仍在等你点头 / 后续排期）</h3>
 <div style="font-size:13px;line-height:2;color:#3C4A46">
-1. 音标区默认「元音 + 全部」（20 个 chip、三行）+ 面板紧跟 —— 现在不用滑到底了<br>
-2. 例词行新排版：<code>sit i 坐 ……………… 🔊</code>（单词 + 命中字母 + 中文连排，喇叭在最右）<br>
-3. 场景标签用了 2 字：日常 / 闲聊 / 书面 / 职场 / 学习 / 出行 / 购物 / 商务 —— 是否好认<br>
-4. 人话开场白的口吻（例：<b>开口前先想一句：这是现在、过去，还是以后的事？</b>）
+1. 音标例词行的目标字母现在是<b>纯绿色</b>——要不要再加一点提示（如下划线）？<br>
+2. 对错图标统一后的观感（易错点 ✗/✓ · toast 勾 · 设置页勾）<br>
+3. 播放按钮现状：绿 / 蓝两色（美音 vs 英音）、30 / 36rpx 两档尺寸<br>
+4. 待排期：全量代码扫描专项、语法例句音频全量预生成（含慢速）
 </div>
 </div>
 </div></body></html>`;

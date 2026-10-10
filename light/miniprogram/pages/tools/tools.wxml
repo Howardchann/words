@@ -118,13 +118,16 @@
            2026-10-10 用户真机反馈「单词的翻译和播放按钮之间大片空白」——根因是文字块 flex:1 被强行
            撑满、喇叭又被钉死在最右，而例词本身很短（最长的才 television·si·电视，空白占行宽 49%~72%）。
            喇叭仍是同一枚 36rpx 绿喇叭（.ex-speak 同款热区，只是位置从行尾改为行首列），
-           垂直对齐仍靠 .ex-speak 的零宽空格 strut + .spk-ico vertical-align:middle 取 x-height 基线。 -->
+           垂直对齐仍靠 .ex-speak 的零宽空格 strut + .spk-ico vertical-align:middle 取 x-height 基线。
+           v1.1.70：目标字母从「单词后面的独立蓝色小标签」改为**就地染色**（sit 的 i 变绿），
+           由 tools.js 的 hitSegs() 预先切成 item.seg 分段，模板只负责 for 出来。 -->
       <view class="ph-ex" wx:for="{{ph.ex}}" wx:key="w" data-w="{{item.w}}"
             hover-class="ph-ex--press" hover-stay-time="80" bindtap="onSpeakPhonEx">
         <view class="ex-speak ex-speak--lead"><view class="spk-ico {{playingText === item.w ? 'spk-ico--on' : ''}}"></view></view>
         <view class="ph-ex__txt">
-          <text class="ph-ex__w"><text wx:if="{{playingText === item.w}}" class="kara-lit">{{karaLit}}</text>{{playingText === item.w ? karaRest : item.w}}</text>
-          <text class="ph-ex__hit">{{item.hit}}</text>
+          <!-- 播放中：整词卡拉 OK（与今日页一致）；常态：目标字母就地染色（item.seg 由 tools.js 的 hitSegs 派生） -->
+          <text class="ph-ex__w" wx:if="{{playingText === item.w}}"><text class="kara-lit">{{karaLit}}</text>{{karaRest}}</text>
+          <text class="ph-ex__w" wx:else><text wx:for="{{item.seg}}" wx:for-item="sg" wx:key="i" class="{{sg.h ? 'ph-ex__seg--hit' : ''}}">{{sg.v}}</text></text>
           <text class="ph-ex__cn">{{item.cn}}</text>
         </view>
       </view>

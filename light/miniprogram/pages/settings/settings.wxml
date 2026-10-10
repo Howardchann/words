@@ -16,7 +16,7 @@
 <view class="sheet-mask" wx:if="{{sheet.show}}" bindtap="closeSheet" catchtouchmove="noop">
   <view class="sheet" catchtap="noop">
     <view class="sheet-title">{{sheet.title}}</view>
-    <view class="sheet-opt {{sheet.index===index?'sheet-opt--on':''}}" wx:for="{{sheet.options}}" wx:key="label" hover-class="sheet-opt--press" data-i="{{index}}" bindtap="onSheetPick"><text>{{item.label}}</text><text class="sheet-check" wx:if="{{sheet.index===index}}">✓</text></view>
+    <view class="sheet-opt {{sheet.index===index?'sheet-opt--on':''}}" wx:for="{{sheet.options}}" wx:key="label" hover-class="sheet-opt--press" data-i="{{index}}" bindtap="onSheetPick"><text>{{item.label}}</text><view class="sheet-check" wx:if="{{sheet.index===index}}"></view></view>
   </view>
 </view>
 

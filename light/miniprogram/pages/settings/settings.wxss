@@ -14,7 +14,12 @@
 .sheet-opt:last-child{border-bottom:none}
 .sheet-opt--on{color:var(--green);font-weight:700}
 .sheet-opt--press{background:var(--soft)}
-.sheet-check{color:var(--green-mid);font-weight:700}
+/* 选中勾（v1.1.70）：字符 ✓ → SVG（path 与 topic 的 .fix__mk--good、feedback 的 toast 勾同源）。
+   走 background-image 用不了 var()，故明暗各一条；盒是 flex item，靠行内 align-items:center 居中，稳定。 */
+.sheet-check{flex-shrink:0;width:30rpx;height:30rpx;background:center/contain no-repeat;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%232E8B72' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4.9 12.4l4.9 4.9L19 6.9'/%3E%3C/svg%3E");}
+.theme-dark .sheet-check{background:center/contain no-repeat;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2358B394' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4.9 12.4l4.9 4.9L19 6.9'/%3E%3C/svg%3E");}
 
 /* 自绘月历（替代系统 date picker 深色滚轮） */
 .cal-head{display:flex;align-items:center;justify-content:space-between;padding:4rpx 40rpx 12rpx}
@@ -91,7 +96,7 @@
   .sheet { border-radius:14px 14px 0 0; padding:5px 0 calc(75px + env(safe-area-inset-bottom)); max-height:80vh; }
   .sheet-title { font-size:12px; padding:9px 0 4px; }
   .sheet-opt { font-size:14px; padding:12px 18px; }
-  .sheet-check { font-size:13px; }
+  .sheet-check { width:15px; height:15px; }
   .cal-head { padding:2px 20px 6px; }
   .cal-label { font-size:15px; }
   .cal-nav { width:32px; height:32px; line-height:30px; font-size:20px; }

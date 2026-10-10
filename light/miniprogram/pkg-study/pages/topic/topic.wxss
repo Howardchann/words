@@ -29,16 +29,25 @@ page { padding-bottom: env(safe-area-inset-bottom); }
 .ex__en { font-size: 28rpx; color: var(--ink3); line-height: 1.7; word-break: break-word; }
 .ex__cn { margin-top: 4rpx; font-size: 24rpx; color: var(--muted3); line-height: 1.6; }
 
-/* 易错点：错例/对例对照（自绘 ✗/✓，不用系统 emoji ❌✅ —— 与全站线稿图标同一套观感）。
-   对齐口径：.fix__row 走 align-items:baseline，图标盒与右侧首行文字同基线；
-   图标盒定宽（34rpx）让「✗ / ✓」在左侧成一条竖线，与 .li__dot 的缩进感一致。 */
+/* 易错点：错例/对例对照。对错标记 = **自绘 SVG**（v1.1.70），不再用 ❌✅ emoji、也不用 ✗/✓ 字符。
+   原因：✗(U+2717) 与 ✓(U+2713) 在任何字体下都由不同字形族兜底 —— 笔画粗细/大小/边距各不同，
+   看起来像两套图标（用户真机反馈「看到两个版本」）。改 SVG 后两者同一套 stroke-width / 圆头 / 24 格网格，
+   颜色直接写进 data-URI（走不了 var()），故明暗各一对，共 4 条。
+   对齐口径与全站一致：.fix__ico 内放零宽空格 strut，.fix__mk 是 inline-block + vertical-align:middle，
+   由真机字体现算 x-height 中心；行容器 align-items:baseline。图标盒定宽 34rpx 让两枚标记成一条竖线。
+   尺寸：✗ 对角线 12.8 格、✓ 折线跨 14.1 格（✗ 视觉更重，故 ✓ 稍宽以配平），渲染盒 26rpx。 */
 .fix { margin-top: 16rpx; }
 .fix:first-child { margin-top: 4rpx; }
 .fix__head { font-size: 24rpx; color: var(--muted3); line-height: 1.7; }
 .fix__row { display: flex; align-items: baseline; margin-top: 6rpx; }
-.fix__ico { flex-shrink: 0; width: 34rpx; text-align: center; font-size: 25rpx; font-weight: 700; }
-.fix__ico--bad { color: var(--red); }
-.fix__ico--good { color: var(--green); }
+.fix__ico { flex-shrink: 0; width: 34rpx; text-align: center; font-size: 25rpx; }
+.fix__ico::before { content: '\200B'; }
+.fix__mk { display: inline-block; vertical-align: middle; width: 26rpx; height: 26rpx;
+  background: center/contain no-repeat; }
+.fix__mk--bad { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23C0392B' stroke-width='2.6' stroke-linecap='round'%3E%3Cpath d='M5.6 5.6l12.8 12.8M18.4 5.6L5.6 18.4'/%3E%3C/svg%3E"); }
+.fix__mk--good { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23176B5B' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4.9 12.4l4.9 4.9L19 6.9'/%3E%3C/svg%3E"); }
+.theme-dark .fix__mk--bad { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23E8795F' stroke-width='2.6' stroke-linecap='round'%3E%3Cpath d='M5.6 5.6l12.8 12.8M18.4 5.6L5.6 18.4'/%3E%3C/svg%3E"); }
+.theme-dark .fix__mk--good { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%237CD6B4' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4.9 12.4l4.9 4.9L19 6.9'/%3E%3C/svg%3E"); }
 .fix__tx { flex: 1; min-width: 0; font-size: 27rpx; color: var(--ink3); line-height: 1.75; word-break: break-word; }
 .fix__why { margin-top: 4rpx; padding-left: 44rpx; font-size: 23rpx; color: var(--muted2); line-height: 1.7; }
 

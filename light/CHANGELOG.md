@@ -2,6 +2,26 @@
 
 > 本实例由 cloud 实例 v1.1.38（仓库提交 `dbe76dc` 的 cloud/ 树）派生，**共享全部产品与机制历史**——完整变更史见 `../cloud/CHANGELOG.md`，此处只记录本实例自身的差异与后续变更。
 
+## 2026-10-11 · 目标字母染进单词 + 对错/播放图标全站收口为自绘 SVG（v1.1.70）
+
+> **范围**：`pages/tools/tools.js|wxml|wxss`、`pkg-study/pages/topic/topic.js|wxml|wxss`、`components/feedback/feedback.wxml|wxss`、`pages/settings/settings.wxml|wxss`、`tools/gen-tools-preview.js`，共 10 文件 +229/-67 行。
+> **触发**：用户拍板「目标字母渲染进单词里」；并指出在可视化文件里看到「播放图标不一致」「自绘对错图标有两个版本」。
+
+### 一、改动明细
+
+| # | 位置 | 改动 |
+|---|---|---|
+| ① | 音标例词行 | 目标字母从「单词后的独立蓝色小标签」改为**词内就地染色**：`tools.js` 新增 `hitSegs()` 把 `w` 切成分段（`hit` 缺失/未命中时安全降级为整词一段），4 条开音节（name/time/five/home 的 `a-e`/`i-e`/`o-e`）按字母分别染色；模板 `wx:for` 渲染 `item.seg`。**配色：`--green` + 3rpx `currentColor` 底线**——纯色对比度实测仅约 2:1（29rpx 小字下不可辨，无头浏览器 4 档对比验证），不用 `text-decoration-thickness`（iOS WKWebView 支持不全），`border-bottom` 全兼容。播放中仍整词走卡拉 OK |
+| ② | 易错点 ✗/✓ | 字符（U+2717/U+2713）→ **自绘 SVG**（`stroke-width 2.6` 圆头，✗ 12.8 格 / ✓ 14.1 格配平视觉重量），浅深各一对共 4 条 data-URI；对齐改 `.fix__ico` 零宽空格 strut + `.fix__mk` inline-block `vertical-align:middle`（与 `.ex-speak` 同构）。**根因：这两个字符在任何字体下由不同字形族兜底，粗细/大小天然不一致**（用户说的「两个版本」） |
+| ③ | toast 勾 | `components/feedback` 的 `✓` 字符 → 整枚 SVG（绿圆 + 白勾一张图，勾形与 ② 同源），尺寸完全由盒子决定，零对齐风险 |
+| ④ | 设置页选中勾 | `pages/settings` 弹层的 `✓` 字符 → SVG（与 ② 同源），补 `.theme-dark` 变体 |
+| ⑤ | 效果图脚本 | `gen-tools-preview.js`：喇叭/搜索/勾叉全部改从 `app.wxss` 实抽（上一版喇叭用 emoji 🔊 与底栏真 SVG 混用 → 用户看图觉得「播放按钮不一致」；**真机代码本来就是统一的**，喇叭只出自 `.spk-ico` 一个类）。`appIcon()` 三个坑：规则含多条声明（`[^}]*` 放行）、英音蓝同名规则先出现（选择器完全匹配）、注释文本被吃进选择器串（先剥 `/* */`） |
+
+### 二、验证
+
+- `hitSegs` 单测：sit/i、name/a-e、television/si、fish/sh、未命中、空 hit 全部正确；3 个 JS `new Function` 编译通过；`verify-structure.js` 26 项全过；10 个改动文件换行符均为纯 LF 未破坏。
+- 效果图 `D:/idea/_reviews/工具页效果图_v1.1.70.html`：渲染层零 emoji/字符图标（残留仅存在于注释与说明文字）。
+
 ## 2026-10-11 · 音标例词行改「左列喇叭」+ 播放按钮全站一致性收口（v1.1.69）
 
 > **范围**：`pages/tools/tools.wxml|wxss`、`pkg-study/pages/topic/topic.wxml|wxss`，共 4 文件 +30/-16 行。本地提交，**未推远端、未传体验版**。

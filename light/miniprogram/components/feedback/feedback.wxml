@@ -1,6 +1,9 @@
-<!-- 轻提示：白卡 + 绿勾，屏幕中上部 -->
+<!-- 轻提示：白卡 + 绿勾，屏幕中上部
+     勾（v1.1.70）：原来是字符 ✓（U+2713）压在绿圆底上 —— 与易错点、设置页的勾各用各的字体字形，
+     三处粗细/大小都不一样（用户真机反馈「图标有两个版本」）。改为整枚 SVG（绿圆 + 白勾一张图），
+     形状与 topic 的 ✓ 同源，且尺寸完全由盒子决定，不存在字符基线的对齐风险。 -->
 <view class="fb-toast" wx:if="{{toast.show}}">
-  <view class="fb-toast-ico">✓</view>
+  <view class="fb-toast-ico"></view>
   <text class="fb-toast-msg">{{toast.msg}}</text>
 </view>
 

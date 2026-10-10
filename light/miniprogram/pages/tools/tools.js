@@ -27,6 +27,44 @@ const DEBOUNCE = 160;
 const JUMP_LOCK_MS = 1200;
 const JUMP_WATCHDOG = 1600;
 
+// 音标例词：把「目标字母」渲染进单词内部（v1.1.70）
+// ───────────────────────────────────────
+// 数据里每个例词只有 { w, cn, hit }；hit = 发这个音的字母或字母组合（i / ch / tion）。
+// 开音节那 4 条写成 a-e / i-e / o-e（name / time / five / home），表示「元音字母 + 不发音的 e」。
+// 这里一次性把 w 切成 [{v,h,i}] 分段（h=1 即目标字母），模板直接 wx:for 渲染 ——
+// 取代原先「单词后面挂一个独立蓝色小标签」（`sit i 坐`），让「哪个字母发这个音」直接长在单词里。
+// 4 条开音节是「字母分别染色」（name → n|a|m|e），每个字母只染一次（left 命中即移出）。
+function hitSegs(w, hit) {
+  const src = String(w || '');
+  const h = String(hit || '').toLowerCase();
+  if (!src) return [];
+  if (!h) return [{ v: src, h: 0, i: 0 }];
+  const raw = [];
+  const push = (v, isHit) => {
+    if (!v) return;
+    const last = raw[raw.length - 1];
+    if (last && last.h === (isHit ? 1 : 0)) last.v += v;
+    else raw.push({ v: v, h: isHit ? 1 : 0 });
+  };
+  if (h.indexOf('-') >= 0) {
+    const left = h.split('-').filter(Boolean);
+    for (let i = 0; i < src.length; i++) {
+      const c = src.charAt(i).toLowerCase();
+      const k = left.indexOf(c);
+      if (k >= 0) { left.splice(k, 1); push(src.charAt(i), true); }
+      else push(src.charAt(i), false);
+    }
+  } else {
+    const at = src.toLowerCase().indexOf(h);
+    if (at < 0) return [{ v: src, h: 0, i: 0 }];
+    push(src.slice(0, at), false);
+    push(src.slice(at, at + h.length), true);
+    push(src.slice(at + h.length), false);
+  }
+  return raw.map((s, i) => ({ v: s.v, h: s.h, i: i }));
+}
+PHONETIC.forEach(p => (p.ex || []).forEach(e => { e.seg = hitSegs(e.w, e.hit); }));
+
 // 音标（v1.1.68 两级筛选）：大类 元音/辅音 → 子类（短元音/长元音/双元音 · 爆破音/摩擦音/…）。
 // 原来 44 个音标平铺 2 屏、讲解面板排在最末 → 点最上面那个音标要滑到底才看得到讲解（用户真机反馈）。
 const PH_VOWEL = PHONETIC.filter(p => p.cls === 'vowel');

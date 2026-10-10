@@ -17,17 +17,15 @@
   box-shadow:0 8rpx 32rpx rgba(23, 107, 91, 0.16);
   max-width:80vw;
 }
+/* 勾 = 整枚 SVG（绿圆 + 白勾同图，v1.1.70）。勾的 path 与 pkg-study/pages/topic/topic.wxss
+   的 .fix__mk--good 同源（同 stroke-width / 圆头 / 24 格网格），三处勾形一致。
+   ⚠️ 原先靠 border-radius + flex 居中一个 ✓ 字符，字符本体大小随机型字体变；改图后完全确定。 */
 .fb-toast-ico {
   flex-shrink:0;
   width:34rpx;
   height:34rpx;
-  border-radius:50%;
-  background:#2E8B72;
-  color:#fff;
-  font-size:22rpx;
-  display:flex;
-  align-items:center;
-  justify-content:center;
+  background:center/contain no-repeat;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='11' fill='%232E8B72'/%3E%3Cpath d='M6.9 12.2l3.5 3.5L17.1 8.7' fill='none' stroke='%23FFFFFF' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
 }
 .fb-toast-msg { line-height:1.5; }
 
@@ -83,7 +81,7 @@
 
 @media (min-width:700px) {
   .fb-toast { font-size:13px; border-radius:9px; padding:9px 14px; bottom:calc(75px + env(safe-area-inset-bottom)); }
-  .fb-toast-ico { width:17px; height:17px; font-size:11px; }
+  .fb-toast-ico { width:17px; height:17px; }
   .fb-card { border-radius:14px; width:420px; padding:20px 18px 14px; }
   .fb-title { font-size:16px; margin-bottom:10px; }
   .fb-content { font-size:14px; margin-bottom:16px; }

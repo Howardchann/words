@@ -92,7 +92,13 @@
 .ex-speak--lead { margin-left: 0; margin-right: 14rpx; width: 44rpx; height: 44rpx; }
 .ph-ex__txt { flex: 1; min-width: 0; }
 .ph-ex__w { font-size: 29rpx; font-weight: 700; color: var(--ink); }
-.ph-ex__hit { font-size: 24rpx; color: var(--uk-ink); margin-left: 8rpx; }
+/* 目标字母就地染色（v1.1.70）：取代原来的独立蓝色小标签（`sit i 坐`）。
+   直接让「发这个音的那几个字母」在单词内部变色，一眼就能对上「哪个字母发哪个音」。
+   ⚠️ 光靠颜色不够：--green(#176B5B) 对正文深灰(#24332F) 的对比度实测只有约 2:1，
+   29rpx 小字下肉眼几乎分不出（无头浏览器同字号 4 档对比验证过）→ 补一条 3rpx 同色底线
+   （border-bottom + currentColor，线随字色），不引新色值、深浅主题自动跟随（--green 两态都可用）。
+   不用 text-decoration-thickness/offset：iOS WKWebView 对这两个属性支持不全，border-bottom 全兼容。 */
+.ph-ex__seg--hit { color: var(--green); border-bottom: 3rpx solid currentColor; padding-bottom: 2rpx; }
 .ph-ex__cn { font-size: 24rpx; color: var(--muted3); margin-left: 14rpx; }
 
 /* iPad / 宽屏覆盖（纯追加，手机端不受影响），尺寸 = rpx × 0.5 */
