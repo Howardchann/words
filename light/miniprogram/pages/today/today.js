@@ -223,8 +223,12 @@ Page({
     let gEx = [];
     if (dayData && dayData.g) {
       const ex = (dayData.g.ex || []).map(s => ({ v: s, spk: exSpk(s) }));   // 注释类（提示/例词清单/Tag/日程）一律不给喇叭
-      dayData.g = Object.assign({}, dayData.g, { ex: ex });   // 浅拷贝后换新对象，避免污染 plan 的缓存数据
       gEx = ex.filter(x => x.spk);
+      // v1.1.87：这张卡只在「确实有可朗读的英文例句」时才叫「例句精读」。
+      // 纯方法日（主动回忆法/影子跟读/时间安排……）的讲解里没有任何英文语言点，
+      // 例句是中文要点、也不给喇叭 → 标题改叫「今日要点」，避免名不副实。
+      const gLabel = gEx.length ? '例句精读' : '今日要点';
+      dayData.g = Object.assign({}, dayData.g, { ex: ex, label: gLabel });   // 浅拷贝后换新对象，避免污染 plan 的缓存数据
     }
     const coreCount = dayData ? dayData.coreCount || 0 : 0;
     // 练习任务按 "1) 2) 3)" 编号拆行（数据源里是一整段，无换行符）

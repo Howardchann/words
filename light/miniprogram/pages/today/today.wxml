@@ -95,7 +95,7 @@
 
   <!-- 学习日：例句精读（语法内容保留，仅换标题口径） -->
   <view class="card" wx:if="{{dayData.type === 'study' && dayData.g}}">
-    <view class="section-label">例句精读 · {{dayData.g.t}}</view>
+    <view class="section-label">{{dayData.g.label || '例句精读'}} · {{dayData.g.t}}</view>
     <view class="grammar-exp">{{dayData.g.exp}}</view>
     <!-- 例句精读（v1.1.85）：每条 = {v 显示原文, spk 是否有可朗读的英文}。
          含汉字的句子（「每天 5 分钟回忆，胜过 20 分钟抄写。」）不渲染喇叭 —— 此前它们带喇叭，
