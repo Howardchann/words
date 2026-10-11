@@ -72,6 +72,9 @@ page { padding-bottom: calc(44rpx + env(safe-area-inset-bottom)); }
 .fix__spk { flex-shrink: 0; width: 44rpx; height: 44rpx; font-size: 26rpx; text-align: center; margin-left: 10rpx; }
 .fix__spk::before { content: '\200B'; }
 .fix__spk .spk-ico { width: 32rpx; height: 32rpx; }
+/* 按压反馈（v1.1.83）：此前这里是 hover-class="none"，点下去毫无反馈（用户真机「看不出按了没」）。
+   与全站无底色元素同口径 —— 缩放 + 变淡（app.wxss 的 .ex-speak.speak-hover 同款，这里给易错点喇叭单开一条选择器）。 */
+.fix__spk.speak-hover { transform: scale(.85); opacity: .6; }
 
 .day-chips { display: flex; flex-wrap: wrap; gap: 12rpx; }
 .day-chip { background: var(--soft); color: var(--green); border-radius: 14rpx;

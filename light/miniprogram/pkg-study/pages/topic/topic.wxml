@@ -29,9 +29,11 @@
       <view class="fix__head" wx:if="{{N.head}}">{{N.head}}</view>
       <view class="fix__row" wx:for="{{N.segs}}" wx:key="i" wx:for-item="S">
         <view class="fix__ico"><view class="fix__mk fix__mk--{{S.t}}"></view></view>
-        <view class="fix__tx">{{S.v}}</view>
+        <!-- 卡拉OK（v1.1.83）：只有「正在播的这一句」走 wx:if 分支渲染已读/未读两段（tail 是不参与点亮的
+             中文说明尾巴），其余句子渲染纯文本、不引用 karaLit/karaRest → 进度帧只重绘本句两个 text 节点。 -->
+        <view class="fix__tx"><block wx:if="{{S.kara && playingText === S.say}}"><text class="kara-lit">{{karaLit}}</text>{{karaRest}}{{S.tail}}</block><block wx:else>{{S.v}}</block></view>
         <view class="fix__spk" wx:if="{{S.t === 'good' && S.say}}"
-              data-text="{{S.say}}" hover-class="none" hover-stay-time="0"
+              data-text="{{S.say}}" hover-class="speak-hover" hover-stay-time="0"
               bindtap="onSpeakEx"><view class="spk-ico {{playingText === S.say ? 'spk-ico--on' : ''}}"></view></view>
       </view>
       <view class="fix__why" wx:if="{{N.why}}">{{N.why}}</view>
@@ -48,16 +50,19 @@
      v1.1.75：播放态从「整行铺背景」（.ex--on）改为歌词式卡拉OK染色。
      v1.1.80（治「频繁点按整块闪动」）：卡拉OK 撤销 —— 逐帧 setData + 播放时替换整行文本节点，
      再叠加 hover 的 scale(.85)，就是"滑到底部闪上半屏 / 滑到顶部闪下半屏"的来源。
-     现在播放态只切一个 class（.ex--on 极浅绿底）+ 喇叭变深绿，一次播放只重绘两帧。 -->
+     现在播放态只切一个 class（.ex--on 极浅绿底）+ 喇叭变深绿，一次播放只重绘两帧。
+     v1.1.83（卡拉OK 回归 · 换渲染结构）：整行底色保留，另加「已读段染绿」。与 v1.1.75 的不同在于
+     wxml 结构 —— 见 topic.js onStateChange 注释：只有被点的那一行渲染 karaLit/karaRest，
+     其余行是纯文本节点、不引用进度字段，故进度帧不波及其他行；两段拼起来等于原文、断行点不变。 -->
 <view class="card" wx:if="{{t.ex.length}}">
   <view class="section-label">例句 · 点整句听朗读</view>
   <view class="ex {{playingText === item.en ? 'ex--on' : ''}}" wx:for="{{t.ex}}" wx:key="en"
         data-text="{{item.en}}" hover-class="none" hover-stay-time="60" bindtap="onSpeakEx">
     <view class="ex__main">
-      <view class="ex__en">{{item.en}}</view>
+      <view class="ex__en"><block wx:if="{{playingText === item.en}}"><text class="kara-lit">{{karaLit}}</text>{{karaRest}}</block><block wx:else>{{item.en}}</block></view>
       <view class="ex__cn">{{item.cn}}</view>
     </view>
-    <view class="ex-speak"><view class="spk-ico {{playingText === item.en ? 'spk-ico--on' : ''}}"></view></view>
+    <view class="ex-speak" hover-class="speak-hover" hover-stay-time="0"><view class="spk-ico {{playingText === item.en ? 'spk-ico--on' : ''}}"></view></view>
   </view>
 </view>
 

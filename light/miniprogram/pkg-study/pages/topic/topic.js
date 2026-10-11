@@ -57,7 +57,15 @@ function parseNotes(arr) {
       segs[segs.length - 1].v = r.v;
       why = r.why;
     }
-    segs.forEach(sg => { sg.say = sg.t === 'good' ? sayOf(sg.v) : ''; });   // v1.1.82 播放文本（无英文则空 → 不渲染喇叭）
+    segs.forEach(sg => {
+      sg.say = sg.t === 'good' ? sayOf(sg.v) : '';   // v1.1.82 播放文本（无英文则空 → 不渲染喇叭）
+      // v1.1.83 卡拉OK 显示切分：数据里常把「英文句 + 中文说明」连写（如「I need some advice. 不可数名词…」），
+      // 而播放文本 say 只取英文部分。若直接按 say 切片染色，会和显示文本错位 → 这里把显示文本拆成
+      // 「可点亮的英文前缀 say」+「不参与点亮的尾巴 tail」。say 不是 v 的前缀时（归一化差异）关掉本条卡拉OK。
+      const sv = String(sg.v || '');
+      sg.kara = !!(sg.say && sv.indexOf(sg.say) === 0);
+      sg.tail = (sg.kara && sg.say !== sv) ? sv.slice(sg.say.length) : '';
+    });
     out.push({ k: 'n' + idx, kind: 'fix', head: head, segs: segs, why: why });
   });
   return out;
@@ -71,6 +79,8 @@ Page({
     days: [],
     dayMore: 0,
     playingText: '',
+    karaLit: '',      // 卡拉OK：已读部分（v1.1.83）
+    karaRest: '',     // 卡拉OK：未读部分
     toast: '',
   },
 
@@ -81,12 +91,27 @@ Page({
     speech.setEngineMode(store.get('engineMode') || 'auto');
     // 朗读状态订阅（v1.1.68 修复）：此前只在点击时 setData({playingText})，播完没有任何回调复位 →
     // 例句整行常驻深色（用户真机反馈）。现在与今日页/工具页一致，订阅回调、播完自动还原。
-    // v1.1.80（治闪动）：撤销卡拉OK逐帧推送 —— 原来每次进度回调（约每秒 4 次）都 setData
-    // karaLit/karaRest，整页例句行全部重算重绘，页面中部整块闪（用户真机描述「滑到底部闪上半屏、
-    // 滑到顶部闪下半屏」）。现在只在「播放文本」本身变化时才 setData，一次播放最多 2 次。 */
+    // v1.1.80（治闪动）：曾把卡拉OK 整个撤掉 —— 原因是当时 karaLit/karaRest 被**页面上每一个**
+    //   例句行引用，进度回调（每秒约 3~4 次）会让整页所有行一起重算重绘（用户描述「滑到底闪上半屏、
+    //   滑到顶闪下半屏」）。
+    // v1.1.83（卡拉OK 回归，但换了渲染结构）：两个关键约束 ——
+    //   ① wxml 里用 wx:if 双分支：**只有正在播放的那一行**才渲染 karaLit/karaRest，其余行是纯文本节点、
+    //      完全不引用这两个字段 → 进度帧的重绘范围从「整页所有行」压到「该行的两个 text 节点」；
+    //   ② 已读/未读两段拼起来 == 整句原文（只是切分点移动），文本总长度不变 → 断行点不变 → 无重排。
+    //   这两点合起来才是「今日页卡拉OK 不闪、语法区当初会闪」的差别所在。
     this._offSpeech = speech.onStateChange((p) => {
       const t = p.playing ? p.text : '';
-      if (t !== this.data.playingText) this.setData({ playingText: t });
+      const upd = {};
+      if (t !== this.data.playingText) upd.playingText = t;
+      if (t) {
+        const lit = Math.round((p.progress || 0) * t.length);
+        const a = t.slice(0, lit), b = t.slice(lit);
+        if (a !== this.data.karaLit) upd.karaLit = a;
+        if (b !== this.data.karaRest) upd.karaRest = b;
+      } else if (this.data.karaLit || this.data.karaRest) {
+        upd.karaLit = ''; upd.karaRest = '';
+      }
+      if (upd.playingText !== undefined || upd.karaLit !== undefined || upd.karaRest !== undefined) this.setData(upd);
     });
     const cat = GRAMMAR.filter(c => c.id === (query && query.c))[0];
     const t = cat && cat.topics[Number(query && query.i) || 0];
@@ -126,10 +151,11 @@ Page({
     if (!text) return;
     if (this.data.playingText === text) {
       speech.togglePause();
-      this.setData({ playingText: '' });
+      this.setData({ playingText: '', karaLit: '', karaRest: '' });
       return;
     }
-    this.setData({ playingText: text });
+    // 换句播放：卡拉OK 从零起步（progress 首帧前先用空切片，避免上一句的染色残留一帧）
+    this.setData({ playingText: text, karaLit: '', karaRest: '' });
     // 语法例句无词表编号 → kind 传 's' 且 ai=0，引擎按文本哈希去 g/ 桶取预生成音频，
     // 命中不到才降级在线。音色与今日页/工具页统一（Azure Ava）。
     speech.speak(text, { kind: 's' });
