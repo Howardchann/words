@@ -4,19 +4,19 @@
 .practice-line{font-size:26rpx;color:var(--ink3);line-height:1.8;margin-top:8rpx}
 .prac-no{color:var(--green);font-weight:700;display:inline-block;min-width:36rpx;text-align:center;margin-right:14rpx}
 .practice-line:first-child{margin-top:0}.prestart-card{text-align:center;padding:60rpx 30rpx}.prestart-title{font-size:40rpx;font-weight:800;color:var(--green)}.prestart-sub{font-size:28rpx;color:var(--muted3);margin-top:14rpx}.prestart-days{font-size:60rpx;font-weight:800;color:var(--ink);margin:30rpx 0}.prestart-note{font-size:28rpx;color:var(--muted3);margin:28rpx 0 6rpx}
-/* 准备期双按钮（v1.1.90：方案A + 用户再定去图标/胶囊圆弧）：箭头行，与 tools 页 .cat-cell 同语言。
-   主行 = press-green 常亮 + 深绿字与箭头（开学=主行动作），按压再深一档 press2；
-   次行 = soft 底 +「只预览 · 不打卡」，按压 press-green（与 cat-cell 按压约定一致）。
-   胶囊圆弧 999rpx（两端半圆），无左侧图标。 */
-.cellrow{display:flex;align-items:center;background:var(--soft);border-radius:999rpx;padding:20rpx 26rpx;margin-top:20rpx}
-.cellrow--main{background:var(--press-green)}
-.cellrow--main.cellrow--press{background:var(--press2)}
-.cellrow--press{background:var(--press-green)}
-.cellrow__tt{flex:1;min-width:0;font-size:27rpx;font-weight:700;color:var(--ink);text-align:left}
-.cellrow__tt--sub{color:var(--ink2);font-weight:400}
-.cellrow__meta{flex-shrink:0;font-size:22rpx;color:var(--muted);margin-right:12rpx}
-.cellrow__go{flex-shrink:0;width:16rpx;height:16rpx;margin-left:12rpx;color:var(--muted3);border-right:3rpx solid currentColor;border-bottom:3rpx solid currentColor;transform:rotate(-45deg)}
-.cellrow__go--dark{color:var(--green-press)}
+/* 准备期行动区（v1.1.92 方案④）：单主按钮 + 文字链接降级。
+   主 = 实心绿大按钮（--green-solid 底 + 白字 + 白箭头），全站首个实心主按钮；
+   次 = 其下一行绿字链接「先看看第 1 天（只预览）」，只预览不打卡。
+   按下反馈：主按钮走 opacity（不用 press 色 —— 深色主题里 --green-press 是浅绿，作底色会失效）；
+   链接按全站「无底色行」约定走 opacity .55。 */
+.prestart-start{display:flex;align-items:center;justify-content:center;height:92rpx;margin-top:22rpx;border-radius:999rpx;background:var(--green-solid);box-shadow:0 8rpx 24rpx rgba(23,107,91,.22)}
+.prestart-start--press{opacity:.86}
+.prestart-start__tt{font-size:30rpx;font-weight:700;color:#fff}
+.prestart-start__go{width:14rpx;height:14rpx;margin-left:16rpx;color:#fff;border-right:3rpx solid currentColor;border-bottom:3rpx solid currentColor;transform:rotate(-45deg)}
+.prestart-preview{display:flex;align-items:center;justify-content:center;margin-top:26rpx;padding:10rpx 0}
+.prestart-preview--press{opacity:.55}
+.prestart-preview__tt{font-size:25rpx;font-weight:600;color:var(--green)}
+.prestart-preview__go{width:12rpx;height:12rpx;margin-left:12rpx;color:var(--green);border-right:3rpx solid currentColor;border-bottom:3rpx solid currentColor;transform:rotate(-45deg)}
 
 /* 词汇分组标签：主题词 / 扩展词（彩点+纯文字，去色块，与文字按钮同语言） */
 .group-tag {
@@ -71,10 +71,12 @@
   .prestart-sub { font-size:14px; margin-top:7px; }
   .prestart-days { font-size:30px; margin:15px 0; }
   .prestart-note { font-size:14px; margin:14px 0 3px; }
-  .cellrow { border-radius:999px; padding:10px 13px; margin-top:10px; }
-  .cellrow__tt { font-size:13.5px; }
-  .cellrow__meta { font-size:11px; margin-right:6px; }
-  .cellrow__go { width:8px; height:8px; margin-left:6px; border-width:1.5px; }
+  .prestart-start { height:46px; margin-top:11px; }
+  .prestart-start__tt { font-size:15px; }
+  .prestart-start__go { width:7px; height:7px; margin-left:8px; border-width:1.5px; }
+  .prestart-preview { margin-top:13px; }
+  .prestart-preview__tt { font-size:12.5px; }
+  .prestart-preview__go { width:6px; height:6px; margin-left:6px; border-width:1.5px; }
   .group-tag { font-size:11px; border-radius:4px; padding:2px 7px; margin:2px 0 1px; }
 }
 /* 准备期预览提示条（09-26）：day-head 上方常驻，比纯文字链接直观 */

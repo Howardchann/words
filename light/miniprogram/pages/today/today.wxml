@@ -11,16 +11,17 @@
   <view class="tip-box">
     <view class="tip-text">可以先看看第 1 天的单词，熟悉一下操作：点音标模块听发音（美音 / 英音各读各的），点<view class="ico-inline ico-heart"></view>收藏重点词</view>
   </view>
-  <!-- 双按钮 v1.1.90（方案A + 用户再定）：箭头行同语言（tools 页 cat-cell 同构），胶囊圆弧、无左侧图标。
-       主行 press-green 常亮 + 深绿字箭头 =「真开学」；次行 soft 底 + 「只预览 · 不打卡」 = 看了还能回。 -->
-  <view class="cellrow cellrow--main" hover-class="cellrow--press" hover-stay-time="120" bindtap="startLearning" aria-role="button" aria-label="开始学习，从第 1 天开始">
-    <view class="cellrow__tt">开始学习</view>
-    <view class="cellrow__go cellrow__go--dark"></view>
+  <!-- 单主按钮 + 文字链接（v1.1.92 方案④，用户在方案报告里选定）：
+       主 = 实心绿大按钮「开始学习」（--green-solid 底 + 白字，全站首个实心主按钮）；
+       次 = 其下一行绿字链接「先看看第 1 天（只预览）」，降级为文字、不再是等重的一行。
+       行为完全不变：startLearning（写 startDate=今天，回第 1 天）/ backToToday（只预览不打卡）。 -->
+  <view class="prestart-start" hover-class="prestart-start--press" hover-stay-time="120" bindtap="startLearning" aria-role="button" aria-label="开始学习，从第 1 天开始">
+    <view class="prestart-start__tt">开始学习</view>
+    <view class="prestart-start__go"></view>
   </view>
-  <view class="cellrow" hover-class="cellrow--press" hover-stay-time="120" bindtap="backToToday" aria-role="button" aria-label="先看看第 1 天，只预览不打卡">
-    <view class="cellrow__tt cellrow__tt--sub">先看看第 1 天</view>
-    <view class="cellrow__meta">只预览 · 不打卡</view>
-    <view class="cellrow__go"></view>
+  <view class="prestart-preview" hover-class="prestart-preview--press" hover-stay-time="120" bindtap="backToToday" aria-role="button" aria-label="先看看第 1 天，只预览不打卡">
+    <view class="prestart-preview__tt">先看看第 1 天（只预览）</view>
+    <view class="prestart-preview__go"></view>
   </view>
 </view>
 
