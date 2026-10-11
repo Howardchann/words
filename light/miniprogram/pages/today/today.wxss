@@ -43,6 +43,13 @@
   background:#85B7EB;
 }
 
+/* 方法日「补充」条（v1.1.91）：无序号、左侧细竖线、浅色小字。
+   方法日没有可点读的英文例句，剩下的中文要点与上方背景色注释区常常是同一件事的两种说法，
+   带着「1. 2.」编号并列显示，观感就像把同一句话说了两遍 → 摘掉序号并降格为附注。
+   point 日（有英文例句）不加此类，仍是绿色序号的例句列表。 */
+.grammar-ex--sup{padding:8rpx 0 8rpx 18rpx;border-bottom:none;border-left:4rpx solid var(--line)}
+.grammar-ex--sup .grammar-ex-text{font-size:24rpx;color:var(--muted3);line-height:1.7}
+
 /* iPad / 宽屏覆盖（纯追加，手机端不受影响），字号 = rpx × 0.5 */
 @media (min-width:700px) {
   .nav-btn { font-size:13px; padding:7px 9px; }
@@ -55,6 +62,8 @@
   .btn-cancel { margin-top:6px; }
   .btn-speak-all { font-size:13px; padding:1px 10px; }
   .grammar-exp { font-size:13px; padding:10px 11px; }
+  .grammar-ex--sup { padding:4px 0 4px 9px; border-left-width:2px; }
+  .grammar-ex--sup .grammar-ex-text { font-size:12px; }
   .practice-text { font-size:13px; }
   .practice-line { font-size:13px; margin-top:4px; }
   .prestart-card { padding:30px 15px; }

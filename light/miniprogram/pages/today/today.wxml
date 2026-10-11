@@ -109,9 +109,11 @@
     <view class="grammar-exp">{{dayData.g.exp}}</view>
     <!-- 例句精读（v1.1.85）：每条 = {v 显示原文, spk 是否有可朗读的英文}。
          含汉字的句子（「每天 5 分钟回忆，胜过 20 分钟抄写。」）不渲染喇叭 —— 此前它们带喇叭，
-         点下去是在线 TTS 读中文（与全站 Azure 音色完全两回事）。 -->
-    <view class="grammar-ex" wx:for="{{dayData.g.ex}}" wx:key="v">
-      <view class="ex-no">{{index + 1}}.</view>
+         点下去是在线 TTS 读中文（与全站 Azure 音色完全两回事）。
+         v1.1.91：方法日（g.plain）无序号、样式降格为左侧细竖线的浅色补充条 —— 这些中文要点与上方
+         背景色注释区是同一件事的两种说法，并列编号会显得重复。point 日（有英文例句）保持编号列表。 -->
+    <view class="grammar-ex {{dayData.g.plain ? 'grammar-ex--sup' : ''}}" wx:for="{{dayData.g.ex}}" wx:key="v">
+      <view class="ex-no" wx:if="{{!dayData.g.plain}}">{{index + 1}}.</view>
       <text class="grammar-ex-text"><text wx:if="{{playingText === item.v}}" class="kara-lit">{{karaLit}}</text>{{playingText === item.v ? karaRest : item.v}}</text>
       <view class="ex-speak {{playingText === item.v ? 'playing' : ''}}" wx:if="{{item.spk}}"
             hover-class="speak-hover" hover-stay-time="120"

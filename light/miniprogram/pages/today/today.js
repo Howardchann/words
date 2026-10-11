@@ -227,8 +227,8 @@ Page({
       // v1.1.87：这张卡只在「确实有可朗读的英文例句」时才叫「例句精读」。
       // 纯方法日（主动回忆法/影子跟读/时间安排……）的讲解里没有任何英文语言点，
       // 例句是中文要点、也不给喇叭 → 标题改叫「今日要点」，避免名不副实。
-      const gLabel = gEx.length ? '例句精读' : '今日要点';
-      dayData.g = Object.assign({}, dayData.g, { ex: ex, label: gLabel });   // 浅拷贝后换新对象，避免污染 plan 的缓存数据
+      // v1.1.91：方法日（无可朗读英文的纯要点日）给 plain 标记 —— 模板据此去掉「1. 2.」序号，      // 把与上方注释区并列的中文要点降格为浅色补充条（避免「同一件事说两遍」的观感）。      const gLabel = gEx.length ? '例句精读' : '今日要点';
+      dayData.g = Object.assign({}, dayData.g, { ex: ex, label: gLabel, plain: !gEx.length });   // 浅拷贝后换新对象，避免污染 plan 的缓存数据
     }
     const coreCount = dayData ? dayData.coreCount || 0 : 0;
     // 练习任务按 "1) 2) 3)" 编号拆行（数据源里是一整段，无换行符）
