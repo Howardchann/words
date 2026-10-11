@@ -304,7 +304,8 @@ Page({
     const upd = { wfText: t, wfKey: key };
     if (this.data.playingWord) upd.playingWord = '';   // 词形→词条切换：先收词条播放态
     this.setData(upd);
-    speech.speak(t, { kind: 'g' });
+    const wfAi = plan.wordAi(t);
+    speech.speak(t, wfAi ? { ai: wfAi, kind: 'w' } : { kind: 'g' });   // 词表内形式（be/do/take…）走 w/ 桶 = 与单词同一文件（v1.1.85）
   },
 
   // 填空答对后朗读英文原句（v1.1.80，C6）：kind:'s' + 该词编号 → 命中例句预生成音频，音色与卡片一致。

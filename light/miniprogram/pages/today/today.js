@@ -1,5 +1,18 @@
 // pages/today/today.js —— 今日学习计划
 const plan = require('../../utils/data.js');
+// 例句精读「可朗读」判定（v1.1.85，与 _ipa_build/mk_g_tasks.js 的 looksSentence 同口径）：
+// 含汉字（注释/提示行）、填空 ___、箭头替换、「标签:」开头、无句末标点、英文词 <3 → 都不给喇叭。
+// 词数下限 3：Day1 就有「I'm from China.」这类三词真句，不能按 4 挡。
+function exSpk(s) {
+  if (!s) return false;
+  if (/[\u4e00-\u9fff]/.test(s)) return false;
+  if (/[_\u2192\u2191\u2260\u300c\u300d\u21d2\u279c]|->/.test(s)) return false;
+  if ((String(s).match(/[A-Za-z']+/g) || []).length < 3) return false;
+  if (/^[A-Za-z][A-Za-z ]{0,12}:\s/.test(s)) return false;
+  if (/^\d/.test(s)) return false;                          // 日程条目（10:45 - 11:45 writing…）
+  if (/^(Day|Box|Minute|Week)\s*\d/i.test(s)) return false; // 打卡/计划条目（Day 5: mixed practice…）
+  return /[.!?]["']?\s*$/.test(String(s).trim());
+}
 const store = require('../../utils/store.js');
 const theme = require('../../utils/theme.js');
 const speech = require('../../utils/speech.js');
@@ -148,7 +161,8 @@ Page({
       this.setData({ playingText: '', playingAccent: '' });         // 词条→词形切换：清主行态
     }
     this.setData({ wfText: t, wfKey: key });
-    speech.speak(t, { kind: 'g' });
+    const wfAi = plan.wordAi(t);
+    speech.speak(t, wfAi ? { ai: wfAi, kind: 'w' } : { kind: 'g' });   // 词表内形式（be/do/take…）走 w/ 桶 = 与单词同一文件（v1.1.85）
   },
 
   _scrollToWord(w, tries, via) {
@@ -200,6 +214,16 @@ Page({
     // 词形标签（v1.1.80）：换成 wfNotes —— 正向（原形→不规则变化）+ 反向（变体→原形，如 were→原形 be）。
     // 原来只用 noteFor，功能词包里的 was/were/been/am/is/are 作今日单词时词形行是空的。
     const list = (raw && raw.v ? raw.v : []).map(v => Object.assign({}, v, { starred: store.isStarred(v.w), wf: wordforms.wfNotes(v.w) }));
+    // 例句精读（v1.1.85）：这些句子在模板里是 `data-kind="g"` 且**没有词表编号** → 走文本哈希（g/ 桶）。
+    // ⚠️ 两点：① 含汉字的句子（「每天 5 分钟回忆，胜过 20 分钟抄写。」）没有可朗读的英文 → 标 spk=false，
+    //    模板据此不渲染喇叭（此前它们带喇叭，点下去是在线 TTS 读中文）；② 句子文本要提前收进 g/ 桶，
+    //    否则真机点一次就等一次云函数签名 + 下载（与 v1.1.82 语法例句同一类问题）。
+    let gEx = [];
+    if (dayData && dayData.g) {
+      const ex = (dayData.g.ex || []).map(s => ({ v: s, spk: exSpk(s) }));   // 注释类（提示/例词清单/Tag/日程）一律不给喇叭
+      dayData.g = Object.assign({}, dayData.g, { ex: ex });   // 浅拷贝后换新对象，避免污染 plan 的缓存数据
+      gEx = ex.filter(x => x.spk);
+    }
     const coreCount = dayData ? dayData.coreCount || 0 : 0;
     // 练习任务按 "1) 2) 3)" 编号拆行（数据源里是一整段，无换行符）
     const prLines = dayData && dayData.pr ? String(dayData.pr).split(/(?=\d\)\s)/).map(s => { const m = s.match(/^(\d+)\)\s*/); return { no: m ? m[1] : '', text: m ? s.slice(m[0].length) : s }; }) : [];
@@ -230,6 +254,7 @@ Page({
       const items = [];
       list.forEach(v => { items.push({ ai: v.ai, kind: 'w' }); items.push({ ai: v.ai, kind: 's' }); });
       speech.prefetch(items.slice(0, 40), 0);   // 全天只签链接（v1.1.72），落盘交给滑动窗口
+      if (gEx.length) speech.prefetch(gEx.map(x => ({ text: x.v })), 0);   // 例句精读（v1.1.85）：走 g/ 桶哈希
       this._prefetchWindow(0);
     }
   },

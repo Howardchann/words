@@ -257,8 +257,11 @@ function gRel(text, slow) {
   return 'g/' + (parseInt(h, 16) % 10) + '/' + h + (slow ? 's' : '') + '.mp3';
 }
 function tryPregenG(text, onResult) {
-  // 中文条目（记忆法说明）没有预生成音频 → 直接走在线，省一次无效的云函数调用与播放报错
-  if (/[^\x20-\x7E]/.test(text)) { onResult(false); return; }
+  // 含汉字的条目没有可朗读的英文 → 直接走在线，省一次无效的云函数调用与播放报错。
+  // v1.1.85：原来判的是 `[^\x20-\x7E]`（任何非 ASCII 都判死）—— 会把「It is vital / crucial / essential。」
+  //          「Rent ↑ 20% since 2020」这类**只是标点/箭头不是 ASCII** 的英文句也推给在线音源。
+  //          现在与生成脚本 `_ipa_build/mk_g_tasks.js` 同口径：**只看有没有汉字**。两处必须成对改。***
+  if (/[\u4e00-\u9fff]/.test(text)) { onResult(false); return; }
   const slow = state.rate <= SLOW_GATE;
   const rel = gRel(text, slow);
   tryPregenRel(rel, CACHE_ROOT + '/' + rel, onResult, slow);

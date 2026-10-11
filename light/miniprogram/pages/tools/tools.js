@@ -312,7 +312,8 @@ Page({
       this.setData({ playingText: '', playingAccent: '' });   // 词条→词形切换：清主行态
     }
     this.setData({ wfText: t, wfKey: key });
-    speech.speak(t, { kind: 'g' });
+    const wfAi = plan.wordAi(t);
+    speech.speak(t, wfAi ? { ai: wfAi, kind: 'w' } : { kind: 'g' });   // 词表内形式（be/do/take…）走 w/ 桶 = 与单词同一文件（v1.1.85）
   },
 
   // ---------- ④ 语法速查 ----------

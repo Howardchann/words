@@ -97,12 +97,15 @@
   <view class="card" wx:if="{{dayData.type === 'study' && dayData.g}}">
     <view class="section-label">例句精读 · {{dayData.g.t}}</view>
     <view class="grammar-exp">{{dayData.g.exp}}</view>
-    <view class="grammar-ex" wx:for="{{dayData.g.ex}}" wx:key="*this">
+    <!-- 例句精读（v1.1.85）：每条 = {v 显示原文, spk 是否有可朗读的英文}。
+         含汉字的句子（「每天 5 分钟回忆，胜过 20 分钟抄写。」）不渲染喇叭 —— 此前它们带喇叭，
+         点下去是在线 TTS 读中文（与全站 Azure 音色完全两回事）。 -->
+    <view class="grammar-ex" wx:for="{{dayData.g.ex}}" wx:key="v">
       <view class="ex-no">{{index + 1}}.</view>
-      <text class="grammar-ex-text"><text wx:if="{{playingText === item}}" class="kara-lit">{{karaLit}}</text>{{playingText === item ? karaRest : item}}</text>
-      <view class="ex-speak {{playingText === item ? 'playing' : ''}}"
+      <text class="grammar-ex-text"><text wx:if="{{playingText === item.v}}" class="kara-lit">{{karaLit}}</text>{{playingText === item.v ? karaRest : item.v}}</text>
+      <view class="ex-speak {{playingText === item.v ? 'playing' : ''}}" wx:if="{{item.spk}}"
             hover-class="speak-hover" hover-stay-time="120"
-            data-text="{{item}}" data-kind="g" bindtap="onSpeakWord"><view class="spk-ico {{playingText === item ? 'spk-ico--on' : ''}}"></view></view>
+            data-text="{{item.v}}" data-kind="g" bindtap="onSpeakWord"><view class="spk-ico {{playingText === item.v ? 'spk-ico--on' : ''}}"></view></view>
     </view>
   </view>
 
