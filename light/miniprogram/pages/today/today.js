@@ -11,7 +11,9 @@ function exSpk(s) {
   if (/^[A-Za-z][A-Za-z ]{0,12}:\s/.test(s)) return false;
   if (/^\d/.test(s)) return false;                          // 日程条目（10:45 - 11:45 writing…）
   if (/^(Day|Box|Minute|Week)\s*\d/i.test(s)) return false; // 打卡/计划条目（Day 5: mixed practice…）
-  return /[.!?]["']?\s*$/.test(String(s).trim());
+  // v1.1.86：句末允许跟一个短括号补充 —— `The town that I visited was quiet. (not where)`
+  // 是语法真例句（对照 where/that 的用法），此前被「以 ) 结尾 = 没有句末标点」误挡掉喇叭。
+  return /[.!?]["']?\s*(\([^)]{0,24}\))?\s*$/.test(String(s).trim());
 }
 const store = require('../../utils/store.js');
 const theme = require('../../utils/theme.js');

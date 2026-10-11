@@ -154,8 +154,13 @@ Page({
       this.setData({ playingText: '', karaLit: '', karaRest: '' });
       return;
     }
-    // 换句播放：卡拉OK 从零起步（progress 首帧前先用空切片，避免上一句的染色残留一帧）
-    this.setData({ playingText: text, karaLit: '', karaRest: '' });
+    // 换句播放：karaRest 先填「整句」（= 未读态），karaLit 留空。
+    // ⚠️ v1.1.86 修闪屏：此前这里两个都清空 → wxml 的 karaoke 分支把整句渲染成空字符串，
+    //    而网络音频首帧要等几百毫秒，于是这一行会「整句消失 → 再逐字长出」，
+    //    看起来就是用户说的「播放按钮和同一行的例句一起动了」。填 karaRest=整句后，
+    //    文本从第一帧起就等于原文（只是染色区从 0 开始长），断行点不变、无重排。
+    //    （今日页/复习页/工具页都不做这次清空，全靠 onStateChange 推 —— 所以只有语法区会闪。）
+    this.setData({ playingText: text, karaLit: '', karaRest: text });
     // 语法例句无词表编号 → kind 传 's' 且 ai=0，引擎按文本哈希去 g/ 桶取预生成音频，
     // 命中不到才降级在线。音色与今日页/工具页统一（Azure Ava）。
     speech.speak(text, { kind: 's' });
