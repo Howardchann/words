@@ -5,11 +5,14 @@ page { padding-bottom: env(safe-area-inset-bottom); }
 /* 分类小字（v1.1.78）：原为英音蓝胶囊，与全站浅色绿语言不合群（用户真机指出）→ 中性纯文字。
    不与下方模块卡的 section-label（绿色粗体）同款是有意的：head 是「语法点本体」，
    用法/易错点/例句是「附属模块」，本体卡的导航信息用最轻的小字呈现，标题才是主角。 */
-.head__cat { font-size: 22rpx; color: var(--muted3); letter-spacing: 1rpx; }
+/* 分类名（v1.1.79 方案C）：原 22rpx/muted3 —— 比下方每张卡的模块标题（.section-label 26rpx/700/绿）还小还淡，
+   层级倒挂（附属模块的标题压过头卡的身份标题）→ 并入模块标题那一套语言：26rpx / 700 / --green。 */
+.head__cat { font-size: 26rpx; font-weight: 700; color: var(--green); letter-spacing: 1rpx; }
 .head__t { margin-top: 12rpx; font-size: 38rpx; font-weight: 800; color: var(--ink); line-height: 1.35; }
-/* 人话开场白（v1.1.68）：零基础学习者先看这一句 ——「这东西帮你解决什么问题」，再往下才是术语式讲解 */
-.head__plain { margin-top: 14rpx; padding: 14rpx 18rpx; border-radius: 12rpx; background: var(--soft);
-  font-size: 26rpx; color: var(--ink3); line-height: 1.7; }
+/* 人话开场白（v1.1.68）：零基础学习者先看这一句 ——「这东西帮你解决什么问题」，再往下才是术语式讲解。
+   v1.1.79 方案C：去掉软底块 —— 它和下面的「定义」同为灰字，一个 26 一个 27、一个有底一个没底，
+   是头卡"看着乱"的主要来源。改为与定义同字号 27rpx，靠颜色分级（开场白 --ink4 稍深、定义 --ink3）。 */
+.head__plain { margin-top: 14rpx; font-size: 27rpx; color: var(--ink4); line-height: 1.7; }
 .head__def { margin-top: 12rpx; font-size: 27rpx; color: var(--ink3); line-height: 1.7; }
 
 .li { display: flex; align-items: flex-start; margin-top: 14rpx; }
@@ -67,7 +70,9 @@ page { padding-bottom: env(safe-area-inset-bottom); }
   box-shadow: 0 8rpx 30rpx rgba(0,0,0,.14); }
 
 @media (min-width:700px) {
+  .head__cat { font-size: 13px; }
   .head__t { font-size: 19px; }
+  .head__plain { font-size: 14px; }
   .head__def { font-size: 14px; }
   .li__tx { font-size: 14px; }
   .ex__en { font-size: 14px; }

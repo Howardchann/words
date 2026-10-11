@@ -4,10 +4,10 @@
 <view class="page-veil" wx:if="{{veil}}"></view>
 <!-- 复习页 -->
 <view class="tab-row">
-  <view class="tab {{tab === 'random' ? 'tab--on' : ''}}" data-tab="random" hover-class="hover-dim" hover-stay-time="120" bindtap="onTab">随机抽查</view>
-  <view class="tab {{tab === 'due' ? 'tab--on' : ''}}" data-tab="due" hover-class="hover-dim" hover-stay-time="120" bindtap="onTab">到期复习</view>
-  <view class="tab {{tab === 'cloze' ? 'tab--on' : ''}}" data-tab="cloze" hover-class="hover-dim" hover-stay-time="120" bindtap="onTab">填空</view>
-  <view class="tab {{tab === 'starred' ? 'tab--on' : ''}}" data-tab="starred" hover-class="hover-dim" hover-stay-time="120" bindtap="onTab">重点词（{{starred.length}}）</view>
+  <view class="tab {{tab === 'random' ? 'tab--on' : ''}}" data-tab="random" hover-class="none" hover-stay-time="0" bindtap="onTab">随机抽查</view>
+  <view class="tab {{tab === 'due' ? 'tab--on' : ''}}" data-tab="due" hover-class="none" hover-stay-time="0" bindtap="onTab">到期复习</view>
+  <view class="tab {{tab === 'cloze' ? 'tab--on' : ''}}" data-tab="cloze" hover-class="none" hover-stay-time="0" bindtap="onTab">填空</view>
+  <view class="tab {{tab === 'starred' ? 'tab--on' : ''}}" data-tab="starred" hover-class="none" hover-stay-time="0" bindtap="onTab">重点词（{{starred.length}}）</view>
 </view>
 <block wx:if="{{tab === 'random'}}">
   <view class="card pool-info"><text class="muted">可抽查词汇 {{poolSize}} 个，随学习进度增加</text></view>
@@ -38,10 +38,10 @@
     <view class="ex-cn" wx:if="{{showZh && currentDue.cn}}">{{currentDue.cn}}</view>
     <view class="zh-toggle" hover-class="none" hover-stay-time="0" bindtap="onShowZh"><view class="eye-ico {{showZh ? 'eye-ico--on' : ''}}"></view></view>
     <view class="review-result-row review-result-row--4">
-      <view class="grade-btn grade-btn--again" data-grade="again" hover-class="btn-press" hover-stay-time="0" bindtap="onReviewResult"><text class="grade-name">忘记</text><text class="grade-hint">{{dueHint.again}}</text></view>
-      <view class="grade-btn grade-btn--hard" data-grade="hard" hover-class="btn-press" hover-stay-time="0" bindtap="onReviewResult"><text class="grade-name">困难</text><text class="grade-hint">{{dueHint.hard}}</text></view>
-      <view class="grade-btn grade-btn--good" data-grade="good" hover-class="btn-press" hover-stay-time="0" bindtap="onReviewResult"><text class="grade-name">一般</text><text class="grade-hint">{{dueHint.good}}</text></view>
-      <view class="grade-btn grade-btn--easy" data-grade="easy" hover-class="btn-press" hover-stay-time="0" bindtap="onReviewResult"><text class="grade-name">简单</text><text class="grade-hint">{{dueHint.easy}}</text></view>
+      <view class="grade-btn grade-btn--again" data-grade="again" hover-class="none" hover-stay-time="0" bindtap="onReviewResult"><text class="grade-name">忘记</text><text class="grade-hint">{{dueHint.again}}</text></view>
+      <view class="grade-btn grade-btn--hard" data-grade="hard" hover-class="none" hover-stay-time="0" bindtap="onReviewResult"><text class="grade-name">困难</text><text class="grade-hint">{{dueHint.hard}}</text></view>
+      <view class="grade-btn grade-btn--good" data-grade="good" hover-class="none" hover-stay-time="0" bindtap="onReviewResult"><text class="grade-name">一般</text><text class="grade-hint">{{dueHint.good}}</text></view>
+      <view class="grade-btn grade-btn--easy" data-grade="easy" hover-class="none" hover-stay-time="0" bindtap="onReviewResult"><text class="grade-name">简单</text><text class="grade-hint">{{dueHint.easy}}</text></view>
     </view>
   </view>
   <view class="card" wx:else><view class="empty-text">暂无到期词汇——学过的词到复习周期后会自动出现在这里</view></view>
@@ -54,7 +54,7 @@
     <view class="cloze-opts">
       <view class="cloze-opt {{item.state ? 'cloze-opt--' + item.state : ''}}"
             wx:for="{{cloze.options}}" wx:key="w"
-            hover-class="{{cloze.done ? 'none' : 'btn-press'}}" hover-stay-time="0"
+            hover-class="none" hover-stay-time="0"
             data-w="{{item.w}}" bindtap="onClozePick"><text>{{item.w}}</text></view>
     </view>
     <view class="cloze-en" wx:if="{{cloze.done}}">{{cloze.en}}</view>

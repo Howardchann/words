@@ -25,6 +25,8 @@ page { padding-bottom: env(safe-area-inset-bottom); }
 
 /* 分类卡（手风琴） */
 .cat { padding: 6rpx 28rpx; }
+/* 行尾顺序（v1.1.79 核实）：名称/简介 → 数量 → 箭头。三处都统一「箭头在行尾」，
+   与工具页语法目录（原先箭头写在名称左侧，已一并修正）、设置页一致。 */
 .cat__head { display: flex; align-items: center; padding: 22rpx 0; }
 /* 按压反馈（v1.1.75 统一口径）：无底色行改「变淡」，与今日页/工具页一致，不再整行铺背景 */
 /* 按压反馈（v1.1.77 收窄）：不再整头行变淡（数字跟着闪，用户点名不要）——
@@ -33,9 +35,11 @@ page { padding-bottom: env(safe-area-inset-bottom); }
 .cat__l { flex: 1; min-width: 0; }
 .cat__name { font-size: 30rpx; font-weight: 700; color: var(--ink); }
 .cat__intro { margin-top: 6rpx; font-size: 23rpx; color: var(--muted3); line-height: 1.6; }
-/* 数量列：定宽 + 右对齐（v1.1.68）—— 原来不定宽挤在标题与箭头之间，随标题长短左右浮动、也对不齐 */
-.cat__n { flex-shrink: 0; width: 96rpx; text-align: right; font-size: 25rpx; color: var(--green); margin-left: 12rpx; }
-.cat__arrow { flex-shrink: 0; width: 40rpx; text-align: center; font-size: 34rpx; color: var(--muted2);
+/* 数量列（v1.1.79 收口）：去掉 96rpx 定宽 —— 标题已经是 flex:1，数量贴着行尾即可；
+   定宽会把「6 个」这类短数字推到离箭头很远的地方。字号与工具页 .cat-count 统一为 24rpx。 */
+.cat__n { flex-shrink: 0; font-size: 24rpx; color: var(--green); margin-left: 12rpx; }
+/* 箭头三处统一 32rpx（v1.1.79：原首层 34rpx / 三层 30rpx / 工具页 30rpx 各写一个值） */
+.cat__arrow { flex-shrink: 0; width: 40rpx; text-align: center; font-size: 32rpx; color: var(--muted2);
   transition: transform .18s; margin-left: 6rpx; }
 .cat__arrow.on { transform: rotate(90deg); }
 
@@ -48,7 +52,7 @@ page { padding-bottom: env(safe-area-inset-bottom); }
    → 改中性纯文字小字，信息保留、视觉减重 */
 .tp__cat { flex-shrink: 0; margin-left: 14rpx; font-size: 21rpx; color: var(--muted3); }
 /* 可点指引（v1.1.78）：第二层展开行加 chevron —— 展开列表此前无任何可点暗示（用户真机反馈） */
-.tp__go { flex-shrink: 0; margin-left: 14rpx; color: var(--muted3); font-size: 30rpx; line-height: 1; }
+.tp__go { flex-shrink: 0; margin-left: 14rpx; color: var(--muted3); font-size: 32rpx; line-height: 1; }
 .tp__def { margin-top: 6rpx; font-size: 24rpx; color: var(--muted3); line-height: 1.6; }
 
 /* 自绘轻提示（不引组件，分包零依赖） */
@@ -62,4 +66,7 @@ page { padding-bottom: env(safe-area-inset-bottom); }
   .tagchip { padding: 5px 11px; border-radius: 13px; font-size: 12.5px; }
   .cat__name { font-size: 15px; }
   .tp__t { font-size: 14px; }
+  .cat__n { font-size: 12px; }
+  .cat__arrow { font-size: 16px; }
+  .tp__go { font-size: 16px; }
 }

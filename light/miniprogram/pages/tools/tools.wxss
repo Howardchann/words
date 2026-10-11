@@ -58,9 +58,11 @@
   display: flex; align-items: center; justify-content: space-between; }
 .cat-cell--press { background: var(--press-green); }
 .cat-name { flex: 1; min-width: 0; font-size: 27rpx; font-weight: 700; color: var(--ink); }
-/* 可点击指引（v1.1.77）：分类格右侧加箭头 —— 首层此前只有文字+数字，用户第一眼不知可点 */
-.cat-cell__go { flex-shrink: 0; margin-right: 10rpx; font-size: 30rpx; color: var(--muted2); line-height: 1; }
-.cat-count { flex-shrink: 0; font-size: 22rpx; color: var(--green); }
+/* 可点击指引（v1.1.77）：分类格右侧加箭头 —— 首层此前只有文字+数字，用户第一眼不知可点。
+   v1.1.79 修正：箭头原先写成第一个子元素（渲染在名称左侧），与语法速查页/设置页「箭头在行尾」不一致
+   → 挪到数量之后（行尾），字号与 .tp__go/.cat__arrow 统一为 32rpx；数量与 .cat-count 统一 24rpx。 */
+.cat-cell__go { flex-shrink: 0; margin-left: 8rpx; font-size: 32rpx; color: var(--muted2); line-height: 1; }
+.cat-count { flex-shrink: 0; font-size: 24rpx; color: var(--green); }
 
 /* ③ 音标（大类 + 子类两级筛选 → 音标网格 → 常驻详情面板） */
 .ph-hint { margin: 8rpx 0 14rpx; font-size: 23rpx; color: var(--muted2); line-height: 1.7; }
@@ -72,7 +74,9 @@
 /* 选中态：浅绿底 + 深绿字（v1.1.76 由实心绿白字浅色化，与 .ph-subchip.on 同风格；按压不掉色） */
 .ph-cls.on { background: var(--press-green); color: var(--green-press); }
 .ph-cls--press { opacity: .85; }
-.ph-cls__n { font-size: 22rpx; font-weight: 600; margin-left: 8rpx; opacity: .8; }
+/* 数量与标签同量级（v1.1.79）：原 22rpx + opacity .8，与 28rpx 的「元音/辅音」差 6rpx 且额外变淡，
+   真机上就是"两个大小"→ 提到 24rpx 并去掉额外透明度。 */
+.ph-cls__n { font-size: 24rpx; font-weight: 600; margin-left: 8rpx; }
 
 /* 子类筛选（全部 / 短元音 …）：胶囊 chips，自动换行 */
 .ph-sub { display: flex; flex-wrap: wrap; gap: 12rpx; margin-top: 14rpx; }
@@ -116,7 +120,9 @@
 /* 行首喇叭：取消 margin-left，盒宽收到 44rpx（图标仍是 36rpx 定值不变，只少一点左侧缩进） */
 .ex-speak--lead { margin-left: 0; margin-right: 14rpx; width: 44rpx; height: 44rpx; }
 .ph-ex__txt { flex: 1; min-width: 0; }
-.ph-ex__w { font-size: 29rpx; font-weight: 700; color: var(--ink); }
+/* 例词行三尺度收口（v1.1.79）：单词 29rpx / 中文 24rpx 差 5rpx，一行里像三个来源 → 统一 27rpx。
+   基线本来就是对齐的（父级 align-items:baseline），问题只是字号差导致视觉重心散。 */
+.ph-ex__w { font-size: 27rpx; font-weight: 700; color: var(--ink); }
 /* 目标字母就地染色（v1.1.70）：取代原来的独立蓝色小标签（`sit i 坐`）。
    直接让「发这个音的那几个字母」在单词内部变色，一眼就能对上「哪个字母发哪个音」。
    ⚠️ 光靠颜色不够：--green(#176B5B) 对正文深灰(#24332F) 的对比度实测只有约 2:1，
@@ -124,7 +130,7 @@
    （border-bottom + currentColor，线随字色），不引新色值、深浅主题自动跟随（--green 两态都可用）。
    不用 text-decoration-thickness/offset：iOS WKWebView 对这两个属性支持不全，border-bottom 全兼容。 */
 .ph-ex__seg--hit { color: var(--green); border-bottom: 3rpx solid currentColor; padding-bottom: 2rpx; }
-.ph-ex__cn { font-size: 24rpx; color: var(--muted3); margin-left: 14rpx; }
+.ph-ex__cn { font-size: 27rpx; color: var(--muted3); margin-left: 14rpx; }
 
 /* iPad / 宽屏覆盖（纯追加，手机端不受影响），尺寸 = rpx × 0.5 */
 @media (min-width:700px) {
