@@ -61,10 +61,11 @@ function parseNotes(arr) {
       sg.say = sg.t === 'good' ? sayOf(sg.v) : '';   // v1.1.82 播放文本（无英文则空 → 不渲染喇叭）
       // v1.1.83 卡拉OK 显示切分：数据里常把「英文句 + 中文说明」连写（如「I need some advice. 不可数名词…」），
       // 而播放文本 say 只取英文部分。若直接按 say 切片染色，会和显示文本错位 → 这里把显示文本拆成
-      // 「可点亮的英文前缀 say」+「不参与点亮的尾巴 tail」。say 不是 v 的前缀时（归一化差异）关掉本条卡拉OK。
+      // 「可点亮的英文前缀 say」+「不参与点亮的尾巴 tail」；v1.1.89 起 tail 独立成行渲染，
+      // 行首标点（say 切分落在「。」前留下的）在显示层剥掉，数据不动。
       const sv = String(sg.v || '');
       sg.kara = !!(sg.say && sv.indexOf(sg.say) === 0);
-      sg.tail = (sg.kara && sg.say !== sv) ? sv.slice(sg.say.length) : '';
+      sg.tail = (sg.kara && sg.say !== sv) ? sv.slice(sg.say.length).replace(/^[\s。，、；：,]+/, '') : '';
     });
     out.push({ k: 'n' + idx, kind: 'fix', head: head, segs: segs, why: why });
   });

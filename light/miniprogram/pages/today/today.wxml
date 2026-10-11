@@ -11,8 +11,19 @@
   <view class="tip-box">
     <view class="tip-text">可以先看看第 1 天的单词，熟悉一下操作：点音标模块听发音（美音 / 英音各读各的），点<view class="ico-inline ico-heart"></view>收藏重点词</view>
   </view>
-  <button class="btn-primary btn-fit" hover-class="btn-press" bindtap="startLearning" style="margin-top:24rpx;">开始学习</button>
-  <button class="btn-ghost btn-fit" hover-class="btn-press" bindtap="backToToday" style="margin-top:12rpx;">先看看第 1 天</button>
+  <!-- 双按钮 v1.1.89（方案A，用户定）：箭头行同语言（tools 页 cat-cell 同构）。主行 press-green 常亮 +
+       实心绿圆播放标 =「真开学」；次行 soft 底 + 灰眼睛标 + 「只预览 · 不打卡」 = 看了还能回。 -->
+  <view class="cellrow cellrow--main" hover-class="cellrow--press" hover-stay-time="120" bindtap="startLearning" aria-role="button" aria-label="开始学习，从第 1 天开始">
+    <view class="cellrow__ico cellrow__ico--play"></view>
+    <view class="cellrow__tt">开始学习</view>
+    <view class="cellrow__go cellrow__go--dark"></view>
+  </view>
+  <view class="cellrow" hover-class="cellrow--press" hover-stay-time="120" bindtap="backToToday" aria-role="button" aria-label="先看看第 1 天，只预览不打卡">
+    <view class="cellrow__ico cellrow__ico--eye"></view>
+    <view class="cellrow__tt cellrow__tt--sub">先看看第 1 天</view>
+    <view class="cellrow__meta">只预览 · 不打卡</view>
+    <view class="cellrow__go"></view>
+  </view>
 </view>
 
 <block wx:else>

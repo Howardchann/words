@@ -66,6 +66,8 @@ page { padding-bottom: calc(44rpx + env(safe-area-inset-bottom)); }
    原来引导语 muted3、原因 muted2、正文 ink3 = 三档灰，用户真机反馈"这种颜色那种颜色"不统一。 */
 .fix__tx { flex: 0 1 auto; min-width: 0; font-size: 27rpx; color: var(--ink3); line-height: 1.75; word-break: break-word; }
 .fix__why { margin-top: 4rpx; padding-left: 44rpx; font-size: 23rpx; color: var(--muted3); line-height: 1.7; }
+/* v1.1.89（方案A）：「英文句+中文说明」连写条的说明尾巴独立成行 —— 缩进对齐文本列、小字浅色，与 fix__why 同构 */
+.fix__tail { margin-top: 2rpx; padding-left: 44rpx; font-size: 23rpx; color: var(--muted3); line-height: 1.7; }
 /* 对句朗读（v1.1.80，A5）：只给 ✅ 对句配喇叭 —— 错句是反例、不需要听。
    对齐口径与全站一致：零宽空格 strut + 图标 vertical-align:middle（x-height 锚定，见 app.wxss .word-speak 注释），
    行容器 .fix__row 已是 align-items:baseline → 喇叭贴对句文本首行基线，折行时不会浮在两行中间。
