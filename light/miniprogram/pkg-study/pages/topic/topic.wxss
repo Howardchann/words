@@ -31,12 +31,14 @@ page { padding-bottom: calc(44rpx + env(safe-area-inset-bottom)); }
    例句行完全同构，折行时喇叭贴英文首行基线而不是浮在两行中间。
    播放态深绿由 .spk-ico--on（wxml 三元）承担，不再需要本页私有的 .ex__spk 规则。
    v1.1.80 治「整块闪动」：① 去掉 hover-class="ex--press"（喇叭 scale(.85) 会重绘整行）
-   ② 播放态不再替换文本节点、也不逐帧推送卡拉OK —— 只切换本行一个 class（.ex--on）；
-   重绘范围从「整页所有例句行 × 每秒 4 次」收到「被点的那一行 × 2 次（开始/结束）」。 */
+   ② 播放态不再替换文本节点、也不逐帧推送卡拉OK，只切本行一个 class；
+   重绘范围从「整页所有例句行 × 每秒 4 次」收到「被点的那一行 × 2 次（开始/结束）」。
+   v1.1.84：连「本行切一个 class」也去掉了（用户不要纯色背景）→ 播放态 = 卡拉OK 染绿 + 喇叭深绿。 */
 .ex { display: flex; align-items: baseline; padding: 18rpx 16rpx; border-radius: 14rpx; border-bottom: 1rpx solid var(--line); }
 .ex:last-child { border-bottom: none; }
-/* 播放态：极浅绿底（--soft）+ 喇叭深绿（.spk-ico--on）。用最淡的一档，不做整块深色。 */
-.ex--on { background: var(--soft); }
+/* 播放态（v1.1.84 用户真机定）：例句行**不铺任何底色**。
+   原来这里是 `.ex--on { background: var(--soft) }`（极浅绿底）—— 用户反馈「卡拉OK 有了，
+   但例句交互形式还有纯色背景」→ 删除该规则，播放反馈只由卡拉OK 已读段染绿 + 喇叭 .spk-ico--on 承担。 */
 .ex__main { flex: 1; min-width: 0; }
 .ex__en { font-size: 28rpx; color: var(--ink3); line-height: 1.7; word-break: break-word; }
 .ex__cn { margin-top: 4rpx; font-size: 24rpx; color: var(--muted3); line-height: 1.6; }

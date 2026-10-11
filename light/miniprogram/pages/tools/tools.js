@@ -350,9 +350,12 @@ Page({
     speech.stop();
     this.setData({ ph: ph });
   },
-  // 音标例词朗读：走 g/ 桶（按文本哈希预生成的 Azure 音频），与今日页/语法例句同一套音色。
-  // ⚠️ ai 必须传 0 —— 132 个音标例词里有 20 个（ten/my/five/out/here…）原先不在词表（v1.1.74 功能词包已补入大部分），
-  //    原先 ai=0 直接掉到在线合成（有道/百度），所以用户听出「音色和今日页不一样」。
+  // 音标例词朗读（v1.1.84 修音色）：口径必须与生成脚本 `_ipa_build/mk_g_tasks.js` **完全一致** ——
+  //   ① 在词表里的例词 → 走 w/ 桶（词表序号），**与今日页单词是同一个文件**，音色/语速必然一致；
+  //   ② 不在词表的例词 → 走 g/ 桶（按文本哈希预生成，那里只收了「不在词表」的部分）。
+  // ⚠️ 此前恒传 `ai: 0`（只问 g/ 桶），而生成侧**故意跳过词表内的词**（认为它们会走 w/ 桶）→
+  //    111 个例词里 109 个在词表 → 这些全部命中不到、每次点都降级在线有道 TTS，
+  //    用户真机听出「音标例词的音色和今日页单词不一致」（2026-10-11 反馈）。两侧口径必须成对改。
   onSpeakPhonEx(e) {
     const w = e.currentTarget.dataset.w;
     if (!w) return;
@@ -361,7 +364,9 @@ Page({
       this.setData({ playingText: r === 'paused' ? '' : w });
       return;
     }
-    speech.speak(w, { ai: 0, kind: 'g' });
+    const ai = plan.wordAi(w);
+    if (ai) speech.speak(w, { ai: ai, kind: 'w' });     // 词表内 → w/ 桶（同今日页单词）
+    else speech.speak(w, { ai: 0, kind: 'g' });         // 词表外 → g/ 桶哈希
   },
 
   fb() { return this.selectComponent('#fb'); },
