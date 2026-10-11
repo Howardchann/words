@@ -63,7 +63,13 @@ Page({
         upd.karaLit = payload.text.slice(0, lit);
         upd.karaRest = payload.text.slice(lit);
       } else { upd.karaLit = ''; upd.karaRest = ''; }
-      if (!payload.playing && this.data.wfText) upd.wfText = ''; upd.wfKey = '';   // 播完清掉词形标签的独立态
+      // 词形播放分支（v1.1.93 对齐今日页 v1.1.78 语义）：wf 播放中词条态冻结（onSpeakWf 切换时已先清词条态），播完清 wf 态。
+      // 旧写法「if (...) upd.wfText=空; upd.wfKey=空;」少花括号 → wfKey 每次回调都被清，词形磁贴高亮一点就灭（v1.1.81 起，真机 be→were 反馈）。
+      if (this.data.wfText) {
+        if (!payload.playing) { this.setData({ wfText: '', wfKey: '' }); return; }
+        if (payload.text === this.data.wfText) return;   // wf 自己的进度回调：保持冻结（词形磁贴只亮 --on，无卡拉OK 渲染位）
+        this.setData({ wfText: '', wfKey: '' });      // 用户点了别的（词条）：收掉 wf 态，落入下方正常分支
+      }
       this.setData(upd);
     });
   },
@@ -159,7 +165,12 @@ Page({
     }
     const item = pool[Math.floor(Math.random() * pool.length)];
     // v1.1.38：去掉自动朗读 —— 朗读统一走卡片上的喇叭（onSpeakCurrent），点进卡片是静默的
-    // v1.1.91：重点词快照只存 {w,m,p,e,ai,ts}，无 ipa/uk（store.js 注释同）——随机/到期卡抽到收藏词时    // 此前不反查，导致美音胶囊无字、英音胶囊整块不渲染（真机反馈 were 只有一个读音）。此处与收藏列表同口径补齐。    const c = Object.assign({}, item, {      ipa: item.ipa || ipaOf(item.w), uk: item.uk || ukOf(item.w), cn: item.cn || cnOf(item.w),      starred: store.isStarred(item.w), wf: wordforms.wfNotes(item.w),    });
+    // v1.1.91：重点词快照只存 {w,m,p,e,ai,ts}，无 ipa/uk（store.js 注释同）——随机/到期卡抽到收藏词时
+    // 此前不反查，导致美音胶囊无字、英音胶囊整块不渲染（真机反馈 were 只有一个读音）。此处与收藏列表同口径补齐。
+    const c = Object.assign({}, item, {
+      ipa: item.ipa || ipaOf(item.w), uk: item.uk || ukOf(item.w), cn: item.cn || cnOf(item.w),
+      starred: store.isStarred(item.w), wf: wordforms.wfNotes(item.w),
+    });
     this.setData({ currentDue: c, showZh: false, dueHint: this._hints(item.w), wfText: '', wfKey: '' });
     this._prefetchCard(c);   // v1.1.80：抽到词就把音频备好，第一次点即出声
   },
@@ -248,7 +259,12 @@ Page({
     this._lastWord = item.w;
     // 重点词池里的对象是副本，没有 starred 字段 —— 必须按单词实际状态回填，否则已收藏的词永远显示"未收藏"
     // v1.1.38：去掉自动朗读，与到期 tab 统一为手动喇叭
-    // v1.1.91：重点词快照只存 {w,m,p,e,ai,ts}，无 ipa/uk（store.js 注释同）——随机/到期卡抽到收藏词时    // 此前不反查，导致美音胶囊无字、英音胶囊整块不渲染（真机反馈 were 只有一个读音）。此处与收藏列表同口径补齐。    const c = Object.assign({}, item, {      ipa: item.ipa || ipaOf(item.w), uk: item.uk || ukOf(item.w), cn: item.cn || cnOf(item.w),      starred: store.isStarred(item.w), wf: wordforms.wfNotes(item.w),    });
+    // v1.1.91：重点词快照只存 {w,m,p,e,ai,ts}，无 ipa/uk（store.js 注释同）——随机/到期卡抽到收藏词时
+    // 此前不反查，导致美音胶囊无字、英音胶囊整块不渲染（真机反馈 were 只有一个读音）。此处与收藏列表同口径补齐。
+    const c = Object.assign({}, item, {
+      ipa: item.ipa || ipaOf(item.w), uk: item.uk || ukOf(item.w), cn: item.cn || cnOf(item.w),
+      starred: store.isStarred(item.w), wf: wordforms.wfNotes(item.w),
+    });
     this.setData({ currentRandom: c, showZh: false, wfText: '', wfKey: '' });
     this._prefetchCard(c);   // v1.1.80：切词即预取
   },
