@@ -55,11 +55,11 @@ function buildLabel() {
 }
 
 Page({
-  data:{startDate:plan.DEFAULT_START,today:'',rate:0.9,rateText:'0.90×',accent:'us',
+  data:{today:'',rate:0.9,rateText:'0.90×',accent:'us',
     accentOptions:[{value:'us',label:'美式发音（默认）'},{value:'uk',label:'英式发音'}],accentIndex:0,
     engineOptions:[{value:'auto',label:'自动（推荐）：优先预生成，失败切在线'},{value:'pregen',label:'仅预生成高清音频'},{value:'online',label:'仅在线 TTS（有道/百度）'}],engineIndex:0,
     starredCount:0,reviewCount:0,appVersion:buildLabel(),aboutCardLabel:ABOUT_CARD_LABEL,aboutTitle:ABOUT_TITLE,engineLabel:'',engineHint:'',backupText:'',showBackup:false,importText:'',showImport:false,voiceTesting:false,voiceLabel:'试听发音',
-    cloudOn:true,cloudMeta:'',cloudErr:'',cloudTip:'',syncing:false,sheet:{show:false,title:'',options:[],index:0,key:''},cal:{show:false,y:0,m:0,label:'',grid:[],canPrev:true,canNext:true},
+    cloudOn:true,cloudMeta:'',cloudErr:'',cloudTip:'',syncing:false,sheet:{show:false,title:'',options:[],index:0,key:''},
     // 主题 data 初始化（与 tabBar 同款）：首帧即正确深浅，见 today.js 注释
     dark:theme.isDark(),pageStyle:theme.isDark()?'background-color:#0E1618;':'',
     // 自定义导航栏（v1.1.33）：标题走 data 绑定 <nav-bar title>
@@ -75,23 +75,13 @@ Page({
     const MODES={auto:['自动（当前云端音频可用，优先预生成）','优先预生成高清音频（美音），失败自动切在线。'],pregen:['仅预生成高清音频','只用预生成音频（美音），失败不切在线。'],online:['仅在线 TTS（有道 / 百度）','全部在线朗读，口音切换只在此音源生效。']};
     const m=MODES[engineMode]||MODES.auto;
     // 同值守卫：onShow 每次进设置页都调 refresh，数值没变就不再整树 setData（切 tab 闪屏）
-    theme.sameSet(this,{startDate:store.get('startDate')||'',rate,rateText:Number(rate).toFixed(2)+'×',accent,accentIndex:Math.max(0,ACCENTS.indexOf(accent)),engineIndex:Math.max(0,this.data.engineOptions.findIndex(o=>o.value===engineMode)),starredCount:(store.get('starredWords')||[]).length,reviewCount:store.activeReviewCount(),
+    theme.sameSet(this,{rate,rateText:Number(rate).toFixed(2)+'×',accent,accentIndex:Math.max(0,ACCENTS.indexOf(accent)),engineIndex:Math.max(0,this.data.engineOptions.findIndex(o=>o.value===engineMode)),starredCount:(store.get('starredWords')||[]).length,reviewCount:store.activeReviewCount(),
       engineLabel:m[0],
       engineHint:(pre?'':'⚠️ 云端音频不可用，预生成将自动降级在线。')+m[1]});this.refreshCloud();},
   openEngineSheet(){this.setData({sheet:{show:true,title:'朗读方式',options:this.data.engineOptions,index:this.data.engineIndex,key:'engine'}});},
   openAccentSheet(){this.setData({sheet:{show:true,title:'默认口音',options:this.data.accentOptions,index:this.data.accentIndex,key:'accent'}});},
   closeSheet(){this.setData({'sheet.show':false});},noop(){},
   onSheetPick(e){const i=Number(e.currentTarget.dataset.i),k=this.data.sheet.key;this.setData({'sheet.show':false});if(k==='engine'){const m=this.data.engineOptions[i].value;store.set('engineMode',m);speech.setEngineMode(m);this.refresh();}else{const accent=this.data.accentOptions[i].value;store.set('accent',accent);speech.setAccent(accent);this.setData({accent,accentIndex:i});}},
-  onStartDate(){this.openCal();},
-  /* 自绘月历弹层（替代系统 date picker 深色滚轮）：周一开头，范围 2025-01 ~ 2028-12；任选一天即为第 1 天（v1.1.66 取消「非周一自动顺延」限制） */
-  openCal(){const d=(this.data.startDate||plan.DEFAULT_START).split('-').map(Number);const y=d[0],m=d[1]-1;const g=this._buildCal(y,m);this.setData({cal:{show:true,y,m,label:g.label,grid:g.grid,canPrev:g.canPrev,canNext:g.canNext}});},
-  _buildCal(y,m){const first=new Date(y,m,1),lead=(first.getDay()+6)%7,days=new Date(y,m+1,0).getDate();const p=n=>('0'+n).slice(-2);const t=new Date(),tIso=t.getFullYear()+'-'+p(t.getMonth()+1)+'-'+p(t.getDate());const grid=[];for(let i=0;i<lead;i++)grid.push({blank:true,iso:'b'+i});for(let d=1;d<=days;d++){const iso=y+'-'+p(m+1)+'-'+p(d);grid.push({d,iso,dis:iso<tIso||iso>'2028-12-31',sel:iso===this.data.startDate,today:iso===tIso});}return{grid,label:y+' 年 '+(m+1)+' 月',canPrev:!(y===2025&&m===0),canNext:!(y===2028&&m===11)};},
-  shiftMonth(e){const dir=Number(e.currentTarget.dataset.dir);let{y,m}=this.data.cal;m+=dir;if(m<0){m=11;y--;}if(m>11){m=0;y++;}if((dir<0&&(y===2025&&m===0))||(dir>0&&(y===2028&&m===11))){return;}const g=this._buildCal(y,m);this.setData({'cal.y':y,'cal.m':m,'cal.label':g.label,'cal.grid':g.grid,'cal.canPrev':g.canPrev,'cal.canNext':g.canNext});},
-  closeCal(){this.setData({'cal.show':false});},
-  pickDay(e){const ds=e.currentTarget.dataset;if(ds.dis==='true'||ds.dis===true)return;const iso=ds.iso;
-  // v1.1.66：不再强制对齐周一——第 1 天就是所选当天，「周」不再是计划单位。
-  // 日历仍禁选今天之前的日期，startDate 恒 ≥ 今天；开始日设到未来时进入准备期倒计时。
-  store.set('startDate',iso);getCurrentPages().forEach(pg=>{if(pg.resetView)pg.resetView();});this.setData({'cal.show':false,startDate:iso});this.refresh();this.fb().toast('开始日期已更新');},
   // 学习进度数字跳转（v1.1.26 方案B → v1.1.27 二轮修）：①原生 hover-class 切 tab 返回后残影
   // （微信清理不可靠）→ 改 data.statPress 手动按压态：touchstart 亮 / touchmove 灭
   // （滚动不拖亮块）/ touchend 不灭灯（tap 紧随跳转）/ tap 未派发 350ms 兜底 / onShow·onHide 双兜底。
@@ -135,7 +125,7 @@ Page({
   onHideBackup(){this.setData({showBackup:false});},onShowImport(){this.setData({showImport:true,showBackup:false,importText:''});},onHideImport(){this.setData({showImport:false,importText:''});},onImportInput(e){this.setData({importText:e.detail.value});},
   doImport(mode){const text=(this.data.importText||'').trim();if(!text){this.fb().toast('请先粘贴备份内容');return;}let r;try{r=store.importBackup(text,mode);}catch(e){this.fb().modal({title:'导入失败',content:e.message||String(e),showCancel:false});return;}this.setData({showImport:false,importText:''});getCurrentPages().forEach(pg=>{if(pg.resetView)pg.resetView();});this.refresh();const bs=this.backupSummaryOf(text);const head=mode==='merge'?'合并完成':'覆盖完成';const detail=(bs?('该备份：'+bs+'\n\n'):'')+(mode==='merge'?('新增 '+r.addedDays+' 天打卡、'+r.addedWords+' 个重点词\n合并后共 '+r.totalDays+' 天、'+r.totalWords+' 个重点词\n已恢复 '+r.reviewWords+' 个复习记录'):('已替换为备份中的 '+r.totalDays+' 天打卡、'+r.totalWords+' 个重点词、'+r.reviewWords+' 个复习记录'));this.fb().modal({title:head,content:detail,showCancel:false});},
   onImportMerge(){this.doImport('merge');},onImportReplace(){this.doImport('replace');},
-  onResetProgress(){this.fb().modal({title:'清除学习记录',content:'将清空全部打卡、收藏与复习记录，云端一并清除，其他设备同步后同样清空——无法撤销。建议先「导出备份」，确定从 0 开始吗？\n清空后回到「准备期」，各页面恢复初始状态；想开学，把上方开始日期设为今天或未来某天即可。',confirmText:'清除',danger:true,onConfirm:()=>{store.resetProgress();getCurrentPages().forEach(p=>{if(p.resetView)p.resetView();});this.refresh();this.fb().toast('已清除，重新开始',1500);}});},
+  onResetProgress(){this.fb().modal({title:'清除学习记录',content:'将清空全部打卡、收藏与复习记录，云端一并清除，其他设备同步后同样清空——无法撤销。建议先「导出备份」，确定从 0 开始吗？\n清空后回到「准备期」，各页面恢复初始状态；想开学，在今日页点「开始学习」即可。',confirmText:'清除',danger:true,onConfirm:()=>{store.resetProgress();getCurrentPages().forEach(p=>{if(p.resetView)p.resetView();});this.refresh();this.fb().toast('已清除，重新开始',1500);}});},
   // 云同步状态：只更新这一小块，避免每次 store 变更都整页 refresh
   refreshCloud(){
     const sr=store.cloudStatus();const p=n=>String(n).padStart(2,'0');

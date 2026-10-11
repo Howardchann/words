@@ -21,26 +21,10 @@
 .theme-dark .sheet-check{background:center/contain no-repeat;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2358B394' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4.9 12.4l4.9 4.9L19 6.9'/%3E%3C/svg%3E");}
 
-/* 自绘月历（替代系统 date picker 深色滚轮） */
-.cal-head{display:flex;align-items:center;justify-content:space-between;padding:4rpx 40rpx 12rpx}
-.cal-label{font-size:30rpx;font-weight:700;color:var(--ink)}
-.cal-nav{width:64rpx;height:64rpx;line-height:60rpx;text-align:center;font-size:40rpx;color:var(--green);border-radius:50%}
-.cal-nav--press{background:var(--soft)}
-.cal-nav--dis{color:var(--star-off)}
-.cal-week{display:grid;grid-template-columns:repeat(7,1fr);padding:0 24rpx}
-.cal-week text{text-align:center;font-size:22rpx;color:var(--muted);padding:8rpx 0}
-.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);padding:0 24rpx 6rpx}
-.cal-cell{height:80rpx;display:flex;align-items:center;justify-content:center}
-.cal-day{width:64rpx;height:64rpx;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:27rpx;color:var(--ink);box-sizing:border-box}
-.cal-day--today{border:2rpx solid var(--green-mid)}
-.cal-day--sel{background:var(--green-solid);color:#fff;font-weight:700;border-color:var(--green-solid)}
-
 /* 外观三态分段选择（跟随系统/浅色/深色） */
 .seg-row{display:flex;background:var(--soft);border-radius:44rpx;padding:8rpx}
 .seg{flex:1;text-align:center;font-size:26rpx;color:var(--muted);padding:14rpx 0;border-radius:40rpx}
 .seg--on{background:var(--card);color:var(--green);font-weight:700;box-shadow:0 2rpx 10rpx rgba(0,0,0,.08)}
-.cal-day--dis{color:var(--dis2)}
-.cal-day--press{background:var(--soft)}
 
 /* picker 行改为「值 + 右侧箭头」图标指引（替代「点击修改/点击切换」文字）。
    v1.1.80：全站箭头统一为这一种「CSS 边框 chevron」（见 app.wxss .chev 注释）——
@@ -102,12 +86,4 @@
   .sheet-title { font-size:12px; padding:9px 0 4px; }
   .sheet-opt { font-size:14px; padding:12px 18px; }
   .sheet-check { width:15px; height:15px; }
-  .cal-head { padding:2px 20px 6px; }
-  .cal-label { font-size:15px; }
-  .cal-nav { width:32px; height:32px; line-height:30px; font-size:20px; }
-  .cal-week { padding:0 12px; }
-  .cal-week text { font-size:11px; padding:4px 0; }
-  .cal-grid { padding:0 12px 3px; }
-  .cal-cell { height:40px; }
-  .cal-day { width:32px; height:32px; font-size:14px; }
 }

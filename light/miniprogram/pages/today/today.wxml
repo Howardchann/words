@@ -5,18 +5,19 @@
 <!-- 准备期：计划尚未开始 -->
 <view class="card prestart-card" wx:if="{{preStart}}">
   <view class="prestart-title">准备期</view>
-  <view class="prestart-sub">计划开始日前，可先熟悉操作</view>
+  <view class="prestart-sub">先熟悉一下，随时可以开始</view>
   <view class="prestart-days" wx:if="{{daysToStart > 0}}">还有 {{daysToStart}} 天开始学单词</view>
-  <view class="prestart-days" wx:else>尚未设置开始日期 · 选好日期即开学</view>
+  <view class="prestart-note" wx:else>还没有学习记录 · 点「开始学习」即开学</view>
   <view class="tip-box">
     <view class="tip-text">可以先看看第 1 天的单词，熟悉一下操作：点音标模块听发音（美音 / 英音各读各的），点<view class="ico-inline ico-heart"></view>收藏重点词</view>
   </view>
-  <button class="btn-primary btn-fit" hover-class="btn-press" bindtap="backToToday" style="margin-top:24rpx;">先看看第 1 天</button>
+  <button class="btn-primary btn-fit" hover-class="btn-press" bindtap="startLearning" style="margin-top:24rpx;">开始学习</button>
+  <button class="btn-ghost btn-fit" hover-class="btn-press" bindtap="backToToday" style="margin-top:12rpx;">先看看第 1 天</button>
 </view>
 
 <block wx:else>
 <!-- 准备期预览提示条：替代原「回到准备期」纯文字链接，常驻顶部一眼可见 -->
-<view class="prep-back" wx:if="{{todayNum === 0}}" hover-class="hover-dim" hover-stay-time="120" bindtap="backToPrep">‹ 返回准备期（{{daysToStart > 0 ? '还有 ' + daysToStart + ' 天开始' : '未设置开始日期'}}）</view>
+<view class="prep-back" wx:if="{{todayNum === 0}}" hover-class="hover-dim" hover-stay-time="120" bindtap="backToPrep">‹ 返回准备期</view>
 
   <!-- 日期导航 -->
   <view class="card day-head">

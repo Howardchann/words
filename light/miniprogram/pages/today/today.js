@@ -269,6 +269,21 @@ Page({
   nextDay() {
     if (this.data.viewDay < plan.TOTAL_DAYS) { speech.stop(); this.renderDay(this.data.viewDay + 1); }
   },
+  // v1.1.88：准备期唯一「开学」入口（设置页的「计划开始日期」模块已删除）。
+  // startDate 由空串 → 今天 → currentDayFromStart 返 1：今日页立刻变成第 1 天，打卡放开。
+  // 之后即便当天没打卡，下次进来仍是第 1 天（firstUnfinishedDay 驱动），不会退回准备期。
+  startLearning() {
+    const pad = n => ('0' + n).slice(-2);
+    const d = new Date();
+    const iso = d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+    store.set('startDate', iso);
+    getCurrentPages().forEach(pg => { if (pg.resetView) pg.resetView(); });
+    speech.stop();
+    this._daySig = null;
+    this.setData({ preStart: false, viewDay: 0 });
+    this.onShow();
+    this.fb().toast('已开始 · 第 1 天', 1500);
+  },
   backToToday() {
     const t = this.data.todayNum || 1;
     speech.stop();
@@ -278,8 +293,8 @@ Page({
   },
 
   resetView() {
-    // 清除记录/改开始日期后由设置页调用：丢弃浏览位置，下次 onShow 走默认落点
-    // （startDate 重置为今天 → todayNum=1，直接进第 1 天；开始日被设到未来时才进准备期倒计时卡）
+    // 清除记录 / 点「开始学习」后调用：丢弃浏览位置，下次 onShow 走默认落点
+    // （startDate 置为今天 → todayNum=1，直接进第 1 天；只有云端同步来的未来日期才进倒计时卡）
     this._daySig = null;
     this.setData({ viewDay: 0 });
   },

@@ -30,7 +30,7 @@ const MAX_DIRTY_PER_SYNC = 400; // 单次最多上送多少个单词的复习记
 const SETTINGS_KEYS = { startDate: 1, rate: 1, accent: 1, engineMode: 1 };
 
 const defaults = () => ({
-  startDate: '',                   // 计划开始日（v1.1.78 起新装默认「未开学」→ 今日页准备期；选日期即开学）
+  startDate: '',                   // 计划开始日（新装默认「未开学」→ 今日页准备期；v1.1.88 起由今日页「开始学习」置为当天）
   checkedDays: {},                 // { 'w1d1': 打卡时间戳 }   ← 旧版值是 1，两个都能用
   uncheckedDays: {},               // { 'w1d1': 取消打卡时间戳 } 防止另一端把取消掉的打卡复活
   starredWords: [],                // [ { w, m, p, e, ts } ]
@@ -683,7 +683,7 @@ function resetProgress() {
   data.reviewStats = zero;
   data.reviewDirty = {};
   Object.keys(zero).forEach(w => { data.reviewDirty[w] = 1; });
-  data.startDate = '';   // v1.1.77 清空 = 回到「未开学」（今日页准备期）；开学由用户在设置里重选日期
+  data.startDate = '';   // 清空 = 回到「未开学」（今日页准备期）；开学改由今日页「开始学习」按钮
   data.settingsAt = now;            // startDate 走 settingsAt 更晚者胜的合并规则
   data.updatedAt = now;
   saveLocal(); schedulePush(); emit();
