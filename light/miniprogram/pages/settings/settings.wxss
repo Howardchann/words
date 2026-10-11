@@ -42,9 +42,12 @@
 .cal-day--dis{color:var(--dis2)}
 .cal-day--press{background:var(--soft)}
 
-/* picker 行改为「值 + 右侧箭头」图标指引（替代「点击修改/点击切换」文字） */
+/* picker 行改为「值 + 右侧箭头」图标指引（替代「点击修改/点击切换」文字）。
+   v1.1.80：全站箭头统一为这一种「CSS 边框 chevron」（见 app.wxss .chev 注释）——
+   语法页/工具页的字符「›」已换成同款；本页两处箭头同步对齐尺寸（16rpx 盒 / 3rpx 线）与颜色（--muted3）。
+   border-color 用 currentColor：深浅主题自动跟随，不再需要 darkicons 生成深色变体。 */
 .picker-value{display:flex;align-items:center;justify-content:space-between}
-.picker-value--press{color:var(--green-press)}.picker-arrow{width:14rpx;height:14rpx;border-right:4rpx solid var(--muted4);border-bottom:4rpx solid var(--muted4);transform:rotate(-45deg);margin-left:12rpx;flex-shrink:0}
+.picker-value--press{color:var(--green-press)}.picker-arrow{width:16rpx;height:16rpx;border-right:3rpx solid currentColor;border-bottom:3rpx solid currentColor;transform:rotate(-45deg);margin-left:12rpx;flex-shrink:0;color:var(--muted3)}
 
 /* 学习进度三列统计（替代一行长文字，大字体下不再折行） */
 .stat-row{display:flex;justify-content:space-around}
@@ -53,7 +56,9 @@
    切 tab 时 hover-class 由微信自动清理，无手动 pressed 残留问题，不需日格那套跳转特判） */
 .stat-item--tap{padding:6rpx 16rpx;border-radius:12rpx}
 .stat-item--press{background:var(--press-green)}
-.stat-arrow{display:inline-block;width:12rpx;height:12rpx;border-right:3rpx solid var(--muted4);border-bottom:3rpx solid var(--muted4);transform:rotate(-45deg);margin-left:8rpx;vertical-align:8rpx}
+/* 箭头颜色统一 --muted3（v1.1.80，与语法页/工具页一致）；几何不变（12rpx 盒 + 8rpx 基线偏移，
+   使箭头中心落在 40rpx 数字的字面中心 14.4rpx 上，偏差 0.4rpx，见 v1.1.79 验算） */
+.stat-arrow{display:inline-block;width:12rpx;height:12rpx;border-right:3rpx solid currentColor;border-bottom:3rpx solid currentColor;transform:rotate(-45deg);margin-left:8rpx;vertical-align:8rpx;color:var(--muted3)}
 .stat-num{font-size:40rpx;font-weight:800;color:var(--green)}
 .stat-label{font-size:22rpx;color:var(--muted);margin-top:4rpx}
 
@@ -85,7 +90,7 @@
   .about-btn { font-size:14px; padding:4px 0; }
   .backup-box { margin-top:8px; border-radius:6px; }
   .backup-text { height:110px; padding:8px; font-size:11px; }
-  .picker-arrow { width:7px; height:7px; border-width:2px; margin-left:6px; }
+  .picker-arrow { width:8px; height:8px; border-width:1.5px; margin-left:6px; }
   .stat-row { justify-content:space-around; }
   .stat-item--tap { padding:3px 8px; border-radius:6px; }
   .stat-arrow { width:6px; height:6px; border-width:1.5px; margin-left:4px; vertical-align:4px; }

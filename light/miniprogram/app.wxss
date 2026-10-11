@@ -205,7 +205,21 @@ page {
    返回后按压底色残留（实机翻车）。给其他页面接按压态时照 weeks.js 的 onTileDown/onTileUp 模式。 */
 .hover-tint{background:var(--soft)}
 .btn-press{transform:scale(.96)}
-.btn-primary.btn-press{background:var(--press-green);color:var(--green-press)}
+/* 动作按钮按压（v1.1.80 强化）：此前只把底色 soft→press-green，两个都是极浅绿、色差≈0，
+   真机上"看不出按了没"（用户反馈）。加一档内阴影 + 字色加深，按下有明确的"陷下去"感。
+   ⚠️ 只作用于有底的 .btn-primary/.btn-c；无底文字按钮（.btn-ghost）不加阴影。 */
+.btn-primary.btn-press{background:var(--press-green);color:var(--green-press);box-shadow:inset 0 2rpx 8rpx rgba(15,74,62,.22)}
+.btn-c.btn-press{box-shadow:inset 0 2rpx 8rpx rgba(15,74,62,.12)}
+
+/* ── 统一右向箭头（v1.1.80）──────────────────────────────
+   全站原本三套写法：① 语法/工具页用「›」字符（32rpx 文本，字形瘦、随字体漂移）
+   ② 设置页用 CSS 边框 chevron（border-right + border-bottom + rotate(-45deg)）。
+   现统一为 ② 这一种，并把设置页同款复刻到语法页 / 工具页：
+   · border-color 用 currentColor → 颜色随所在行的 token 自动适配深浅主题，**不需要 darkicons 生成变体**；
+   · 尺寸/线宽统一，旋转后视觉约 22rpx，比之前的『›』更清晰、也不再受字形影响；
+   · 展开态的 rotate(90deg) 动画照旧由使用方（.cat__arrow.on）接管。 */
+.chev{display:inline-block;width:16rpx;height:16rpx;flex-shrink:0;
+  border-right:3rpx solid currentColor;border-bottom:3rpx solid currentColor;transform:rotate(-45deg)}
 /* 方案A（次级文字按钮）：按压字加深；方案C（重要按钮）加 btn-c：按压浮出淡绿底 #F0F7F3（比 #E6F4EE 更淡），
    危险类（取消打卡/清除学习记录）由页内规则按压浮淡红底。两者都配合 .btn-press 的缩放 */
 .btn-ghost.btn-press{color:var(--green-press)}

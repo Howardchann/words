@@ -73,12 +73,35 @@
 /* ── SM-2 四档按钮（v1.1.52）：忘记 / 困难 / 一般 / 简单，副标题是各自的下次间隔 ── */
 .review-result-row--4{display:flex;gap:12rpx;margin-top:30rpx}
 .grade-btn{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;height:96rpx;border-radius:18rpx;border:1rpx solid var(--line);background:var(--soft)}
+/* 按压反馈（v1.1.80）：此前是 hover-class="none" —— 完全没反馈，用户真机"按了不知道按到没"。
+   改回按压，但遵守全站约定「有底色元素只用状态色」：底色加深一档 + 边框转绿，不叠缩放/变淡。 */
+.grade-btn--press{background:var(--press-green);border-color:var(--green)}
 .grade-name{font-size:28rpx;font-weight:700;color:var(--green);line-height:1.25}
 .grade-hint{font-size:20rpx;color:var(--muted2);line-height:1.25}
 .grade-btn--again .grade-name{color:var(--red)}
 .grade-btn--hard .grade-name{color:#B4713A}
 .grade-btn--easy .grade-name{color:var(--green-mid)}
 
+
+/* 其他词形标签（v1.1.80，D）：口径与今日页 .wf-line__t / 工具页 .wf-note__t 一致（绿字 + 点状下划线）。
+   随机/到期卡是居中布局 → 整行居中；磁贴内左对齐（与词条同列）。 */
+.rv-wf { display: flex; flex-wrap: wrap; justify-content: center; margin-top: 12rpx; }
+.rv-wf--tile { justify-content: flex-start; margin-top: 8rpx; }
+.rv-wf__t {
+  display: inline-block;
+  margin: 0 14rpx 6rpx 0;
+  font-size: 22rpx;
+  color: var(--green);
+  border-bottom: 2rpx dotted var(--green);
+  padding-bottom: 2rpx;
+}
+/* 播放态：与今日页 .wf-line__t--on / 工具页 .wf-note__t--on 同款（wfText 独立态防误亮卡片） */
+.rv-wf__t--on { color: var(--green-press); background: var(--press-green); border-bottom-color: var(--green-press); border-radius: 6rpx; }
+
+/* 填空答对后的英文原句 + 喇叭（v1.1.80，C6）。
+   喇叭跟着句子走（不钉到行尾）—— 原句通常很短，钉右会留下大片空白（v1.1.69 音标例词行的教训）。 */
+.cloze-en-row { display: flex; align-items: baseline; justify-content: center; margin-top: 30rpx; }
+.cloze-en-row .cloze-en { margin-top: 0; }
 
 /* ── 中文例句挖空（v1.1.52）── */
 .cloze-card{padding:44rpx 30rpx;text-align:center}
@@ -106,4 +129,8 @@
   .cloze-opt{height:44px;border-radius:8px;font-size:15px}
   .cloze-en{font-size:13px;margin-top:15px}
   .cloze-verdict{font-size:14px;margin-bottom:10px}
+  .rv-wf { margin-top:6px; }
+  .rv-wf--tile { margin-top:4px; }
+  .rv-wf__t { font-size:11px; margin:0 7px 3px 0; }
+  .cloze-en-row { margin-top:15px; }
 }

@@ -52,8 +52,6 @@ Page({
     days: [],
     dayMore: 0,
     playingText: '',
-    karaLit: '',
-    karaRest: '',
     toast: '',
   },
 
@@ -64,29 +62,21 @@ Page({
     speech.setEngineMode(store.get('engineMode') || 'auto');
     // 朗读状态订阅（v1.1.68 修复）：此前只在点击时 setData({playingText})，播完没有任何回调复位 →
     // 例句整行常驻深色（用户真机反馈）。现在与今日页/工具页一致，订阅回调、播完自动还原。
-    // v1.1.75：补卡拉OK —— 播放态从「整行铺背景」改为按进度的歌词式染色（与今日页/工具页同构）。
+    // v1.1.80（治闪动）：撤销卡拉OK逐帧推送 —— 原来每次进度回调（约每秒 4 次）都 setData
+    // karaLit/karaRest，整页例句行全部重算重绘，页面中部整块闪（用户真机描述「滑到底部闪上半屏、
+    // 滑到顶部闪下半屏」）。现在只在「播放文本」本身变化时才 setData，一次播放最多 2 次。 */
     this._offSpeech = speech.onStateChange((p) => {
       const t = p.playing ? p.text : '';
-      const upd = {};
-      if (t !== this.data.playingText) upd.playingText = t;
-      if (p.playing && p.text) {
-        const lit = Math.round((p.progress || 0) * p.text.length);
-        // 守卫键 = 文本 + 已亮字符数（同工具页）：播完归零后新一轮 lit 也是 0，只比 lit 会漏更新
-        if (p.text !== this._karaText || lit !== this._lit) {
-          this._karaText = p.text; this._lit = lit;
-          upd.karaLit = p.text.slice(0, lit); upd.karaRest = p.text.slice(lit);
-        }
-      } else if (this._karaText) {
-        this._karaText = ''; this._lit = 0;
-        upd.karaLit = ''; upd.karaRest = '';
-      }
-      if (upd.playingText !== undefined || upd.karaLit !== undefined) this.setData(upd);
+      if (t !== this.data.playingText) this.setData({ playingText: t });
     });
     const cat = GRAMMAR.filter(c => c.id === (query && query.c))[0];
     const t = cat && cat.topics[Number(query && query.i) || 0];
     if (!cat || !t) { this.tip('内容缺失'); return; }
     const all = (t.days || []).map(d => ({ d: d }));
-    wx.setNavigationBarTitle({ title: t.t });
+    // 导航栏短标题（v1.1.80）：本页是系统「原生导航栏」（非自定义），原生标题固定单行 + 超出省略，
+    // 长语法点名（如「英语句子的基本结构」）在真机上尾部被截成省略号（用户反馈）。
+    // 改用分类名（如「句子基础」）——完整标题本来就在下方头卡里，导航栏只作位置提示。
+    wx.setNavigationBarTitle({ title: cat.name });
     this.setData({
       catName: cat.name,
       t: t,

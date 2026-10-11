@@ -195,7 +195,9 @@ Page({
     // dayData 里剔除词汇数组 v，避免与 vocab 重复 setData 两份（传输量翻倍）
     const dayData = raw ? Object.assign({}, raw) : null;
     if (dayData) delete dayData.v;
-    const list = (raw && raw.v ? raw.v : []).map(v => Object.assign({}, v, { starred: store.isStarred(v.w), wf: wordforms.noteFor(v.w) }));
+    // 词形标签（v1.1.80）：换成 wfNotes —— 正向（原形→不规则变化）+ 反向（变体→原形，如 were→原形 be）。
+    // 原来只用 noteFor，功能词包里的 was/were/been/am/is/are 作今日单词时词形行是空的。
+    const list = (raw && raw.v ? raw.v : []).map(v => Object.assign({}, v, { starred: store.isStarred(v.w), wf: wordforms.wfNotes(v.w) }));
     const coreCount = dayData ? dayData.coreCount || 0 : 0;
     // 练习任务按 "1) 2) 3)" 编号拆行（数据源里是一整段，无换行符）
     const prLines = dayData && dayData.pr ? String(dayData.pr).split(/(?=\d\)\s)/).map(s => { const m = s.match(/^(\d+)\)\s*/); return { no: m ? m[1] : '', text: m ? s.slice(m[0].length) : s }; }) : [];

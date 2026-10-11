@@ -152,4 +152,17 @@ function allForms() {
   return out;
 }
 
-module.exports = { lemma: lemma, noteFor: noteFor, allForms: allForms, LBL: LBL };
+// 词条要展示的「其他形式」标签（v1.1.80）—— 一个入口出全部标签，模板直接遍历：
+//  · 正向：单词本身是原形 → 列出它的不规则变化（take → 过去式 took / 过去分词 taken）
+//  · 反向：单词本身是某原形的变体（功能词包里 was/were/been/am/is/are 都是独立词条）
+//          → 标出原形（were → 原形 be）。此前只做正向，所以「were」当今日单词时词形行是空的。
+// 返回 [{label, form}]，form 也是朗读文本（音频按文本哈希走 g/ 桶，逐字一致）。
+function wfNotes(w) {
+  w = String(w || '').toLowerCase();
+  var out = noteFor(w);
+  if (out.length) return out;
+  var hit = VARIANTS[w];
+  return hit ? [{ label: '原形', form: hit.base }] : [];
+}
+
+module.exports = { lemma: lemma, noteFor: noteFor, wfNotes: wfNotes, allForms: allForms, LBL: LBL };

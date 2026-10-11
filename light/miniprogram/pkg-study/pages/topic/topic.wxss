@@ -1,6 +1,8 @@
 /* 语法点详情（分包页） */
-/* 本页是普通页面（非 tab）：撤掉 app.wxss 给 tabBar 预留的底部内边距 */
-page { padding-bottom: env(safe-area-inset-bottom); }
+/* 本页是普通页面（非 tab）：撤掉 app.wxss 给 tabBar 预留的底部内边距。
+   v1.1.80 修：原来只留 env(safe-area-inset-bottom)，多数安卓机型该值为 0
+   → 最后一张卡（如「课程对应」）贴底、被手势条压住（用户真机反馈）。补 44rpx（≈22px）。 */
+page { padding-bottom: calc(44rpx + env(safe-area-inset-bottom)); }
 
 /* 分类小字（v1.1.78）：原为英音蓝胶囊，与全站浅色绿语言不合群（用户真机指出）→ 中性纯文字。
    不与下方模块卡的 section-label（绿色粗体）同款是有意的：head 是「语法点本体」，
@@ -27,12 +29,14 @@ page { padding-bottom: env(safe-area-inset-bottom); }
 /* 例句行（v1.1.69 收口）：喇叭改回全站同款 .ex-speak（app.wxss：56×56 热区 + 36rpx 图标 +
    零宽空格 strut），容器对齐由 align-items:center 改回 baseline —— 与今日页例句行、工具页查单词
    例句行完全同构，折行时喇叭贴英文首行基线而不是浮在两行中间。
-   播放态深绿由 .spk-ico--on（wxml 三元）承担，不再需要本页私有的 .ex__spk 规则。 */
+   播放态深绿由 .spk-ico--on（wxml 三元）承担，不再需要本页私有的 .ex__spk 规则。
+   v1.1.80 治「整块闪动」：① 去掉 hover-class="ex--press"（喇叭 scale(.85) 会重绘整行）
+   ② 播放态不再替换文本节点、也不逐帧推送卡拉OK —— 只切换本行一个 class（.ex--on）；
+   重绘范围从「整页所有例句行 × 每秒 4 次」收到「被点的那一行 × 2 次（开始/结束）」。 */
 .ex { display: flex; align-items: baseline; padding: 18rpx 16rpx; border-radius: 14rpx; border-bottom: 1rpx solid var(--line); }
 .ex:last-child { border-bottom: none; }
-/* 按压反馈（v1.1.71）：整行变色 → 喇叭缩放变淡，与今日页 .ex-speak.speak-hover 同款；
-   播放态（v1.1.75）：不再铺整行背景（原 .ex--on），改卡拉OK染绿（.kara-lit，app.wxss 全局类）。 */
-.ex--press .spk-ico { transform: scale(.85); opacity: .6; }
+/* 播放态：极浅绿底（--soft）+ 喇叭深绿（.spk-ico--on）。用最淡的一档，不做整块深色。 */
+.ex--on { background: var(--soft); }
 .ex__main { flex: 1; min-width: 0; }
 .ex__en { font-size: 28rpx; color: var(--ink3); line-height: 1.7; word-break: break-word; }
 .ex__cn { margin-top: 4rpx; font-size: 24rpx; color: var(--muted3); line-height: 1.6; }
@@ -56,8 +60,18 @@ page { padding-bottom: env(safe-area-inset-bottom); }
 .fix__mk--good { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23176B5B' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4.9 12.4l4.9 4.9L19 6.9'/%3E%3C/svg%3E"); }
 .theme-dark .fix__mk--bad { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23E8795F' stroke-width='2.6' stroke-linecap='round'%3E%3Cpath d='M5.6 5.6l12.8 12.8M18.4 5.6L5.6 18.4'/%3E%3C/svg%3E"); }
 .theme-dark .fix__mk--good { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%237CD6B4' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4.9 12.4l4.9 4.9L19 6.9'/%3E%3C/svg%3E"); }
-.fix__tx { flex: 1; min-width: 0; font-size: 27rpx; color: var(--ink3); line-height: 1.75; word-break: break-word; }
-.fix__why { margin-top: 4rpx; padding-left: 44rpx; font-size: 23rpx; color: var(--muted2); line-height: 1.7; }
+/* 颜色收 2 档（v1.1.80）：正文句 --ink3 / 辅助（引导语 + 原因）--muted3。
+   原来引导语 muted3、原因 muted2、正文 ink3 = 三档灰，用户真机反馈"这种颜色那种颜色"不统一。 */
+.fix__tx { flex: 0 1 auto; min-width: 0; font-size: 27rpx; color: var(--ink3); line-height: 1.75; word-break: break-word; }
+.fix__why { margin-top: 4rpx; padding-left: 44rpx; font-size: 23rpx; color: var(--muted3); line-height: 1.7; }
+/* 对句朗读（v1.1.80，A5）：只给 ✅ 对句配喇叭 —— 错句是反例、不需要听。
+   对齐口径与全站一致：零宽空格 strut + 图标 vertical-align:middle（x-height 锚定，见 app.wxss .word-speak 注释），
+   行容器 .fix__row 已是 align-items:baseline → 喇叭贴对句文本首行基线，折行时不会浮在两行中间。
+   热区 44rpx 用不显形：可见图标仍是 36rpx 一套（.spk-ico--on 深绿播放态同款），相对 27rpx 正文不喧宾夺主。
+   ⚠️ 不能给 .fix__tx 加 flex:1 —— 对句短，会把喇叭顶到卡片最右边、中间留一大片空白（v1.1.69 音标例词行踩过）。 */
+.fix__spk { flex-shrink: 0; width: 44rpx; height: 44rpx; font-size: 26rpx; text-align: center; margin-left: 10rpx; }
+.fix__spk::before { content: '\200B'; }
+.fix__spk .spk-ico { width: 32rpx; height: 32rpx; }
 
 .day-chips { display: flex; flex-wrap: wrap; gap: 12rpx; }
 .day-chip { background: var(--soft); color: var(--green); border-radius: 14rpx;
@@ -76,4 +90,6 @@ page { padding-bottom: env(safe-area-inset-bottom); }
   .head__def { font-size: 14px; }
   .li__tx { font-size: 14px; }
   .ex__en { font-size: 14px; }
+  .fix__spk { width: 22px; height: 22px; font-size: 13px; margin-left: 5px; }
+  .fix__spk .spk-ico { width: 16px; height: 16px; }
 }

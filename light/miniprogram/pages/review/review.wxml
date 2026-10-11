@@ -17,6 +17,11 @@
       <view class="ipa-mod {{playingWord === currentRandom.w && playingAccent === 'us' ? 'on' : ''}}" hover-class="speak-hover" hover-stay-time="0" data-accent="us" bindtap="onSpeakCurrent"><view class="spk-ico {{playingWord === currentRandom.w && playingAccent === 'us' ? 'spk-ico--on' : ''}}"></view><text class="ipa-txt" wx:if="{{currentRandom.ipa}}">{{currentRandom.ipa}}</text></view>
       <view class="ipa-mod ipa-mod--uk {{playingWord === currentRandom.w && playingAccent === 'uk' ? 'on' : ''}}" wx:if="{{currentRandom.uk}}" hover-class="speak-hover" hover-stay-time="0" data-accent="uk" bindtap="onSpeakCurrent"><view class="spk-ico {{playingWord === currentRandom.w && playingAccent === 'uk' ? 'spk-ico--on' : ''}}"></view><text class="ipa-txt">{{currentRandom.uk}}</text></view>
     </view>
+    <!-- 其他词形（v1.1.80，D）：固定显示；点标签即读该形式（g/ 桶）。wfText 独立态防误亮卡片上的单词/例句 -->
+    <view class="rv-wf" wx:if="{{currentRandom.wf.length}}">
+      <view class="rv-wf__t {{wfText === F.form ? 'rv-wf__t--on' : ''}}" wx:for="{{currentRandom.wf}}" wx:for-item="F" wx:key="form"
+            hover-class="none" hover-stay-time="0" data-w="{{F.form}}" bindtap="onSpeakWf">{{F.label}} {{F.form}}</view>
+    </view>
     <view class="random-zh-main" wx:if="{{showZh}}">{{currentRandom.m}}</view>
     <view class="random-ex"><text class="random-ex-text"><text wx:if="{{playingWord === currentRandom.e}}" class="kara-lit">{{karaLit}}</text>{{playingWord === currentRandom.e ? karaRest : currentRandom.e}}</text><view class="ex-speak {{playingWord === currentRandom.e ? 'playing' : ''}}" hover-class="speak-hover" hover-stay-time="0" bindtap="onSpeakExample"><view class="spk-ico {{playingWord === currentRandom.e ? 'spk-ico--on' : ''}}"></view></view></view>
     <view class="ex-cn" wx:if="{{showZh && currentRandom.cn}}">{{currentRandom.cn}}</view>
@@ -33,15 +38,20 @@
       <view class="ipa-mod {{playingWord === currentDue.w && playingAccent === 'us' ? 'on' : ''}}" hover-class="speak-hover" hover-stay-time="0" data-accent="us" bindtap="onSpeakCurrent"><view class="spk-ico {{playingWord === currentDue.w && playingAccent === 'us' ? 'spk-ico--on' : ''}}"></view><text class="ipa-txt" wx:if="{{currentDue.ipa}}">{{currentDue.ipa}}</text></view>
       <view class="ipa-mod ipa-mod--uk {{playingWord === currentDue.w && playingAccent === 'uk' ? 'on' : ''}}" wx:if="{{currentDue.uk}}" hover-class="speak-hover" hover-stay-time="0" data-accent="uk" bindtap="onSpeakCurrent"><view class="spk-ico {{playingWord === currentDue.w && playingAccent === 'uk' ? 'spk-ico--on' : ''}}"></view><text class="ipa-txt">{{currentDue.uk}}</text></view>
     </view>
+    <!-- 其他词形（v1.1.80，D）：同上 -->
+    <view class="rv-wf" wx:if="{{currentDue.wf.length}}">
+      <view class="rv-wf__t {{wfText === F.form ? 'rv-wf__t--on' : ''}}" wx:for="{{currentDue.wf}}" wx:for-item="F" wx:key="form"
+            hover-class="none" hover-stay-time="0" data-w="{{F.form}}" bindtap="onSpeakWf">{{F.label}} {{F.form}}</view>
+    </view>
     <view class="random-zh-main" wx:if="{{showZh}}">{{currentDue.m}}</view>
     <view class="random-ex"><text class="random-ex-text"><text wx:if="{{playingWord === currentDue.e}}" class="kara-lit">{{karaLit}}</text>{{playingWord === currentDue.e ? karaRest : currentDue.e}}</text><view class="ex-speak {{playingWord === currentDue.e ? 'playing' : ''}}" hover-class="speak-hover" hover-stay-time="0" bindtap="onSpeakExample"><view class="spk-ico {{playingWord === currentDue.e ? 'spk-ico--on' : ''}}"></view></view></view>
     <view class="ex-cn" wx:if="{{showZh && currentDue.cn}}">{{currentDue.cn}}</view>
     <view class="zh-toggle" hover-class="none" hover-stay-time="0" bindtap="onShowZh"><view class="eye-ico {{showZh ? 'eye-ico--on' : ''}}"></view></view>
     <view class="review-result-row review-result-row--4">
-      <view class="grade-btn grade-btn--again" data-grade="again" hover-class="none" hover-stay-time="0" bindtap="onReviewResult"><text class="grade-name">忘记</text><text class="grade-hint">{{dueHint.again}}</text></view>
-      <view class="grade-btn grade-btn--hard" data-grade="hard" hover-class="none" hover-stay-time="0" bindtap="onReviewResult"><text class="grade-name">困难</text><text class="grade-hint">{{dueHint.hard}}</text></view>
-      <view class="grade-btn grade-btn--good" data-grade="good" hover-class="none" hover-stay-time="0" bindtap="onReviewResult"><text class="grade-name">一般</text><text class="grade-hint">{{dueHint.good}}</text></view>
-      <view class="grade-btn grade-btn--easy" data-grade="easy" hover-class="none" hover-stay-time="0" bindtap="onReviewResult"><text class="grade-name">简单</text><text class="grade-hint">{{dueHint.easy}}</text></view>
+      <view class="grade-btn grade-btn--again" data-grade="again" hover-class="grade-press" hover-stay-time="0" bindtap="onReviewResult"><text class="grade-name">忘记</text><text class="grade-hint">{{dueHint.again}}</text></view>
+      <view class="grade-btn grade-btn--hard" data-grade="hard" hover-class="grade-press" hover-stay-time="0" bindtap="onReviewResult"><text class="grade-name">困难</text><text class="grade-hint">{{dueHint.hard}}</text></view>
+      <view class="grade-btn grade-btn--good" data-grade="good" hover-class="grade-press" hover-stay-time="0" bindtap="onReviewResult"><text class="grade-name">一般</text><text class="grade-hint">{{dueHint.good}}</text></view>
+      <view class="grade-btn grade-btn--easy" data-grade="easy" hover-class="grade-press" hover-stay-time="0" bindtap="onReviewResult"><text class="grade-name">简单</text><text class="grade-hint">{{dueHint.easy}}</text></view>
     </view>
   </view>
   <view class="card" wx:else><view class="empty-text">暂无到期词汇——学过的词到复习周期后会自动出现在这里</view></view>
@@ -57,7 +67,13 @@
             hover-class="none" hover-stay-time="0"
             data-w="{{item.w}}" bindtap="onClozePick"><text>{{item.w}}</text></view>
     </view>
-    <view class="cloze-en" wx:if="{{cloze.done}}">{{cloze.en}}</view>
+    <!-- 答对后给出英文原句 + 喇叭（v1.1.80，C6）：可整句听；四个选项故意不加喇叭（一读出来就能听音猜词=泄题） -->
+    <view class="cloze-en-row" wx:if="{{cloze.done}}">
+      <view class="cloze-en">{{cloze.en}}</view>
+      <view class="ex-speak {{playingWord === cloze.en ? 'playing' : ''}}"
+            hover-class="speak-hover" hover-stay-time="0"
+            bindtap="onSpeakClozeEn"><view class="spk-ico {{playingWord === cloze.en ? 'spk-ico--on' : ''}}"></view></view>
+    </view>
     <view class="cloze-foot" wx:if="{{cloze.done}}">
       <view class="cloze-verdict {{cloze.right ? 'cloze-verdict--ok' : 'cloze-verdict--bad'}}">{{cloze.right ? '答对了' : '正确答案：' + cloze.answer}}</view>
       <button class="btn-primary btn-fit" hover-class="btn-press" hover-stay-time="0" bindtap="onNextCloze">下一题</button>
@@ -67,7 +83,7 @@
 </block>
 <block wx:if="{{tab === 'starred'}}">
   <view class="card" wx:if="{{!starred.length}}"><view class="empty-text">还没有重点词——在学习页点词右侧的<view class="ico-inline ico-heart"></view>即可收藏，随机抽查会优先复习它们</view></view>
-  <view class="star-list" wx:else><view class="star-tile" wx:for="{{starred}}" wx:key="w"><view class="word-row"><view class="word-main"><view class="word-head"><text class="word-en">{{item.w}}</text><text class="word-pos">{{item.p}}</text><view class="word-zh">{{item.m}}</view><view class="ipa-row"><view class="ipa-mod {{playingWord === item.w && playingAccent === 'us' ? 'on' : ''}}" hover-class="speak-hover" hover-stay-time="0" data-word="{{item.w}}" data-accent="us" bindtap="onSpeakStarred"><view class="spk-ico {{playingWord === item.w && playingAccent === 'us' ? 'spk-ico--on' : ''}}"></view><text class="ipa-txt" wx:if="{{item.ipa}}">{{item.ipa}}</text></view><view class="ipa-mod ipa-mod--uk {{playingWord === item.w && playingAccent === 'uk' ? 'on' : ''}}" wx:if="{{item.uk}}" hover-class="speak-hover" hover-stay-time="0" data-word="{{item.w}}" data-accent="uk" bindtap="onSpeakStarred"><view class="spk-ico {{playingWord === item.w && playingAccent === 'uk' ? 'spk-ico--on' : ''}}"></view><text class="ipa-txt">{{item.uk}}</text></view></view></view><view class="word-example-row"><view class="word-example" data-word="{{item.e}}" bindtap="onSpeakStarredEx"><text wx:if="{{playingWord === item.e}}" class="kara-lit">{{karaLit}}</text>{{playingWord === item.e ? karaRest : item.e}}</view><view class="ex-speak {{playingWord === item.e ? 'playing' : ''}}" hover-class="speak-hover" hover-stay-time="0" data-word="{{item.e}}" bindtap="onSpeakStarredEx"><view class="spk-ico {{playingWord === item.e ? 'spk-ico--on' : ''}}"></view></view><view class="ex-eye" wx:if="{{item.cn}}" hover-class="none" hover-stay-time="0" data-w="{{item.w}}" catchtap="onToggleExZh"><view class="eye-ico {{zhOpen[item.w] ? 'eye-ico--on' : ''}}"></view></view></view><view class="ex-cn" wx:if="{{item.cn && zhOpen[item.w]}}">{{item.cn}}</view></view><view class="word-remove" data-index="{{index}}" hover-class="word-remove--press" hover-stay-time="0" bindtap="onRemoveStarred"><view class="rm-ico"></view></view></view></view></view>
+  <view class="star-list" wx:else><view class="star-tile" wx:for="{{starred}}" wx:key="w"><view class="word-row"><view class="word-main"><view class="word-head"><text class="word-en">{{item.w}}</text><text class="word-pos">{{item.p}}</text><view class="word-zh">{{item.m}}</view><view class="rv-wf rv-wf--tile" wx:if="{{item.wf.length}}"><view class="rv-wf__t {{wfText === F.form ? 'rv-wf__t--on' : ''}}" wx:for="{{item.wf}}" wx:for-item="F" wx:key="form" hover-class="none" hover-stay-time="0" data-w="{{F.form}}" bindtap="onSpeakWf">{{F.label}} {{F.form}}</view></view><view class="ipa-row"><view class="ipa-mod {{playingWord === item.w && playingAccent === 'us' ? 'on' : ''}}" hover-class="speak-hover" hover-stay-time="0" data-word="{{item.w}}" data-accent="us" bindtap="onSpeakStarred"><view class="spk-ico {{playingWord === item.w && playingAccent === 'us' ? 'spk-ico--on' : ''}}"></view><text class="ipa-txt" wx:if="{{item.ipa}}">{{item.ipa}}</text></view><view class="ipa-mod ipa-mod--uk {{playingWord === item.w && playingAccent === 'uk' ? 'on' : ''}}" wx:if="{{item.uk}}" hover-class="speak-hover" hover-stay-time="0" data-word="{{item.w}}" data-accent="uk" bindtap="onSpeakStarred"><view class="spk-ico {{playingWord === item.w && playingAccent === 'uk' ? 'spk-ico--on' : ''}}"></view><text class="ipa-txt">{{item.uk}}</text></view></view></view><view class="word-example-row"><view class="word-example" data-word="{{item.e}}" bindtap="onSpeakStarredEx"><text wx:if="{{playingWord === item.e}}" class="kara-lit">{{karaLit}}</text>{{playingWord === item.e ? karaRest : item.e}}</view><view class="ex-speak {{playingWord === item.e ? 'playing' : ''}}" hover-class="speak-hover" hover-stay-time="0" data-word="{{item.e}}" bindtap="onSpeakStarredEx"><view class="spk-ico {{playingWord === item.e ? 'spk-ico--on' : ''}}"></view></view><view class="ex-eye" wx:if="{{item.cn}}" hover-class="none" hover-stay-time="0" data-w="{{item.w}}" catchtap="onToggleExZh"><view class="eye-ico {{zhOpen[item.w] ? 'eye-ico--on' : ''}}"></view></view></view><view class="ex-cn" wx:if="{{item.cn && zhOpen[item.w]}}">{{item.cn}}</view></view><view class="word-remove" data-index="{{index}}" hover-class="word-remove--press" hover-stay-time="0" bindtap="onRemoveStarred"><view class="rm-ico"></view></view></view></view></view>
 </block>
 
 <feedback id="fb"/>

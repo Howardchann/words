@@ -60,8 +60,11 @@
 .cat-name { flex: 1; min-width: 0; font-size: 27rpx; font-weight: 700; color: var(--ink); }
 /* 可点击指引（v1.1.77）：分类格右侧加箭头 —— 首层此前只有文字+数字，用户第一眼不知可点。
    v1.1.79 修正：箭头原先写成第一个子元素（渲染在名称左侧），与语法速查页/设置页「箭头在行尾」不一致
-   → 挪到数量之后（行尾），字号与 .tp__go/.cat__arrow 统一为 32rpx；数量与 .cat-count 统一 24rpx。 */
-.cat-cell__go { flex-shrink: 0; margin-left: 8rpx; font-size: 32rpx; color: var(--muted2); line-height: 1; }
+   → 挪到数量之后（行尾）。
+   v1.1.80：字符「›」换成设置页同款 CSS 边框 chevron（与语法页 .cat__arrow/.tp__go 完全同款同尺寸），
+   颜色统一 --muted3、由 currentColor 描边（深浅主题自动跟随）。 */
+.cat-cell__go { flex-shrink: 0; width: 16rpx; height: 16rpx; margin-left: 12rpx; color: var(--muted3);
+  border-right: 3rpx solid currentColor; border-bottom: 3rpx solid currentColor; transform: rotate(-45deg); }
 .cat-count { flex-shrink: 0; font-size: 24rpx; color: var(--green); }
 
 /* ③ 音标（大类 + 子类两级筛选 → 音标网格 → 常驻详情面板） */
@@ -141,6 +144,7 @@
   .tk-bar__input { height: 38px; }
   .cat-grid { gap: 7px; }
   .cat-cell { padding: 10px 11px; border-radius: 8px; }
+  .cat-cell__go { width: 8px; height: 8px; border-width: 1.5px; margin-left: 6px; }
   .ph-chip { min-width: 48px; padding: 6px 8px; font-size: 14px; }
   .ph-cls { height: 34px; line-height: 34px; border-radius: 7px; font-size: 14px; }
   .ph-subchip { padding: 4px 10px; border-radius: 12px; font-size: 12px; }

@@ -3,6 +3,7 @@ const plan = require('../../utils/data.js');
 const store = require('../../utils/store.js');
 const theme = require('../../utils/theme.js');
 const speech = require('../../utils/speech.js');
+const wordforms = require('../../utils/wordforms.js');
 
 // 收藏词在 store 里是快照（v1.1.44 之前的存量没有 ipa 字段）→ 渲染前按词反查词表补全。
 let _ipaMap = null;
@@ -40,6 +41,9 @@ Page({
     starred: [],
     playingWord: '',
     playingAccent: '',
+    // 词形标签独立播放态（v1.1.80，同今日页 v1.1.78）：词形朗读文本可能与卡片上的单词/例句撞车，
+    // 用独立键记「正在播的是哪个标签」→ 只亮标签自己，不误亮卡片上的其他元素。
+    wfText: '',
     dueHint: null,      // 四档各自的下次间隔提示（Anki 式按钮副标题）
     cloze: null,        // 中文例句挖空：当前题 {zh, en, answer, options, done, right}
     clozePoolSize: 0,   // 可出填空题的词数（词库有中文例句的）
@@ -58,6 +62,7 @@ Page({
         upd.karaLit = payload.text.slice(0, lit);
         upd.karaRest = payload.text.slice(lit);
       } else { upd.karaLit = ''; upd.karaRest = ''; }
+      if (!payload.playing && this.data.wfText) upd.wfText = '';   // 播完清掉词形标签的独立态
       this.setData(upd);
     });
   },
@@ -101,9 +106,12 @@ Page({
     store.onResume();
     this._pool = null;
     this.refreshPool();
-    // 收藏列表同值守卫（新数组实例同值也会触发重渲染）；ipa 渲染时反查补全（v1.1.50）
+    // 收藏列表同值守卫（新数组实例同值也会触发重渲染）；ipa/uk/cn 渲染时反查补全（v1.1.50）
+    // wf（其他词形，v1.1.80）是派生字段、快照里没有 → 每次渲染都算
     const raw = store.get('starredWords') || [];
-    const starred = raw.map(v => (v.ipa && v.uk && v.cn) ? v : Object.assign({}, v, { ipa: v.ipa || ipaOf(v.w), uk: v.uk || ukOf(v.w), cn: v.cn || cnOf(v.w) }));
+    const starred = raw.map(v => Object.assign({}, v, {
+      ipa: v.ipa || ipaOf(v.w), uk: v.uk || ukOf(v.w), cn: v.cn || cnOf(v.w), wf: wordforms.wfNotes(v.w),
+    }));
     const sj = JSON.stringify(starred);
     if (sj !== this._starredJson) { this._starredJson = sj; this.setData({ starred }); }
   },
@@ -125,6 +133,8 @@ Page({
     // v1.1.38：首次进到期页抽一个词（不自动朗读）；已在到期页再点不再换词（保持当前词）
     if (t === 'due' && !this.data.currentDue) this.onNextDue();
     if (t === 'cloze' && !this.data.cloze) this.onNextCloze();
+    // v1.1.80：切到重点词 tab 就把首屏磁贴的音频备好（下面 _prefetchAllStarred 有说明）
+    if (t === 'starred') this._prefetchAllStarred();
   },
 
   // 四档下次间隔提示（<=0 天 = 仍在 10 分钟学习步）
@@ -148,7 +158,9 @@ Page({
     }
     const item = pool[Math.floor(Math.random() * pool.length)];
     // v1.1.38：去掉自动朗读 —— 朗读统一走卡片上的喇叭（onSpeakCurrent），点进卡片是静默的
-    this.setData({ currentDue: Object.assign({}, item, { starred: store.isStarred(item.w) }), showZh: false, dueHint: this._hints(item.w) });
+    const c = Object.assign({}, item, { starred: store.isStarred(item.w), wf: wordforms.wfNotes(item.w) });
+    this.setData({ currentDue: c, showZh: false, dueHint: this._hints(item.w), wfText: '' });
+    this._prefetchCard(c);   // v1.1.80：抽到词就把音频备好，第一次点即出声
   },
 
   onReviewResult(e) {
@@ -164,8 +176,9 @@ Page({
     const pool = store.dueWords(this.refreshPool());
     if (pool.length) {
       const item = pool[Math.floor(Math.random() * pool.length)];
-      const next = Object.assign({}, item, { starred: store.isStarred(item.w) });
-      this.setData({ currentDue: next, showZh: false, dueHint: this._hints(next.w) }); // v1.1.38：下一词同样不自动朗读
+      const next = Object.assign({}, item, { starred: store.isStarred(item.w), wf: wordforms.wfNotes(item.w) });
+      this.setData({ currentDue: next, showZh: false, dueHint: this._hints(next.w), wfText: '' }); // v1.1.38：下一词同样不自动朗读
+      this._prefetchCard(next);
       return;
     }
     // 真正没有下一词（到期答完）才显示空状态卡片
@@ -184,8 +197,9 @@ Page({
     const it = cand[Math.floor(Math.random() * cand.length)];
     const opts = plan.clozeOptions(it, pool, 4).map(w => ({ w: w, state: '' }));
     this.setData({
-      cloze: { zh: it.cn, blank: plan.clozeSentence(it), en: it.e, answer: it.w, options: opts, done: false, right: false }
+      cloze: { zh: it.cn, blank: plan.clozeSentence(it), en: it.e, ai: it.ai, answer: it.w, options: opts, done: false, right: false }
     });
+    this._prefetchCard(it);   // v1.1.80：出题即预取该词音频（答对后要读整句）
   },
 
   onClozePick(e) {
@@ -230,7 +244,9 @@ Page({
     this._lastWord = item.w;
     // 重点词池里的对象是副本，没有 starred 字段 —— 必须按单词实际状态回填，否则已收藏的词永远显示"未收藏"
     // v1.1.38：去掉自动朗读，与到期 tab 统一为手动喇叭
-    this.setData({ currentRandom: Object.assign({}, item, { starred: store.isStarred(item.w) }), showZh: false });
+    const c = Object.assign({}, item, { starred: store.isStarred(item.w), wf: wordforms.wfNotes(item.w) });
+    this.setData({ currentRandom: c, showZh: false, wfText: '' });
+    this._prefetchCard(c);   // v1.1.80：切词即预取
   },
 
   // 释义/例句中文显隐开关（v1.1.64 用户定稿）：点击在「显示/隐藏」之间切换（对应卡片底部的眼睛图标，闭上=未显示、睁开=已显示）
@@ -248,10 +264,62 @@ Page({
   // v1.1.38：当前卡片随 tab 走 —— 两块卡片各绑各的数据，朗读/收藏/释义操作都作用在本 tab 的词上
   _cur() { return this.data.tab === 'due' ? this.data.currentDue : this.data.currentRandom; },
 
+  // ---- 音频预取（v1.1.80，C1）----
+  // 复习页此前完全没有预取：点播放才现场向云函数要签名链接（往返 1~3 秒）才开始下载，
+  // 用户以为没点中又点一次 → 第一次的异步结果被丢弃（但链接已缓存）→ 就是「点好多次、等很久才出声」。
+  // 修复：抽到/切到某个词时，就把它要用的音频提前签链接（顺带落盘）——看到卡片时音频已就绪，第一次点即出。
+  // 备：美音正常速 + 美音慢速 + 英音正常速 + 例句；失败静默（speech.prefetch 内部逐项兜底）。
+  _prefetchCard(c) {
+    if (!c || !c.ai) return;
+    const items = [
+      { ai: c.ai, kind: 'w', slow: false },
+      { ai: c.ai, kind: 'w', slow: true },
+    ];
+    if (c.uk) items.push({ ai: c.ai, kind: 'w', slow: false, accent: 'uk' });
+    if (c.e) items.push({ ai: c.ai, kind: 's' });
+    speech.prefetch(items);
+  },
+
+  // 重点词磁贴批量预取：只备首屏 6 个（一屏里看得见的那些），避免一次签太多链接。
+  _prefetchAllStarred() {
+    const items = [];
+    (this.data.starred || []).slice(0, 6).forEach(v => {
+      const ai = this._aiOf(v);
+      if (!ai) return;
+      items.push({ ai: ai, kind: 'w' });
+      if (v.e) items.push({ ai: ai, kind: 's' });
+    });
+    if (items.length) speech.prefetch(items);
+  },
+
+  // 其他词形标签朗读（v1.1.80）：走 g/ 桶（按文本哈希预生成），与今日页/工具页同款。
+  // 独立 wfText 态 —— 词形朗读文本可能与卡片上的单词/例句相同，只亮标签自己
+  //（与 v1.1.78 治「点 been 误亮结果卡」同一套做法）。
+  onSpeakWf(e) {
+    const t = e.currentTarget.dataset.w;
+    if (!t) return;
+    if (this.data.wfText === t) { speech.togglePause(); this.setData({ wfText: '' }); return; }
+    const upd = { wfText: t };
+    if (this.data.playingWord) upd.playingWord = '';   // 词形→词条切换：先收词条播放态
+    this.setData(upd);
+    speech.speak(t, { kind: 'g' });
+  },
+
+  // 填空答对后朗读英文原句（v1.1.80，C6）：kind:'s' + 该词编号 → 命中例句预生成音频，音色与卡片一致。
+  // 选项不加喇叭（一读出来就能听音猜词 → 泄题）。
+  onSpeakClozeEn() {
+    const c = this.data.cloze;
+    if (!c || !c.en) return;
+    if (this.data.playingWord === c.en) { speech.togglePause(); this.setData({ playingWord: '' }); return; }
+    if (this.data.wfText) this.setData({ wfText: '' });
+    speech.speak(c.en, { ai: c.ai || 0, kind: 's' });
+  },
+
   // accent 由音标模块的 data-accent 带入（us/uk）；无则用全局口音
   onSpeakCurrent(e) {
     const c = this._cur();
     if (!c) return;
+    if (this.data.wfText) this.setData({ wfText: '' });   // 词形→词条切换：先收词形态
     const accent = (e && e.currentTarget && e.currentTarget.dataset.accent) || '';
     if (this.data.playingWord === c.w && (this.data.playingAccent || '') === accent) {
       const r = speech.togglePause();
@@ -265,6 +333,7 @@ Page({
   onSpeakExample() {
     const c = this._cur();
     if (!c || !c.e) return;
+    if (this.data.wfText) this.setData({ wfText: '' });
     speech.speak(c.e, { ai: c.ai, kind: 's' });
   },
 
@@ -295,6 +364,7 @@ Page({
   onSpeakStarred(e) {
     const w = e.currentTarget.dataset.word;
     const accent = e.currentTarget.dataset.accent || '';
+    if (this.data.wfText) this.setData({ wfText: '' });
     if (this.data.playingWord === w && (this.data.playingAccent || '') === accent) {
       const r = speech.togglePause();
       this.setData({ playingWord: r === 'paused' ? '' : w, playingAccent: r === 'paused' ? '' : accent });
@@ -309,6 +379,7 @@ Page({
   // 重点词例句朗读（v1.1.40）：对齐今日页——点例句或右侧喇叭都可播，kind:'s' 命中例句预生成音频
   onSpeakStarredEx(e) {
     const w = e.currentTarget.dataset.word;
+    if (this.data.wfText) this.setData({ wfText: '' });
     if (this.data.playingWord === w) {
       const r = speech.togglePause();
       this.setData({ playingWord: r === 'paused' ? '' : w });

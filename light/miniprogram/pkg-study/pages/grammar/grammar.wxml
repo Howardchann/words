@@ -23,7 +23,7 @@
   <view class="card" wx:if="{{hits.length}}">
     <view class="tp" wx:for="{{hits}}" wx:key="t" data-c="{{item.c}}" data-i="{{item.i}}"
           hover-class="tp--press" hover-stay-time="60" bindtap="onTopic">
-      <view class="tp__head"><text class="tp__t">{{item.t}}</text><text class="tp__cat">{{item.catName}}</text><text class="tp__go">›</text></view>
+      <view class="tp__head"><text class="tp__t">{{item.t}}</text><text class="tp__cat">{{item.catName}}</text><view class="tp__go"></view></view>
       <view class="tp__def">{{item.def}}</view>
     </view>
   </view>
@@ -36,7 +36,7 @@
   <view class="card" wx:if="{{tagHits.length}}">
     <view class="tp" wx:for="{{tagHits}}" wx:key="t" data-c="{{item.c}}" data-i="{{item.i}}"
           hover-class="tp--press" hover-stay-time="60" bindtap="onTopic">
-      <view class="tp__head"><text class="tp__t">{{item.t}}</text><text class="tp__cat">{{item.catName}}</text><text class="tp__go">›</text></view>
+      <view class="tp__head"><text class="tp__t">{{item.t}}</text><text class="tp__cat">{{item.catName}}</text><view class="tp__go"></view></view>
       <view class="tp__def">{{item.def}}</view>
     </view>
   </view>
@@ -53,12 +53,12 @@
         <view class="cat__intro">{{C.intro}}</view>
       </view>
       <view class="cat__n">{{C.topics.length}} 个</view>
-      <view class="cat__arrow {{open === C.id ? 'on' : ''}}">›</view>
+      <view class="cat__arrow {{open === C.id ? 'on' : ''}}"></view>
     </view>
     <block wx:if="{{open === C.id}}">
       <view class="tp" wx:for="{{C.topics}}" wx:key="t" data-c="{{C.id}}" data-i="{{index}}"
             hover-class="tp--press" hover-stay-time="60" bindtap="onTopic">
-        <view class="tp__head"><text class="tp__t">{{item.t}}</text><text class="tp__go">›</text></view>
+        <view class="tp__head"><text class="tp__t">{{item.t}}</text><view class="tp__go"></view></view>
         <view class="tp__def">{{item.def}}</view>
       </view>
     </block>

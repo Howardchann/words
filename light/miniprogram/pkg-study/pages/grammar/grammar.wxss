@@ -1,6 +1,8 @@
 /* 语法速查 · 体系目录（分包页） */
-/* 本页是普通页面（非 tab）：撤掉 app.wxss 给 tabBar 预留的 132rpx 底部内边距 */
-page { padding-bottom: env(safe-area-inset-bottom); }
+/* 本页是普通页面（非 tab）：撤掉 app.wxss 给 tabBar 预留的 132rpx 底部内边距。
+   v1.1.80 修：原来只留 env(safe-area-inset-bottom)，多数安卓机型该值为 0
+   → 最后一张卡（如「特殊句式」）贴底、被手势条压住（用户真机反馈）。补 44rpx（≈22px）呼吸位。 */
+page { padding-bottom: calc(44rpx + env(safe-area-inset-bottom)); }
 
 .sb { display: flex; align-items: center; margin: 18rpx 24rpx 4rpx; padding: 0 22rpx; height: 76rpx;
   background: var(--card); border-radius: 38rpx; border: 1rpx solid var(--card-line); }
@@ -38,10 +40,14 @@ page { padding-bottom: env(safe-area-inset-bottom); }
 /* 数量列（v1.1.79 收口）：去掉 96rpx 定宽 —— 标题已经是 flex:1，数量贴着行尾即可；
    定宽会把「6 个」这类短数字推到离箭头很远的地方。字号与工具页 .cat-count 统一为 24rpx。 */
 .cat__n { flex-shrink: 0; font-size: 24rpx; color: var(--green); margin-left: 12rpx; }
-/* 箭头三处统一 32rpx（v1.1.79：原首层 34rpx / 三层 30rpx / 工具页 30rpx 各写一个值） */
-.cat__arrow { flex-shrink: 0; width: 40rpx; text-align: center; font-size: 32rpx; color: var(--muted2);
-  transition: transform .18s; margin-left: 6rpx; }
-.cat__arrow.on { transform: rotate(90deg); }
+/* 箭头（v1.1.80）：由「›」字符换成设置页同款的 CSS 边框 chevron（全站统一，见 app.wxss .chev 注释）。
+   字符方案的问题：› 字形瘦、占位小于同号文字，用户反馈"还是偏小"；换成边框 chevron 后可精确控尺寸/线宽。
+   颜色 currentColor + color:var(--muted3) —— 原来首层 muted2 / 三层 muted3 两个灰，现统一到 --muted3 一档。
+   旋转：底形尖端朝东南，-45° 得「指向右」；展开态需指向下 → 再转 90°，即 rotate(45deg)（不是 90deg！）。 */
+.cat__arrow { flex-shrink: 0; width: 16rpx; height: 16rpx; margin-left: 14rpx; color: var(--muted3);
+  border-right: 3rpx solid currentColor; border-bottom: 3rpx solid currentColor;
+  transform: rotate(-45deg); transition: transform .18s; }
+.cat__arrow.on { transform: rotate(45deg); }
 
 /* 语法点行 */
 .tp { padding: 20rpx 0; border-top: 1rpx solid var(--line); }
@@ -51,8 +57,11 @@ page { padding-bottom: env(safe-area-inset-bottom); }
 /* 分类小字（v1.1.78）：原为英音蓝胶囊（--uk-ink/--uk-bg），与全站浅色绿语言不合群（用户真机指出）
    → 改中性纯文字小字，信息保留、视觉减重 */
 .tp__cat { flex-shrink: 0; margin-left: 14rpx; font-size: 21rpx; color: var(--muted3); }
-/* 可点指引（v1.1.78）：第二层展开行加 chevron —— 展开列表此前无任何可点暗示（用户真机反馈） */
-.tp__go { flex-shrink: 0; margin-left: 14rpx; color: var(--muted3); font-size: 32rpx; line-height: 1; }
+/* 可点指引（v1.1.78 加，v1.1.80 换 chevron）：第二层展开行加箭头 —— 展开列表此前无任何可点暗示。
+   与 .cat__arrow 同款同尺寸，容器是 baseline 行 → 元素底边落在文字基线上（x-height 区域内），
+   与「›」原来坐在基线上的视觉位置一致；align-self 不额外调整。 */
+.tp__go { flex-shrink: 0; width: 16rpx; height: 16rpx; margin-left: 16rpx; color: var(--muted3);
+  border-right: 3rpx solid currentColor; border-bottom: 3rpx solid currentColor; transform: rotate(-45deg); }
 .tp__def { margin-top: 6rpx; font-size: 24rpx; color: var(--muted3); line-height: 1.6; }
 
 /* 自绘轻提示（不引组件，分包零依赖） */
@@ -67,6 +76,7 @@ page { padding-bottom: env(safe-area-inset-bottom); }
   .cat__name { font-size: 15px; }
   .tp__t { font-size: 14px; }
   .cat__n { font-size: 12px; }
-  .cat__arrow { font-size: 16px; }
-  .tp__go { font-size: 16px; }
+  /* 宽屏（≥700px）rpx 会 1:1 变 px，箭头按半值给 px（16rpx→8px） */
+  .cat__arrow { width: 8px; height: 8px; border-width: 1.5px; margin-left: 7px; }
+  .tp__go { width: 8px; height: 8px; border-width: 1.5px; margin-left: 8px; }
 }

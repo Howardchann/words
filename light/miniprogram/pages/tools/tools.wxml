@@ -149,7 +149,7 @@
           hover-class="cat-cell--press" hover-stay-time="80" bindtap="onCatTap">
       <view class="cat-name">{{item.name}}</view>
       <view class="cat-count">{{item.count}} 个</view>
-      <view class="cat-cell__go">›</view>
+      <view class="cat-cell__go"></view>
     </view>
   </view>
   <view class="tk-note">共 {{catTotal}} 个语法点：一句人话开场白 + 定义 + 用法 + 易错点 + 例句，能对应上课程的还会挂出「课程里讲过哪几天」。点分类进入；也可以进速查页按「用在什么场合」筛。</view>
