@@ -37,6 +37,7 @@ Page({
     playingText: '',
     playingAccent: '',
     wfText: '',      // 词形小标签播放态（v1.1.78）：与词条播放态隔离，防变体文本撞词条误亮词卡
+    wfKey: '',       // 词形高亮唯一键（v1.1.81）：词+':'+形式，防多卡同 form 串亮
     playingMode: 'idle',
     pluginOk: false,
   },
@@ -52,14 +53,14 @@ Page({
     this._offSpeech = speech.onStateChange((payload) => {
       // 词形播放分支（v1.1.78）：wfText 存在期间主行 playingText/卡拉OK 一律冻结，播完清 wfText
       if (this.data.wfText) {
-        if (!payload.playing) { this.setData({ wfText: '' }); return; }
+        if (!payload.playing) { this.setData({ wfText: '', wfKey: '' }); return; }
         if (payload.text === this.data.wfText) {
           if (this.data.playingText || this.data.playingAccent) {
             this.setData({ playingText: '', playingAccent: '' });
           }
           return;
         }
-        this.setData({ wfText: '' });
+        this.setData({ wfText: '', wfKey: '' });
       }
       const upd = { playingText: payload.playing ? payload.text : '', playingAccent: payload.accent || '', playingMode: payload.mode };
       // 歌词式进度：按朗读进度把当前文本切成「已读/未读」两段，已读染绿
@@ -140,12 +141,13 @@ Page({
   // 词形标签点读（v1.1.77）：与工具页 onSpeakWf 同构，变体音频走 g/ 桶（按文本哈希）
   onSpeakWfToday(e) {
     const t = e.currentTarget.dataset.text;
+    const key = e.currentTarget.dataset.key || t;   // v1.1.81：唯一键=词+':'+形式 —— were/was/been 三卡同有「be」，纯 form 键会三处同亮
     if (!t) return;
-    if (this.data.wfText === t) { speech.togglePause(); return; }   // 再点同标签 = 暂停
+    if (this.data.wfKey === key) { speech.togglePause(); return; }   // 再点同标签 = 暂停
     if (this.data.playingText || this.data.playingAccent) {
       this.setData({ playingText: '', playingAccent: '' });         // 词条→词形切换：清主行态
     }
-    this.setData({ wfText: t });
+    this.setData({ wfText: t, wfKey: key });
     speech.speak(t, { kind: 'g' });
   },
 
@@ -277,7 +279,7 @@ Page({
     const ds = e.currentTarget.dataset;
     const text = ds.text || ds.example || ds.word;
     if (!text) return;
-    if (this.data.wfText) this.setData({ wfText: '' });   // 词形→词条切换：先收词形态
+    if (this.data.wfText) this.setData({ wfText: '', wfKey: '' });   // 词形→词条切换：先收词形态
     const accent = ds.accent || '';
     const same = this.data.playingText === text && (this.data.playingAccent || '') === accent;
     if (same) {

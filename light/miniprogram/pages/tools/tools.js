@@ -102,6 +102,7 @@ Page({
     playingAccent: '',
     wfText: '',   // 词形小标签播放态（v1.1.78）：与词条播放态隔离 —— 变体朗读文本=单词本身，
                   // 会与结果卡的 item.w 撞文本（搜 be 点「过去分词 been」→ been 卡喇叭误亮）
+    wfKey: '',    // 词形高亮唯一键（v1.1.81）：词+':'+形式，防多结果同 form 串亮
     playingMode: 'idle',
     jumpingW: '',
     karaLit: '',
@@ -134,14 +135,14 @@ Page({
       // 词形播放分支（v1.1.78）：朗读态是全局广播的，词形文本=单词 → 会误亮同名结果卡。
       // wfText 存在期间：主行 playingText/卡拉OK 一律冻结；播完（playing=false）清 wfText。
       if (this.data.wfText) {
-        if (!payload.playing) { this.setData({ wfText: '' }); return; }   // 播完/暂停
+        if (!payload.playing) { this.setData({ wfText: '', wfKey: '' }); return; }   // 播完/暂停
         if (payload.text === this.data.wfText) {                          // 朗读中（含进度回调）
           if (this.data.playingText || this.data.playingAccent) {
             this.setData({ playingText: '', playingAccent: '' });          // 从词条切来：清主行残留
           }
           return;
         }
-        this.setData({ wfText: '' });                                     // 播了别的（点了词条）→ wf 态结束
+        this.setData({ wfText: '', wfKey: '' });                                     // 播了别的（点了词条）→ wf 态结束
       }
       // 同值守卫（v1.1.49）：朗读回调只带 1~2 个字段变化，setData 却不做深度 diff，
       // 同值也会把整棵结果列表重渲染 —— 低端机上就是「播放时卡一下」
@@ -289,7 +290,7 @@ Page({
     const ds = e.currentTarget.dataset;
     const text = ds.text;
     if (!text) return;
-    if (this.data.wfText) this.setData({ wfText: '' });   // 词形→词条切换：先收词形态
+    if (this.data.wfText) this.setData({ wfText: '', wfKey: '' });   // 词形→词条切换：先收词形态
     const accent = ds.accent || '';
     if (this.data.playingText === text && (this.data.playingAccent || '') === accent) {
       const r = speech.togglePause();
@@ -304,12 +305,13 @@ Page({
   // v1.1.78：播放态写独立的 wfText（不再任由全局广播误亮同名结果卡）；再点同标签 = 暂停。
   onSpeakWf(e) {
     const t = e.currentTarget.dataset.text;
+    const key = e.currentTarget.dataset.key || t;   // v1.1.81：唯一键=词+':'+形式，防多结果同 form 串亮
     if (!t) return;
-    if (this.data.wfText === t) { speech.togglePause(); return; }
+    if (this.data.wfKey === key) { speech.togglePause(); return; }
     if (this.data.playingText || this.data.playingAccent) {
       this.setData({ playingText: '', playingAccent: '' });   // 词条→词形切换：清主行态
     }
-    this.setData({ wfText: t });
+    this.setData({ wfText: t, wfKey: key });
     speech.speak(t, { kind: 'g' });
   },
 

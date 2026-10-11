@@ -71,9 +71,9 @@
         </view></view>
         <!-- 其他词形（v1.1.77）：固定常驻（不再只跟 2s 跳转高亮），点词形即朗读该形式 -->
         <view class="wf-line" wx:if="{{item.wf.length}}">
-          <view class="wf-line__t {{wfText === F.form ? 'wf-line__t--on' : ''}}" wx:for="{{item.wf}}" wx:for-item="F" wx:key="form"
+          <view class="wf-line__t {{wfKey === item.w + ':' + F.form ? 'wf-line__t--on' : ''}}" wx:for="{{item.wf}}" wx:for-item="F" wx:key="form"
                 hover-class="none" hover-stay-time="0"
-                data-text="{{F.form}}" catchtap="onSpeakWfToday">{{F.label}} {{F.form}}</view>
+                data-text="{{F.form}}" data-key="{{item.w}}:{{F.form}}" catchtap="onSpeakWfToday">{{F.label}} {{F.form}}</view>
         </view>
         <!-- 变体标注（v1.1.75）：搜索结果卡上的「『took』是它的过去式」随跳转带到定位行下，
              与高亮同生共死（2s 自动清空），用户不会忘了自己查的是哪种形式 -->

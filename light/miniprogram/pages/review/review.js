@@ -44,6 +44,7 @@ Page({
     // 词形标签独立播放态（v1.1.80，同今日页 v1.1.78）：词形朗读文本可能与卡片上的单词/例句撞车，
     // 用独立键记「正在播的是哪个标签」→ 只亮标签自己，不误亮卡片上的其他元素。
     wfText: '',
+    wfKey: '',          // 词形高亮唯一键（v1.1.81）：词+':'+形式，防磁贴列表同 form 串亮
     dueHint: null,      // 四档各自的下次间隔提示（Anki 式按钮副标题）
     cloze: null,        // 中文例句挖空：当前题 {zh, en, answer, options, done, right}
     clozePoolSize: 0,   // 可出填空题的词数（词库有中文例句的）
@@ -62,7 +63,7 @@ Page({
         upd.karaLit = payload.text.slice(0, lit);
         upd.karaRest = payload.text.slice(lit);
       } else { upd.karaLit = ''; upd.karaRest = ''; }
-      if (!payload.playing && this.data.wfText) upd.wfText = '';   // 播完清掉词形标签的独立态
+      if (!payload.playing && this.data.wfText) upd.wfText = ''; upd.wfKey = '';   // 播完清掉词形标签的独立态
       this.setData(upd);
     });
   },
@@ -159,7 +160,7 @@ Page({
     const item = pool[Math.floor(Math.random() * pool.length)];
     // v1.1.38：去掉自动朗读 —— 朗读统一走卡片上的喇叭（onSpeakCurrent），点进卡片是静默的
     const c = Object.assign({}, item, { starred: store.isStarred(item.w), wf: wordforms.wfNotes(item.w) });
-    this.setData({ currentDue: c, showZh: false, dueHint: this._hints(item.w), wfText: '' });
+    this.setData({ currentDue: c, showZh: false, dueHint: this._hints(item.w), wfText: '', wfKey: '' });
     this._prefetchCard(c);   // v1.1.80：抽到词就把音频备好，第一次点即出声
   },
 
@@ -177,7 +178,7 @@ Page({
     if (pool.length) {
       const item = pool[Math.floor(Math.random() * pool.length)];
       const next = Object.assign({}, item, { starred: store.isStarred(item.w), wf: wordforms.wfNotes(item.w) });
-      this.setData({ currentDue: next, showZh: false, dueHint: this._hints(next.w), wfText: '' }); // v1.1.38：下一词同样不自动朗读
+      this.setData({ currentDue: next, showZh: false, dueHint: this._hints(next.w), wfText: '', wfKey: '' }); // v1.1.38：下一词同样不自动朗读
       this._prefetchCard(next);
       return;
     }
@@ -245,7 +246,7 @@ Page({
     // 重点词池里的对象是副本，没有 starred 字段 —— 必须按单词实际状态回填，否则已收藏的词永远显示"未收藏"
     // v1.1.38：去掉自动朗读，与到期 tab 统一为手动喇叭
     const c = Object.assign({}, item, { starred: store.isStarred(item.w), wf: wordforms.wfNotes(item.w) });
-    this.setData({ currentRandom: c, showZh: false, wfText: '' });
+    this.setData({ currentRandom: c, showZh: false, wfText: '', wfKey: '' });
     this._prefetchCard(c);   // v1.1.80：切词即预取
   },
 
@@ -296,10 +297,11 @@ Page({
   // 独立 wfText 态 —— 词形朗读文本可能与卡片上的单词/例句相同，只亮标签自己
   //（与 v1.1.78 治「点 been 误亮结果卡」同一套做法）。
   onSpeakWf(e) {
-    const t = e.currentTarget.dataset.w;
+    const t = e.currentTarget.dataset.text;
+    const key = e.currentTarget.dataset.key || t;   // v1.1.81：唯一键=词+':'+形式，防磁贴列表同 form 串亮
     if (!t) return;
-    if (this.data.wfText === t) { speech.togglePause(); this.setData({ wfText: '' }); return; }
-    const upd = { wfText: t };
+    if (this.data.wfKey === key) { speech.togglePause(); this.setData({ wfText: '', wfKey: '' }); return; }
+    const upd = { wfText: t, wfKey: key };
     if (this.data.playingWord) upd.playingWord = '';   // 词形→词条切换：先收词条播放态
     this.setData(upd);
     speech.speak(t, { kind: 'g' });
@@ -311,7 +313,7 @@ Page({
     const c = this.data.cloze;
     if (!c || !c.en) return;
     if (this.data.playingWord === c.en) { speech.togglePause(); this.setData({ playingWord: '' }); return; }
-    if (this.data.wfText) this.setData({ wfText: '' });
+    if (this.data.wfText) this.setData({ wfText: '', wfKey: '' });
     speech.speak(c.en, { ai: c.ai || 0, kind: 's' });
   },
 
@@ -319,7 +321,7 @@ Page({
   onSpeakCurrent(e) {
     const c = this._cur();
     if (!c) return;
-    if (this.data.wfText) this.setData({ wfText: '' });   // 词形→词条切换：先收词形态
+    if (this.data.wfText) this.setData({ wfText: '', wfKey: '' });   // 词形→词条切换：先收词形态
     const accent = (e && e.currentTarget && e.currentTarget.dataset.accent) || '';
     if (this.data.playingWord === c.w && (this.data.playingAccent || '') === accent) {
       const r = speech.togglePause();
@@ -333,7 +335,7 @@ Page({
   onSpeakExample() {
     const c = this._cur();
     if (!c || !c.e) return;
-    if (this.data.wfText) this.setData({ wfText: '' });
+    if (this.data.wfText) this.setData({ wfText: '', wfKey: '' });
     speech.speak(c.e, { ai: c.ai, kind: 's' });
   },
 
@@ -364,7 +366,7 @@ Page({
   onSpeakStarred(e) {
     const w = e.currentTarget.dataset.word;
     const accent = e.currentTarget.dataset.accent || '';
-    if (this.data.wfText) this.setData({ wfText: '' });
+    if (this.data.wfText) this.setData({ wfText: '', wfKey: '' });
     if (this.data.playingWord === w && (this.data.playingAccent || '') === accent) {
       const r = speech.togglePause();
       this.setData({ playingWord: r === 'paused' ? '' : w, playingAccent: r === 'paused' ? '' : accent });
@@ -379,7 +381,7 @@ Page({
   // 重点词例句朗读（v1.1.40）：对齐今日页——点例句或右侧喇叭都可播，kind:'s' 命中例句预生成音频
   onSpeakStarredEx(e) {
     const w = e.currentTarget.dataset.word;
-    if (this.data.wfText) this.setData({ wfText: '' });
+    if (this.data.wfText) this.setData({ wfText: '', wfKey: '' });
     if (this.data.playingWord === w) {
       const r = speech.togglePause();
       this.setData({ playingWord: r === 'paused' ? '' : w });

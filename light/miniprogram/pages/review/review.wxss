@@ -75,7 +75,7 @@
 .grade-btn{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;height:96rpx;border-radius:18rpx;border:1rpx solid var(--line);background:var(--soft)}
 /* 按压反馈（v1.1.80）：此前是 hover-class="none" —— 完全没反馈，用户真机"按了不知道按到没"。
    改回按压，但遵守全站约定「有底色元素只用状态色」：底色加深一档 + 边框转绿，不叠缩放/变淡。 */
-.grade-btn--press{background:var(--press-green);border-color:var(--green)}
+.grade-press{background:var(--press-green);border-color:var(--green)}
 .grade-name{font-size:28rpx;font-weight:700;color:var(--green);line-height:1.25}
 .grade-hint{font-size:20rpx;color:var(--muted2);line-height:1.25}
 .grade-btn--again .grade-name{color:var(--red)}
