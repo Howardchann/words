@@ -30,9 +30,9 @@
       <view class="fix__row" wx:for="{{N.segs}}" wx:key="i" wx:for-item="S">
         <view class="fix__ico"><view class="fix__mk fix__mk--{{S.t}}"></view></view>
         <view class="fix__tx">{{S.v}}</view>
-        <view class="fix__spk" wx:if="{{S.t === 'good'}}"
-              data-text="{{S.v}}" hover-class="none" hover-stay-time="0"
-              bindtap="onSpeakEx"><view class="spk-ico {{playingText === S.v ? 'spk-ico--on' : ''}}"></view></view>
+        <view class="fix__spk" wx:if="{{S.t === 'good' && S.say}}"
+              data-text="{{S.say}}" hover-class="none" hover-stay-time="0"
+              bindtap="onSpeakEx"><view class="spk-ico {{playingText === S.say ? 'spk-ico--on' : ''}}"></view></view>
       </view>
       <view class="fix__why" wx:if="{{N.why}}">{{N.why}}</view>
     </view>

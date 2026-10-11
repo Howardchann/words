@@ -17,6 +17,24 @@ function splitWhy(v) {
   const m = /^([\s\S]*?)\s*（([^（）]*)）\s*$/.exec(v);
   return m ? { v: m[1].trim(), why: m[2].trim() } : { v: String(v).trim(), why: '' };
 }
+// 易错点正确句的「播放文本」（v1.1.82）——数据里的展示文本常把英文句和中文说明连在一起
+// （如「I need some advice. 不可数名词要表示数量用…」），而引擎对含中文文本会跳过 g/ 桶预生成、
+// 直接走在线 TTS → 音色与全站不一致且慢（用户真机反馈）。故朗读只取英文部分，显示仍用原文。
+// ⚠️ 口径必须与生成脚本 _ipa_build/_sayof.js 完全一致（哈希按文本算，差一个字符就命中不到）。
+function sayOf(v) {
+  var s = String(v || '').trim();
+  if (!s) return '';
+  if (!/[\u4e00-\u9fff\u3400-\u4dbf\u3000-\u303f\uff00-\uffef]/.test(s)) {   // 纯英文/数字：原样
+    s = s.replace(/[\u2026]+$/, '').trim();
+    return /[A-Za-z]/.test(s) ? s : '';
+  }
+  var m = /[.!?\u2026]/.exec(s);
+  var cut = m ? m.index + 1 : s.length;
+  var c = /[\u4e00-\u9fff\u3400-\u4dbf\u3000-\u303f\uff00-\uffef]/.exec(s);
+  if (c && c.index < cut) cut = c.index;
+  s = s.slice(0, cut).trim().replace(/\s+/g, ' ').replace(/[\u2026]+$/, '').trim();
+  return /[A-Za-z]/.test(s) ? s : '';
+}
 function parseNotes(arr) {
   const out = [];
   (arr || []).forEach((raw, idx) => {
@@ -39,6 +57,7 @@ function parseNotes(arr) {
       segs[segs.length - 1].v = r.v;
       why = r.why;
     }
+    segs.forEach(sg => { sg.say = sg.t === 'good' ? sayOf(sg.v) : ''; });   // v1.1.82 播放文本（无英文则空 → 不渲染喇叭）
     out.push({ k: 'n' + idx, kind: 'fix', head: head, segs: segs, why: why });
   });
   return out;
@@ -77,13 +96,23 @@ Page({
     // 长语法点名（如「英语句子的基本结构」）在真机上尾部被截成省略号（用户反馈）。
     // 改用分类名（如「句子基础」）——完整标题本来就在下方头卡里，导航栏只作位置提示。
     wx.setNavigationBarTitle({ title: cat.name });
+    const notes = parseNotes(t.note);
     this.setData({
       catName: cat.name,
       t: t,
-      notes: parseNotes(t.note),
+      notes: notes,
       days: all.slice(0, MAX_DAYS),
       dayMore: Math.max(0, all.length - MAX_DAYS),
     });
+    // 易错点正确句的音频预取（v1.1.82）：音频在 g/ 桶（云盘），但 prefetch 此前只认词表编号、
+    // 语法例句 ai=0 被挡 → 从未预热，每次点击都要等云函数签名 + 下载（真机「点击很久才播放」）。
+    // diskLimit=0：只签链接不落盘（省流量），点击时直接命中已签链接。
+    const says = [];
+    notes.forEach(n => {
+      if (n.kind !== 'fix') return;
+      (n.segs || []).forEach(sg => { if (sg.t === 'good' && sg.say && says.indexOf(sg.say) < 0) says.push(sg.say); });
+    });
+    if (says.length) speech.prefetch(says.map(x => ({ text: x })), 0);
   },
   onShow() { theme.applyPage(this); },
   onHide() { speech.stop(); },

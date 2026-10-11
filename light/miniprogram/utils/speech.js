@@ -370,6 +370,20 @@ function prefetch(items, diskLimit) {
   if (!cloudCfg.ready()) return;
   const need = [];
   (items || []).forEach(it => {
+    // 语法例句 / 易错点正确句（v1.1.82）：无词表编号，按文本哈希走 g/ 桶。
+    // 此前本函数用 `if (!ai) return` 把 ai=0 的句子一律挡掉 → 这类音频从未预热，
+    // 每次点击都要现场走云函数签名（1~3s），用户真机表现为「点了很久才出声」。
+    const rawText = it && it.text ? String(it.text) : '';
+    if (rawText) {
+      if (state.accent === 'uk') return;                  // g/ 桶只有美音
+      if (/[^\x20-\x7E]/.test(rawText)) return;           // 含中文无预生成（与 tryPregenG 同口径）
+      const slowT = it.slow != null ? !!it.slow : (state.rate <= SLOW_GATE);
+      const relT = gRel(rawText, slowT);
+      if (exists(CACHE_ROOT + '/' + relT)) return;
+      if (urlOf(relT)) return;
+      if (need.indexOf(relT) < 0) need.push(relT);
+      return;
+    }
     const ai = it && it.ai;
     if (!ai) return;
     const kind = it.kind || 's';
