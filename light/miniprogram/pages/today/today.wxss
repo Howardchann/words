@@ -4,19 +4,14 @@
 .practice-line{font-size:26rpx;color:var(--ink3);line-height:1.8;margin-top:8rpx}
 .prac-no{color:var(--green);font-weight:700;display:inline-block;min-width:36rpx;text-align:center;margin-right:14rpx}
 .practice-line:first-child{margin-top:0}.prestart-card{text-align:center;padding:60rpx 30rpx}.prestart-title{font-size:40rpx;font-weight:800;color:var(--green)}.prestart-sub{font-size:28rpx;color:var(--muted3);margin-top:14rpx}.prestart-days{font-size:60rpx;font-weight:800;color:var(--ink);margin:30rpx 0}.prestart-note{font-size:28rpx;color:var(--muted3);margin:28rpx 0 6rpx}
-/* 准备期双按钮（v1.1.89 方案A）：箭头行，与 tools 页 .cat-cell 同语言。
-   主行 = press-green 常亮 + 实心绿圆播放标（开学=按下播放键），按压再深一档 press2；
-   次行 = soft 底 + 灰眼睛标 +「只预览 · 不打卡」，按压 press-green（与 cat-cell 按压约定一致）。
-   图标自绘 SVG data-URI，深色主题单独给一套（token 不进 data-URI）。 */
-.cellrow{display:flex;align-items:center;background:var(--soft);border-radius:16rpx;padding:20rpx 22rpx;margin-top:20rpx}
+/* 准备期双按钮（v1.1.90：方案A + 用户再定去图标/胶囊圆弧）：箭头行，与 tools 页 .cat-cell 同语言。
+   主行 = press-green 常亮 + 深绿字与箭头（开学=主行动作），按压再深一档 press2；
+   次行 = soft 底 +「只预览 · 不打卡」，按压 press-green（与 cat-cell 按压约定一致）。
+   胶囊圆弧 999rpx（两端半圆），无左侧图标。 */
+.cellrow{display:flex;align-items:center;background:var(--soft);border-radius:999rpx;padding:20rpx 26rpx;margin-top:20rpx}
 .cellrow--main{background:var(--press-green)}
 .cellrow--main.cellrow--press{background:var(--press2)}
 .cellrow--press{background:var(--press-green)}
-.cellrow__ico{flex-shrink:0;width:52rpx;height:52rpx;margin-right:18rpx;background-position:center;background-size:contain;background-repeat:no-repeat}
-.cellrow__ico--play{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='11' fill='%23176B5B'/%3E%3Cpath d='M9.6 7.6v8.8l7.6-4.4z' fill='%23FFFFFF'/%3E%3C/svg%3E")}
-.cellrow__ico--eye{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238B9893' stroke-width='1.8'%3E%3Cpath d='M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6z'/%3E%3Ccircle cx='12' cy='12' r='2.6'/%3E%3C/svg%3E")}
-.theme-dark .cellrow__ico--play{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='11' fill='%237CD6B4'/%3E%3Cpath d='M9.6 7.6v8.8l7.6-4.4z' fill='%230E1618'/%3E%3C/svg%3E")}
-.theme-dark .cellrow__ico--eye{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238FA39C' stroke-width='1.8'%3E%3Cpath d='M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6z'/%3E%3Ccircle cx='12' cy='12' r='2.6'/%3E%3C/svg%3E")}
 .cellrow__tt{flex:1;min-width:0;font-size:27rpx;font-weight:700;color:var(--ink);text-align:left}
 .cellrow__tt--sub{color:var(--ink2);font-weight:400}
 .cellrow__meta{flex-shrink:0;font-size:22rpx;color:var(--muted);margin-right:12rpx}
@@ -67,8 +62,7 @@
   .prestart-sub { font-size:14px; margin-top:7px; }
   .prestart-days { font-size:30px; margin:15px 0; }
   .prestart-note { font-size:14px; margin:14px 0 3px; }
-  .cellrow { border-radius:8px; padding:10px 11px; margin-top:10px; }
-  .cellrow__ico { width:26px; height:26px; margin-right:9px; }
+  .cellrow { border-radius:999px; padding:10px 13px; margin-top:10px; }
   .cellrow__tt { font-size:13.5px; }
   .cellrow__meta { font-size:11px; margin-right:6px; }
   .cellrow__go { width:8px; height:8px; margin-left:6px; border-width:1.5px; }
