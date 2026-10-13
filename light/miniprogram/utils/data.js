@@ -255,8 +255,11 @@ function searchWords(kw, limit) {
       let lb = cands[c].label;
       if (lb === wordforms.LBL.pl && ws[hit].p.indexOf('v.') === 0) lb = wordforms.LBL.s;
       viaMap[hit] = lb;
+      // v1.1.94：查询词本身就是词条时，它自己必须排第一（用户点名：搜 wind 第一个必须是 wind）。
+      // 原形紧跟其后并带 via 标签；只有查询词完全没直查命中时，原形才顶到最前（taken -> take）。
+      const hasSelf = exact.length > 0;
       exact = exact.filter(function (j) { return j !== hit; });
-      exact.unshift(hit);                    // 原形排最前
+      if (hasSelf) exact.splice(1, 0, hit); else exact.unshift(hit);
       break;                                 // 只要最可信的一个候选
     }
   }

@@ -21,6 +21,7 @@ const theme = require('../../utils/theme.js');
 const speech = require('../../utils/speech.js');
 const PHONETIC = require('../../utils/phonetic.js');
 const STUDY_CATS = require('../../utils/study-cats.js');
+const GLOSSARY = require('../../utils/glossary.js');
 
 const DEBOUNCE = 160;
 // 跳转重入锁（v1.1.49）：switchTab 偶发「既不回调 success 也不回调 fail」，硬锁会把后续点击全卡死
@@ -121,6 +122,14 @@ Page({
     consCount: PH_CONS.length,
     phonTotal: PHONETIC.length,
     ph: PHONETIC[0],   // 当前选中音标：默认第一个 → 面板永不为空
+
+    // ⑤ 语法术语速查（v1.1.94）：静态数据，进页面就绪，无异步、无音频
+    glGroup: GLOSSARY.groups[0].id,
+    glGroups: GLOSSARY.groups,
+    glHint: GLOSSARY.groups[0].hint,
+    glTotal: GLOSSARY.groups.reduce((a, g) => a + g.items.length, 0),
+    glList: GLOSSARY.groups[0].items,
+    gl: GLOSSARY.groups[0].items[0],   // 默认选中第一条 → 面板永不为空
   },
 
   // ---------- 生命周期 ----------
@@ -368,6 +377,23 @@ Page({
     const ai = plan.wordAi(w);
     if (ai) speech.speak(w, { ai: ai, kind: 'w' });     // 词表内 → w/ 桶（同今日页单词）
     else speech.speak(w, { ai: 0, kind: 'g' });         // 词表外 → g/ 桶哈希
+  },
+
+  // ---------- ⑤ 语法术语速查（v1.1.94）：与音标卡同构 —— 分类段控 → 胶囊网格 → 常驻面板 ----------
+  // 纯静态数据，切分类/切条目都是就地 setData，没有跳转也没有音频。
+  onGlGrp(e) {
+    const id = e.currentTarget.dataset.id;
+    if (!id || id === this.data.glGroup) return;
+    const g = GLOSSARY.groups.filter(function (x) { return x.id === id; })[0];
+    if (!g) return;
+    this.setData({ glGroup: id, glHint: g.hint, glList: g.items, gl: g.items[0] });
+  },
+  onGlTap(e) {
+    const k = e.currentTarget.dataset.k;
+    if (!k || (this.data.gl && this.data.gl.k === k)) return;
+    const it = this.data.glList.filter(function (x) { return x.k === k; })[0];
+    if (!it) return;
+    this.setData({ gl: it });
   },
 
   fb() { return this.selectComponent('#fb'); },

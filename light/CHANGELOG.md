@@ -2,6 +2,31 @@
 
 > 本实例由 cloud 实例 v1.1.38（仓库提交 `dbe76dc` 的 cloud/ 树）派生，**共享全部产品与机制历史**——完整变更史见 `../cloud/CHANGELOG.md`，此处只记录本实例自身的差异与后续变更。
 
+## 2026-10-13 · 搜索首条保证 / 语法术语速查卡 / 异音词音标修正（v1.1.94，仅本地，未上传）
+
+> **触发**：用户 Day2 真机反馈四条——①搜 wind 第一条是 win；②「宾格」这类词卡术语零基础看不懂，要有个讲解区；③工具页与设置页各有一张学习记录卡，逻辑重复；④多音单词按推荐口径修正。
+
+### ① 搜索：查询词本身保证排第一（`utils/wordforms.js` + `utils/data.js`）
+
+- **删掉「裸剥 -d 当过去式」规则**（`wordforms.js` regularCandidates）：规则动词 +d 的结果必然以 `ed` 结尾、已被 `-ed` 分支覆盖，能走到裸 `-d` 的全是原形本身 → 8115 词全量回归实测 **16 条全是误伤**（wind→win、card→car、feed 原本还会→fee、wood→woo、kind→kin、had→ha、and→an、add→ad、tend→ten、crowd→crow、nod→no、plead→plea、beard→bear、ward→war、grind→grin、fund→fun、band→ban）。
+- **排序保证**（`data.js` searchWords）：查询词本身是词条时不再把归一到的原形顶到最前，改为「自己第一、原形第二并带 via 标签」；只有完全没直查命中时（taken→take）原形才顶最前。
+- **`-ed` 分支加 BASEED 护栏**：本身就是原形却以 -ed 结尾的词（bed / red / feed / seed / shed / wed / need…）不再被剥，否则搜 feed 会冒出「fee 是它的过去式」假标签（feeding 一类仍正常归一）。
+- 验证：wind / feed / seed / bed / red / card 第一条都是自己；used → used、use〔过去式〕；taken → take〔过去分词〕；making → making、make〔现在分词〕；found → found、find〔过去式〕。
+
+### ② 工具页新增「语法术语速查」卡（`utils/glossary.js` 新文件 + tools 三件）
+
+- 零基础会在两处撞见看不懂的「行话」：词卡释义括弧注记（me（宾格）· a（元音开头用 an）…）和词性标签（n. / v. / adj. …），而语法速查按天编排、当下找不到对应讲解。
+- 新卡与音标卡同构：分类段控（词性缩写 15 / 语法术语 25，共 40 条）→ 胶囊网格 → 常驻面板（人话 + 例子），默认选中第一条、面板永不为空；纯静态数据、无音频、无跳转。
+- 顺带修词表脏词性缩写 17 处：`/adv` 补句点（light、close、well、part、back、last、low…）、enough 的 `/i` → `/int.`。
+
+### ③ 异音词音标修正 35 词（`utils/words.js`，纯音标文本）
+
+- **判定原则**：一个词只有一个音标位、一个单词音频 → 音标必须与这个词**自己的例句**读的是同一个读音。核查表：`D:/idea/_reviews/异音词修正核查表_1013.md`。
+- 典型：wind /waɪnd/→/wɪnd/（风）、read /rɛd/→/riːd/、tear /tɛr/→/tɪr/（眼泪）、wound /waʊnd/→/wuːnd/（伤口）、live /laɪv/→/lɪv/（居住）、lead /lɛd/→/liːd/（引导）、appropriate /eɪt/→/ət/（形容词）、object /ˈɑb/→/əbˈ/（例句是动词）、buffet /ˈbʌfət/→/bəˈfeɪ/（自助餐）……
+- 声学实测（共振峰轨迹，`_ipa_build/_probe_hetero2.py`）10 词：wind / read / tear / wound **音频已是对的**（改完音标即闭环）；live / lead / sow **音频读的是旧音** → 进音频重做清单（等 edge-tts 403 修复）。
+- 遗留待用户定夺：bow 释义「弓」与例句「船头」互相矛盾；10 词「音标已跟例句、但释义首项是另一个读音」是否把义项提到首位。
+- 备份：改前词表存 `D:/idea/_ipa_build/_words_backup_1013.js`。
+
 ## 2026-10-12 · 复习页词形磁贴高亮闪灭修复（v1.1.93，随 92 一起上传）
 
 > **触发**：真机验收 v1.1.92 反馈——复习页重点词 be 的其他词形（were）磁贴，点一下高亮马上消失；今日页同款正常。

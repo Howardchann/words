@@ -84,6 +84,10 @@ Object.keys(IRREG_ADJ).forEach(function (base) {
   ]);
 });
 
+// v1.1.94：本身就是原形、却以 -ed 结尾的词（bed / red / feed / seed / shed…）不是过去式，
+// 不能被 -ed 分支剥掉。否则搜 feed 会冒出「fee 是它的过去式」这种假标签。
+var BASEED = { bed: 1, red: 1, wed: 1, shed: 1, sled: 1, feed: 1, need: 1, seed: 1, speed: 1,
+  breed: 1, weed: 1, bleed: 1, deed: 1, creed: 1, greed: 1, heed: 1, steed: 1, tweed: 1 };
 // ---- 规则变形推导（只在反查表未命中时用，候选必须真实存在于词表才生效）----
 // 输入查询词 q，猜它的原形候选：返回 [{base, label}] 列表，由调用方逐个到词表里核对。
 function regularCandidates(q) {
@@ -103,13 +107,12 @@ function regularCandidates(q) {
   if (q.slice(-1) === 's') push(q.slice(0, -1), LBL.pl);
   // 过去式 / 过去分词（候选顺序很重要：e 还原优先于裸切——hoped 必须归 hope 而不是 hop）
   if (q.slice(-3) === 'ied') push(q.slice(0, -3) + 'y', LBL.past);
-  if (q.slice(-2) === 'ed') {
+  if (q.slice(-2) === 'ed' && !BASEED[q]) {
     push(q.slice(0, -1), LBL.past);          // hoped  -> hope；used -> use
     push(q.slice(0, -2), LBL.past);          // worked -> work
     var stem = q.slice(0, -2);
     if (stem.length >= 3 && stem.slice(-1) === stem.slice(-2, -1)) push(stem.slice(0, -1), LBL.past); // stopped -> stopp -> stop
   }
-  if (q.slice(-1) === 'd') push(q.slice(0, -1), LBL.past);
   // 现在分词（同理：e 还原优先——making 归 make 而不是 mak）
   if (q.slice(-3) === 'ing') {
     push(q.slice(0, -3) + 'e', LBL.ing);     // hoping  -> hope；making -> make

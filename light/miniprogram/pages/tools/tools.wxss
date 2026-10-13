@@ -135,8 +135,19 @@
 .ph-ex__seg--hit { color: var(--green); border-bottom: 3rpx solid currentColor; padding-bottom: 2rpx; }
 .ph-ex__cn { font-size: 27rpx; color: var(--muted3); margin-left: 14rpx; }
 
+/* ⑤ 语法术语速查（v1.1.94）
+   交互与排版整体复用音标卡的 .ph-*（分类段控 → 胶囊网格 → 常驻面板），这里只补中文标签的差异：
+   音标 chip 是拉丁字符、走 Times 衬线且给足 min-width；术语是 2~4 个汉字，衬线不适用、
+   也不该被 96rpx 最小宽度撑开 —— 收窄内边距、字体继承全站正文。 */
+.gl-chip { min-width: 0; padding: 12rpx 22rpx; font-size: 26rpx; font-family: inherit; }
+.gl-big { font-family: inherit; font-size: 40rpx; }
+.gl-eg { font-size: 26rpx; color: var(--ink4); line-height: 1.75; }
+
 /* iPad / 宽屏覆盖（纯追加，手机端不受影响），尺寸 = rpx × 0.5 */
 @media (min-width:700px) {
+  .gl-chip { padding: 6px 11px; font-size: 13px; }
+  .gl-big { font-size: 20px; }
+  .gl-eg { font-size: 13px; }
   .rec-card { padding: 15px 14px 11px; }
   .rec-num { font-size: 28px; }
   .rec-div { height: 34px; }
