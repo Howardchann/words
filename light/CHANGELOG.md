@@ -2,7 +2,28 @@
 
 > 本实例由 cloud 实例 v1.1.38（仓库提交 `dbe76dc` 的 cloud/ 树）派生，**共享全部产品与机制历史**——完整变更史见 `../cloud/CHANGELOG.md`，此处只记录本实例自身的差异与后续变更。
 
-## 2026-10-13 · 搜索首条保证 / 语法术语速查卡 / 异音词音标修正（v1.1.94，仅本地，未上传）
+## 2026-10-13 · 学习记录卡合并到工具页（v1.1.95，随 94 一起上传）
+
+> **触发**：用户确认方案 B —— 工具页顶部只有三格进度、设置页顶部才是「重点词 / 复习记录」，两张卡都在讲学习记录、逻辑重复（这也是前几天想删设置页「学习进度」卡的动机）。用户定夺：**加「学习记录」标题**（与下方每张卡都有标题的做法一致），两个入口的跳转保留（直达对应 tab，少一次内部切换）。
+
+### 工具页顶部「学习记录」卡（`pages/tools/tools.wxml/.wxss/.js`）
+
+- **加卡标题「学习记录」** —— 工具页自上而下每张卡都有标题（查单词 / 音标 / 语法速查 / 语法术语速查），就它没有会突兀。
+- **迁入两个入口格**（重点词 / 复习记录）：三格进度下方、上边框分隔；数字 40rpx 绿 + 12rpx chevron 箭头 + 22rpx 灰标签，视觉沿设置页 `.stat-*` 那套 —— 与上方 56rpx 三格形成层级（进度是主角、入口是导航）。宽屏（≥700px）显式 px 化，尺寸 = rpx × 0.5。
+- **跳转逻辑原样迁入**：点数字落复习页对应 tab（重点词 → starred / 复习记录 → random），经 `globalData.reviewTab` 传递 + 跨栈预切换。按压沿用设置页那套 `data.statPress` 手动按压（touchstart 亮 / touchmove 灭 / touchend 不灭灯 / tap 未派发 350ms 兜底）—— 原生 hover-class 切 tab 返回后残影不可靠（v1.1.27 结论）；`onShow`/`onHide` 双兜底清态，`onUnload` 清 `_statTimer`。
+- **数字并入 `refreshRecord()`**：与三格同一次 `setData` 带出，切 tab 回来自动刷新，无额外监听。
+
+### 设置页「学习进度」卡整体删除（`pages/settings/settings.wxml/.wxss/.js`）
+
+- wxml 删卡（设置页首张卡变为「进度同步（多端）」）；wxss 删 `.stat-row/.stat-item/.stat-item--tap/.stat-item--press/.stat-arrow/.stat-num/.stat-label` 及宽屏段对应行；js 删 `data.starredCount/reviewCount/statPress`、`onStatDown/Move/End/Cancel/Tap` 五个方法、`refresh()` 里两个数字、`onShow`/`onHide` 的按压态残句。
+- 设置页回归纯设置：进度同步 / 朗读语速 / 朗读方式 / 默认口音 / 备份与重置 / 关于。
+
+### 备注
+
+- 本轮同时实测 edge-tts 合成链路：**WSS 握手仍 403**（`speech.platform.bing.com/consumer/speech/synthesize/readaloud/edge/v1`），音频重做窗口仍未打开；异音词里 live / lead / sow 三个「音频也读旧音」的词只能等链路修复后再重生成。
+
+
+## 2026-10-13 · 搜索首条保证 / 语法术语速查卡 / 异音词音标修正（v1.1.94，随 95 一起上传）
 
 > **触发**：用户 Day2 真机反馈四条——①搜 wind 第一条是 win；②「宾格」这类词卡术语零基础看不懂，要有个讲解区；③工具页与设置页各有一张学习记录卡，逻辑重复；④多音单词按推荐口径修正。
 

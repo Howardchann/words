@@ -2,8 +2,11 @@
 <view class="page-root {{dark ? 'theme-dark' : ''}}">
 <nav-bar title="{{navTitle}}" />
 
-<!-- ① 学习记录：三格。已学天数分母 = 可打卡天数（弹性日不占名额，口径写在设置-关于） -->
+<!-- ① 学习记录（v1.1.95）：三格进度 + 两个入口（重点词 / 复习记录，由设置页顶部迁入，
+     设置页从此只剩「设置」，不再出现第二张学习记录卡）。
+     已学天数分母 = 可打卡天数（弹性日不占名额，口径写在设置-关于） -->
 <view class="card rec-card">
+  <view class="section-label">学习记录</view>
   <view class="rec-row">
     <view class="rec-item">
       <view class="rec-num">{{learnedDays}}<text class="rec-unit">天</text></view>
@@ -18,6 +21,25 @@
     <view class="rec-item">
       <view class="rec-num">{{leftDays}}<text class="rec-unit">天</text></view>
       <view class="rec-label">预计还剩</view>
+    </view>
+  </view>
+
+  <!-- 两个入口格：点数字直接落到复习页对应 tab（重点词 → starred / 复习记录 → random）。
+       按压态沿用设置页那套 data.statPress 手动按压：切 tab 返回后微信清理 hover 残影不可靠。 -->
+  <view class="rec-entry">
+    <view class="rec-stat {{statPress === 'starred' ? 'rec-stat--press' : ''}}"
+          data-pk="starred" data-url="/pages/review/review" data-tab="starred"
+          bindtouchstart="onStatDown" bindtouchmove="onStatMove" bindtouchend="onStatEnd"
+          bindtouchcancel="onStatCancel" bindtap="onStatTap">
+      <view class="rec-stat__num">{{starredCount}}<text class="rec-stat__go"></text></view>
+      <view class="rec-stat__label">重点词</view>
+    </view>
+    <view class="rec-stat {{statPress === 'review' ? 'rec-stat--press' : ''}}"
+          data-pk="review" data-url="/pages/review/review" data-tab="random"
+          bindtouchstart="onStatDown" bindtouchmove="onStatMove" bindtouchend="onStatEnd"
+          bindtouchcancel="onStatCancel" bindtap="onStatTap">
+      <view class="rec-stat__num">{{reviewCount}}<text class="rec-stat__go"></text></view>
+      <view class="rec-stat__label">复习记录</view>
     </view>
   </view>
 </view>

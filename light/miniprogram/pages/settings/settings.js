@@ -58,65 +58,28 @@ Page({
   data:{today:'',rate:0.9,rateText:'0.90×',accent:'us',
     accentOptions:[{value:'us',label:'美式发音（默认）'},{value:'uk',label:'英式发音'}],accentIndex:0,
     engineOptions:[{value:'auto',label:'自动（推荐）：优先预生成，失败切在线'},{value:'pregen',label:'仅预生成高清音频'},{value:'online',label:'仅在线 TTS（有道/百度）'}],engineIndex:0,
-    starredCount:0,reviewCount:0,appVersion:buildLabel(),aboutCardLabel:ABOUT_CARD_LABEL,aboutTitle:ABOUT_TITLE,engineLabel:'',engineHint:'',backupText:'',showBackup:false,importText:'',showImport:false,voiceTesting:false,voiceLabel:'试听发音',
+    appVersion:buildLabel(),aboutCardLabel:ABOUT_CARD_LABEL,aboutTitle:ABOUT_TITLE,engineLabel:'',engineHint:'',backupText:'',showBackup:false,importText:'',showImport:false,voiceTesting:false,voiceLabel:'试听发音',
     cloudOn:true,cloudMeta:'',cloudErr:'',cloudTip:'',syncing:false,sheet:{show:false,title:'',options:[],index:0,key:''},
     // 主题 data 初始化（与 tabBar 同款）：首帧即正确深浅，见 today.js 注释
     dark:theme.isDark(),pageStyle:theme.isDark()?'background-color:#0E1618;':'',
     // 自定义导航栏（v1.1.33）：标题走 data 绑定 <nav-bar title>
-    navTitle:'设置',
-    statPress:''},
+    navTitle:'设置'},
   onLoad(){theme.applyPage(this);theme.syncTabBar(this);const now=new Date(),pad=n=>String(n).padStart(2,'0');this.setData({today:now.getFullYear()+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate())});speech.initPlugin();this._offSpeech=speech.onStateChange(p=>this.setData({voiceTesting:!!p.playing,voiceLabel:p.playing?'停止朗读':'试听发音'}));this._offStore=store.onChange(()=>this.refreshCloud());this.refreshCloud();},
   onUnload(){if(this._offSpeech){this._offSpeech();this._offSpeech=null;}if(this._offStore){this._offStore();this._offStore=null;}},
-  onShow(){if(this.data.statPress)this.setData({statPress:''});theme.syncTabBar(this,3);this.applyTheme();this.refresh();},
-  onHide(){if(this.data.statPress)this.setData({statPress:''});},
+  onShow(){theme.syncTabBar(this,3);this.applyTheme();this.refresh();},
   applyTheme(){theme.applyPage(this);theme.syncTabBar(this);},
   refresh(){const rate=store.get('rate')||0.9,accent=store.get('accent')||'us',engineMode=store.get('engineMode')||'auto';speech.setRate(rate);speech.setEngineMode(engineMode);speech.setAccent(accent);
     const eng=speech.getEngineInfo(),pre=eng.engine==='pregen';
     const MODES={auto:['自动（当前云端音频可用，优先预生成）','优先预生成高清音频（美音），失败自动切在线。'],pregen:['仅预生成高清音频','只用预生成音频（美音），失败不切在线。'],online:['仅在线 TTS（有道 / 百度）','全部在线朗读，口音切换只在此音源生效。']};
     const m=MODES[engineMode]||MODES.auto;
     // 同值守卫：onShow 每次进设置页都调 refresh，数值没变就不再整树 setData（切 tab 闪屏）
-    theme.sameSet(this,{rate,rateText:Number(rate).toFixed(2)+'×',accent,accentIndex:Math.max(0,ACCENTS.indexOf(accent)),engineIndex:Math.max(0,this.data.engineOptions.findIndex(o=>o.value===engineMode)),starredCount:(store.get('starredWords')||[]).length,reviewCount:store.activeReviewCount(),
+    theme.sameSet(this,{rate,rateText:Number(rate).toFixed(2)+'×',accent,accentIndex:Math.max(0,ACCENTS.indexOf(accent)),engineIndex:Math.max(0,this.data.engineOptions.findIndex(o=>o.value===engineMode)),
       engineLabel:m[0],
       engineHint:(pre?'':'⚠️ 云端音频不可用，预生成将自动降级在线。')+m[1]});this.refreshCloud();},
   openEngineSheet(){this.setData({sheet:{show:true,title:'朗读方式',options:this.data.engineOptions,index:this.data.engineIndex,key:'engine'}});},
   openAccentSheet(){this.setData({sheet:{show:true,title:'默认口音',options:this.data.accentOptions,index:this.data.accentIndex,key:'accent'}});},
   closeSheet(){this.setData({'sheet.show':false});},noop(){},
   onSheetPick(e){const i=Number(e.currentTarget.dataset.i),k=this.data.sheet.key;this.setData({'sheet.show':false});if(k==='engine'){const m=this.data.engineOptions[i].value;store.set('engineMode',m);speech.setEngineMode(m);this.refresh();}else{const accent=this.data.accentOptions[i].value;store.set('accent',accent);speech.setAccent(accent);this.setData({accent,accentIndex:i});}},
-  // 学习进度数字跳转（v1.1.26 方案B → v1.1.27 二轮修）：①原生 hover-class 切 tab 返回后残影
-  // （微信清理不可靠）→ 改 data.statPress 手动按压态：touchstart 亮 / touchmove 灭
-  // （滚动不拖亮块）/ touchend 不灭灯（tap 紧随跳转）/ tap 未派发 350ms 兜底 / onShow·onHide 双兜底。
-  // ②跳转前清态 + 延迟 100ms switchTab（v1.1.21 铁律，防返回残影）。
-  // ③重点词→复习页 starred tab、复习记录→random tab：经 globalData.reviewTab 传递（switchTab
-  //   无法带参），review.onShow 消费后清标记。
-  onStatDown(e){const k=e.currentTarget.dataset.pk;if(this.data.statPress!==k)this.setData({statPress:k});},
-  onStatMove(){if(this.data.statPress)this.setData({statPress:''});},
-  onStatEnd(){clearTimeout(this._statTimer);this._statTimer=setTimeout(()=>{if(this.data.statPress)this.setData({statPress:''});},350);},
-  onStatCancel(){clearTimeout(this._statTimer);if(this.data.statPress)this.setData({statPress:''});},
-  onStatTap(e){
-    if(this.data.statPress)this.setData({statPress:''});
-    const url=e.currentTarget.dataset.url,tab=e.currentTarget.dataset.tab;
-    // go：切 tab 前统一起跳点（按压色保持亮到切走，无空窗）
-    const go=()=>{setTimeout(()=>{wx.switchTab({url});},80);};
-    if(tab){
-      const app=getApp();
-      if(app&&app.globalData){
-        app.globalData.reviewTab=tab;
-        // 跨栈预切换（v1.1.28→29）：复习页实例常驻，先改它的 tab 再跳。
-        // v1.1.28 固定延迟 100ms 赌不赢隐藏页的渲染时机（真机仍见瞬移）→
-        // 改用 setData 完成回调（渲染真正落盘才起跳），400ms 兜底防回调失联
-        const rp=app.globalData._reviewPage;
-        if(rp&&rp.data){
-          if(rp.data.tab===tab){go();return;}
-          let done=false;const once=()=>{if(done)return;done=true;go();};
-          // v1.1.32：罩已由 review.onHide 在页面被盖住时就上好（隐藏期间合成器早已入帧），
-          // 这里只改 tab；残帧必然是罩（纯背景色），onShow 里原子「换tab+撤罩」
-          rp.setData({tab},once);setTimeout(once,400);
-          return;
-        }
-      }
-    }
-    go();
-  },
   onRate(e){const rate=Number(e.detail.value);speech.setRate(rate);store.set('rate',rate);this.setData({rate,rateText:rate.toFixed(2)+'×'});},
   onTestVoice(){if(this.data.voiceTesting){speech.stop();return;}const d=plan.demo();if(d&&d.example){speech.speak(d.example,{ai:d.ai,kind:'s'});}else{speech.speak('Hello. Nice to meet you. This is your daily learning voice.');}},
   backupSummaryOf(text){try{const o=JSON.parse(text);return (o&&typeof o.summary==='string')?o.summary:'';}catch(e){return '';}},

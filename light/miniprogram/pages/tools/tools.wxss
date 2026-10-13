@@ -12,6 +12,26 @@
 .rec-unit { font-size: 24rpx; font-weight: 600; margin-left: 6rpx; }
 .rec-label { margin-top: 6rpx; font-size: 24rpx; color: var(--muted); }
 
+/* 学习记录卡的两个入口格（v1.1.95，由设置页「学习进度」卡迁入）
+   视觉沿用设置页 .stat-* 那一套：40rpx 绿色数字 + 12rpx chevron 箭头 + 22rpx 灰标签，
+   与上方三格的 56rpx 大数字形成层级 —— 进度是主角、入口是导航。
+   ⚠️ 按压用 data.statPress 手动控制，不用原生 hover-class：设置页→复习页是切 tab，
+   微信对 hover 残影的清理不可靠（v1.1.27 结论），故沿用「touchstart 亮 / touchmove 灭 /
+   touchend 不灭灯 / tap 未派发 350ms 兜底 / onShow·onHide 双兜底」这套。 */
+.rec-entry { display: flex; justify-content: space-around; margin-top: 28rpx; padding-top: 28rpx;
+  border-top: 1rpx solid var(--line); }
+.rec-stat { padding: 6rpx 16rpx; border-radius: 12rpx; text-align: center; }
+.rec-stat--press { background: var(--press-green); }
+.rec-stat__num { font-size: 40rpx; font-weight: 800; color: var(--green);
+  font-variant-numeric: tabular-nums; }
+/* 箭头几何与设置页 .stat-arrow 逐值一致：12rpx 盒 + 3rpx 描边 + 8rpx 基线偏移
+   （使箭头中心落在 40rpx 数字的字面中心上），颜色 --muted3 由 currentColor 描边，深浅通吃 */
+.rec-stat__go { display: inline-block; width: 12rpx; height: 12rpx; margin-left: 8rpx;
+  vertical-align: 8rpx; color: var(--muted3);
+  border-right: 3rpx solid currentColor; border-bottom: 3rpx solid currentColor;
+  transform: rotate(-45deg); }
+.rec-stat__label { margin-top: 4rpx; font-size: 22rpx; color: var(--muted); }
+
 /* ② 查单词 */
 .search-card { padding: 24rpx 28rpx; }
 .tk-bar { display: flex; align-items: center; padding: 0 22rpx; height: 76rpx;
@@ -151,6 +171,11 @@
   .rec-card { padding: 15px 14px 11px; }
   .rec-num { font-size: 28px; }
   .rec-div { height: 34px; }
+  .rec-entry { margin-top: 14px; padding-top: 14px; }
+  .rec-stat { padding: 3px 8px; border-radius: 6px; }
+  .rec-stat__num { font-size: 20px; }
+  .rec-stat__go { width: 6px; height: 6px; border-width: 1.5px; margin-left: 4px; vertical-align: 4px; }
+  .rec-stat__label { font-size: 11px; margin-top: 2px; }
   .tk-bar { height: 38px; border-radius: 19px; padding: 0 11px; }
   .tk-bar__input { height: 38px; }
   .cat-grid { gap: 7px; }

@@ -91,6 +91,10 @@ Page({
     totalCheckin: plan.CHECKIN_DAYS,
     learnedWords: 0,
     todayNum: 0,
+    // 两个入口格的数字（v1.1.95 由设置页迁入）
+    starredCount: 0,
+    reviewCount: 0,
+    statPress: '',   // 手动按压态（'starred' / 'review'）
 
     // ② 查单词
     kw: '',
@@ -186,6 +190,7 @@ Page({
 
   applyTheme() { theme.applyPage(this); theme.syncTabBar(this); },
   onShow() {
+    if (this.data.statPress) this.setData({ statPress: '' });
     theme.syncTabBar(this, 2);
     this.applyTheme();
     store.onResume();
@@ -201,10 +206,11 @@ Page({
       this.setData({ focus: true });
     }
   },
-  onHide() { speech.stop(); },
+  onHide() { if (this.data.statPress) this.setData({ statPress: '' }); speech.stop(); },
   onUnload() {
     if (this._deb) { clearTimeout(this._deb); this._deb = null; }
     if (this._wd) { clearTimeout(this._wd); this._wd = null; }
+    if (this._statTimer) { clearTimeout(this._statTimer); this._statTimer = null; }
     speech.stop();
     if (this._offSpeech) this._offSpeech();
     this._offSpeech = null;
@@ -217,7 +223,44 @@ Page({
     const leftDays = Math.max(0, plan.CHECKIN_DAYS - learnedDays);
     const learnedWords = store.checkedWordCount();
     const todayNum = plan.currentDayFromStart(store.get('startDate'));
-    theme.sameSet(this, { learnedDays, leftDays, learnedWords, todayNum });
+    // 两个入口格的数字（v1.1.95）：同一次 setData 带出去，切 tab 回来即刷新
+    const starredCount = (store.get('starredWords') || []).length;
+    const reviewCount = store.activeReviewCount();
+    theme.sameSet(this, { learnedDays, leftDays, learnedWords, todayNum, starredCount, reviewCount });
+  },
+
+  // 学习记录两入口的按压与跳转（v1.1.95 由设置页原样迁入）。为什么要这套手动按压：
+  //   ①原生 hover-class 切 tab 返回后残影（微信清理不可靠）→ touchstart 亮 / touchmove 灭 /
+  //   touchend 不灭灯（tap 紧随跳转）/ tap 未派发 350ms 兜底 / onShow·onHide 双兜底。
+  //   ②跳转前清态 + 延迟 80ms switchTab（v1.1.21 铁律，防返回残影）。
+  //   ③重点词→复习页 starred tab、复习记录→random tab：经 globalData.reviewTab 传递
+  //   （switchTab 无法带参），review.onShow 消费后清标记。
+  onStatDown(e) { const k = e.currentTarget.dataset.pk; if (this.data.statPress !== k) this.setData({ statPress: k }); },
+  onStatMove() { if (this.data.statPress) this.setData({ statPress: '' }); },
+  onStatEnd() { clearTimeout(this._statTimer); this._statTimer = setTimeout(() => { if (this.data.statPress) this.setData({ statPress: '' }); }, 350); },
+  onStatCancel() { clearTimeout(this._statTimer); if (this.data.statPress) this.setData({ statPress: '' }); },
+  onStatTap(e) {
+    if (this.data.statPress) this.setData({ statPress: '' });
+    const url = e.currentTarget.dataset.url, tab = e.currentTarget.dataset.tab;
+    // go：切 tab 前统一起跳点（按压色保持亮到切走，无空窗）
+    const go = () => { setTimeout(() => { wx.switchTab({ url }); }, 80); };
+    if (tab) {
+      const app = getApp();
+      if (app && app.globalData) {
+        app.globalData.reviewTab = tab;
+        // 跨栈预切换（v1.1.28→29）：复习页实例常驻，先改它的 tab 再跳。
+        // 固定延迟赌不赢隐藏页的渲染时机（真机仍见瞬移）→ 改用 setData 完成回调
+        // （渲染真正落盘才起跳），400ms 兜底防回调失联。
+        const rp = app.globalData._reviewPage;
+        if (rp && rp.data) {
+          if (rp.data.tab === tab) { go(); return; }
+          let done = false; const once = () => { if (done) return; done = true; go(); };
+          rp.setData({ tab }, once); setTimeout(once, 400);
+          return;
+        }
+      }
+    }
+    go();
   },
 
   // ---------- ② 查单词（逻辑同原搜索页，去掉页面销毁相关的绕行） ----------
