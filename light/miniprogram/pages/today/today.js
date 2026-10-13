@@ -34,6 +34,7 @@ Page({
     viewDay: 0,
     totalDays: plan.TOTAL_DAYS,
     todayNum: 0,
+    curDay: 0,          // 打卡驱动的「当前进度日」= 第一个未完成日（v1.1.97：页面不再跟自然日滚动）
     preStart: false,
     daysToStart: 0,
     dayNum: 1,
@@ -104,11 +105,17 @@ Page({
     app.globalData.jumpWord = '';
     app.globalData.jumpVia = null;
     const todayNum = plan.currentDayFromStart(store.get('startDate'));
-    // 切 tab 返回（无 jump 且页面未销毁）：保持离开时的浏览位置与准备期预览态，仅刷新打卡/同步数据。
-    // 重新冷启动小程序才回到默认落点（第一个未完成日 / 准备期卡片）。
-    if (!jump && this.data.viewDay) {
+    // v1.1.97：彻底取消自然日滚动。curDay = 打卡驱动的「当前进度日」（第一个未完成日）；
+    // 所有学习日都打过卡才回退自然日 todayNum。页面上唯一的"回到…"入口与跨天重置都以它为准。
+    const curDay = store.firstUnfinishedDay() || todayNum || 1;
+    const d0 = new Date();
+    const dateKey = d0.getFullYear() + '-' + (d0.getMonth() + 1) + '-' + d0.getDate();
+    // 切 tab 返回（无 jump 且页面未销毁）：**仅当天**保持离开时的浏览位置与准备期预览态，只刷新打卡/同步数据。
+    // 跨自然日回来（或冷启动）一律走默认落点 = curDay —— 昨天点了开始学习但没打卡，今天进来仍是第 1 天。
+    if (!jump && this.data.viewDay && this._browseDate === dateKey) {
       // 同值守卫：todayNum/daysToStart 多数时候没变，裸 setData 会整树重渲染（切 tab 闪屏）
-      theme.sameSet(this, { todayNum, daysToStart: this._daysToStart() });
+      this._browseDate = dateKey;
+      theme.sameSet(this, { todayNum, curDay, daysToStart: this._daysToStart() });
       this.renderDay(this.data.viewDay);
       // 防御：理论上 jump 与 jumpWord 同生共死，走不到这条分支；万一 jumpDay 被别的入口清了，
       // jumpWord 仍应生效（搜索页的定位不该因为绕路而丢）
@@ -118,11 +125,12 @@ Page({
     // 默认落点 = 第一个未完成的学习日（打卡驱动）：没学/没学完，第二天仍停在这一天；
     // 全部完成时回退自然日 todayNum。从等级页跳转（jump）或手动翻页不受影响。
     const preStart = todayNum === 0 && !jump;
-    theme.sameSet(this, { todayNum, preStart, daysToStart: this._daysToStart() });
+    this._browseDate = dateKey;
+    theme.sameSet(this, { todayNum, curDay, preStart, daysToStart: this._daysToStart() });
     // 准备期不渲染日内容：renderDay 会把标题改成「第 N 天 · 等级」，
     // 准备期标题应保持「今日单词」；日数据由「先看看第 1 天」入口按需渲染
     if (preStart) { this._setTitle(null); return; }
-    let viewDay = jump || store.firstUnfinishedDay() || todayNum || 1;
+    let viewDay = jump || curDay;
     if (viewDay < 1) viewDay = 1;
     if (viewDay > plan.TOTAL_DAYS) viewDay = plan.TOTAL_DAYS;
     this.renderDay(viewDay);
@@ -284,10 +292,20 @@ Page({
     this.onShow();
     this.fb().toast('已开始 · 第 1 天', 1500);
   },
+  // 准备期预览入口「先看看第 1 天」：直接渲染第 1 天（不打卡、不写 startDate）。
   backToToday() {
     const t = this.data.todayNum || 1;
     speech.stop();
     // 准备期（preStart）点「先看看第 1 天」：必须退出准备期卡片，否则 renderDay 渲染了也被 wx:if 盖住
+    this.setData({ preStart: false });
+    this.renderDay(t);
+  },
+  // v1.1.97：手动翻页后「回到当前进度」—— 目标日 = curDay（第一个未完成日），不再按自然日算。
+  // 页内 chip 只在 dayNum !== curDay 时才出现，所以这里不需要额外守卫。
+  backToProgress() {
+    speech.stop();
+    let t = this.data.curDay || 1;
+    if (t > plan.TOTAL_DAYS) t = plan.TOTAL_DAYS;
     this.setData({ preStart: false });
     this.renderDay(t);
   },

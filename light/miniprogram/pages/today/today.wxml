@@ -40,7 +40,9 @@
       <view class="nav-btn {{viewDay < totalDays ? '' : 'nav-btn--dis'}}" hover-class="{{viewDay < totalDays ? 'nav-btn--press' : 'none'}}" hover-stay-time="120" bindtap="nextDay">后一天 ›</view>
     </view>
     <view class="phase-line">{{theme}}</view>
-    <view class="is-today" wx:if="{{dayNum !== todayNum && todayNum > 0}}" hover-class="hover-dim" hover-stay-time="120" bindtap="backToToday">回到今天（第 {{todayNum}} 天）</view>
+    <!-- v1.1.97：「回到今天」按自然日算 → 改为「回到当前进度」= curDay（第一个未完成日）。
+         目标日由 today.js 的 backToProgress() 提供，页面不再跟自然日滚动。 -->
+    <view class="is-today" wx:if="{{dayNum !== curDay && curDay > 0}}" hover-class="hover-dim" hover-stay-time="120" bindtap="backToProgress">回到当前进度（第 {{curDay}} 天）</view>
   </view>
 
   <!-- 标题与目标 -->

@@ -97,9 +97,10 @@
 /* 选中态：浅绿底 + 深绿字（v1.1.76 由实心绿白字浅色化，与 .ph-subchip.on 同风格；按压不掉色） */
 .ph-cls.on { background: var(--press-green); color: var(--green-press); }
 .ph-cls--press { opacity: .85; }
-/* 数量与标签同量级（v1.1.79）：原 22rpx + opacity .8，与 28rpx 的「元音/辅音」差 6rpx 且额外变淡，
-   真机上就是"两个大小"→ 提到 24rpx 并去掉额外透明度。 */
-.ph-cls__n { font-size: 24rpx; font-weight: 600; margin-left: 8rpx; }
+/* 数量与标签完全一致（v1.1.97）：v1.1.79 提到 24rpx/600 后用户仍觉"两个大小"——实际差在**字重**
+   （数字 600 / 标签 700）。现统一为 28rpx/700，与「元音/辅音」「词性缩写/语法术语」同号同重，
+   数字不再看起来比文字小一号。 */
+.ph-cls__n { font-size: 28rpx; font-weight: 700; margin-left: 8rpx; }
 
 /* 子类筛选（全部 / 短元音 …）：胶囊 chips，自动换行 */
 .ph-sub { display: flex; flex-wrap: wrap; gap: 12rpx; margin-top: 14rpx; }
@@ -183,6 +184,7 @@
   .cat-cell__go { width: 8px; height: 8px; border-width: 1.5px; margin-left: 6px; }
   .ph-chip { min-width: 48px; padding: 6px 8px; font-size: 14px; }
   .ph-cls { height: 34px; line-height: 34px; border-radius: 7px; font-size: 14px; }
+  .ph-cls__n { font-size: 14px; }
   .ph-subchip { padding: 4px 10px; border-radius: 12px; font-size: 12px; }
   .ph-panel { margin-top: 12px; padding: 11px 13px 9px; border-radius: 8px; }
   .ph-big { font-size: 28px; }
