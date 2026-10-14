@@ -130,7 +130,6 @@ Page({
     // ⑤ 语法术语速查（v1.1.94）：静态数据，进页面就绪，无异步、无音频
     glGroup: GLOSSARY.groups[0].id,
     glGroups: GLOSSARY.groups,
-    glHint: GLOSSARY.groups[0].hint,
     glTotal: GLOSSARY.groups.reduce((a, g) => a + g.items.length, 0),
     glList: GLOSSARY.groups[0].items,
     gl: GLOSSARY.groups[0].items[0],   // 默认选中第一条 → 面板永不为空
@@ -429,7 +428,7 @@ Page({
     if (!id || id === this.data.glGroup) return;
     const g = GLOSSARY.groups.filter(function (x) { return x.id === id; })[0];
     if (!g) return;
-    this.setData({ glGroup: id, glHint: g.hint, glList: g.items, gl: g.items[0] });
+    this.setData({ glGroup: id, glList: g.items, gl: g.items[0] });
   },
   onGlTap(e) {
     const k = e.currentTarget.dataset.k;

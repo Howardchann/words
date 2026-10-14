@@ -160,7 +160,7 @@
       </view>
     </view>
   </view>
-  <view class="tk-note">点任意音标看讲解；例词可直接点读（离线也能听）。共 {{phonTotal}} 个音标（元音 {{vowelCount}} / 辅音 {{consCount}}）。</view>
+  <view class="tk-note">共 {{phonTotal}} 个音标（元音 {{vowelCount}} / 辅音 {{consCount}}）。点任意音标看讲解，例词可直接点读（离线也能听）。</view>
 </view>
 
 <!-- ⑤ 术语小词典（v1.1.94，v1.1.97 定名）：零基础用户在词卡释义（me（宾格））和词性标签（n./v.）里
@@ -191,7 +191,7 @@
       <view class="gl-eg">{{gl.e}}</view>
     </view>
   </view>
-  <view class="tk-note">共 {{glTotal}} 个术语，分两类：「词性缩写」指单词卡上单词后面的小标签（n. / v. / adj. …），说明这个词属于哪一类词；「语法术语」指释义括弧里、语法讲解里出现的行话。卡上遇到看不懂的小字，来这里查一条就走。</view>
+  <view class="tk-note">共 {{glTotal}} 个术语。词性缩写 = 单词卡上单词后的小标签（n. / v. / adj. …）；语法术语 = 释义括弧、语法讲解里的行话。卡上遇到看不懂的小字，来这里查一条就走。</view>
 </view>
 
 <!-- ④ 语法速查：本页只给目录（全文在分包，避免撑大启动包） -->
