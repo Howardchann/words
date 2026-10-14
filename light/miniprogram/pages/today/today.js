@@ -52,6 +52,7 @@ Page({
     hlVia: '',        // 变体标注（v1.1.75）：『took』是它的过去式 —— 搜索结果卡的标注在定位行下延续
     hlQ: '',          // 用户当时输入的查询词（标注主语）
     playingText: '',
+    playingKey: '',
     playingAccent: '',
     wfText: '',      // 词形小标签播放态（v1.1.78）：与词条播放态隔离，防变体文本撞词条误亮词卡
     wfKey: '',       // 词形高亮唯一键（v1.1.81）：词+':'+形式，防多卡同 form 串亮
@@ -79,7 +80,7 @@ Page({
         }
         this.setData({ wfText: '', wfKey: '' });
       }
-      const upd = { playingText: payload.playing ? payload.text : '', playingAccent: payload.accent || '', playingMode: payload.mode };
+      const upd = { playingText: payload.playing ? payload.text : '', playingAccent: payload.accent || '', playingMode: payload.mode, playingKey: payload.playing ? this.data.playingKey : '' };
       // 歌词式进度：按朗读进度把当前文本切成「已读/未读」两段，已读染绿
       if (payload.playing && payload.text) {
         const lit = Math.round((payload.progress || 0) * payload.text.length);
@@ -349,14 +350,16 @@ Page({
     if (!text) return;
     if (this.data.wfText) this.setData({ wfText: '', wfKey: '' });   // 词形→词条切换：先收词形态
     const accent = ds.accent || '';
-    const same = this.data.playingText === text && (this.data.playingAccent || '') === accent;
+    const key = ds.k || '';   // 拆卡(v1.1.99): 点单卡喇叭只亮该卡; 朗读全部 key 为空走旧逻辑
+    const same = this.data.playingText === text && (this.data.playingAccent || '') === accent && this.data.playingKey === key;
     if (same) {
       const r = speech.togglePause();
-      this.setData({ playingText: r === 'paused' ? '' : text, playingAccent: r === 'paused' ? '' : accent });
+      this.setData({ playingText: r === 'paused' ? '' : text, playingAccent: r === 'paused' ? '' : accent, playingKey: r === 'paused' ? '' : key });
       return;
     }
     const ai = Number(ds.ai) || 0;
     speech.speak(text, { ai: ai, kind: ds.kind || 's', accent: accent });
+    this.setData({ playingKey: key });   // 立即设 key, playingText 等 speech 回传
     // 滑动窗口（v1.1.72）：以正在播的词为基点，往后备 2 个词的音频
     const vi = this.data.vocab.findIndex(v => v.ai === ai);
     if (vi >= 0) this._prefetchWindow(vi);

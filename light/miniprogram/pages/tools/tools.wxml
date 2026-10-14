@@ -102,15 +102,14 @@
      现在：大类（元音/辅音）→ 子类（短元音/双元音…）两级筛选，屏幕上最多 3 行音标，面板紧跟其下；
      说明文字也移到最前，不再吊在最底。 -->
 <view class="card">
-  <view class="section-label">音标（{{phonTotal}} 个）</view>
-  <view class="ph-hint">点任意音标看讲解；例词可直接点读（离线也能听）。</view>
+  <view class="section-label">音标</view>
 
   <!-- 大类：元音 / 辅音 -->
   <view class="ph-class">
     <view class="ph-cls {{phCls === 'vowel' ? 'on' : ''}}" data-c="vowel"
-          hover-class="ph-cls--press" hover-stay-time="60" bindtap="onPhCls">元音<text class="ph-cls__n">{{vowelCount}}</text></view>
+          hover-class="ph-cls--press" hover-stay-time="60" bindtap="onPhCls">元音</view>
     <view class="ph-cls {{phCls === 'consonant' ? 'on' : ''}}" data-c="consonant"
-          hover-class="ph-cls--press" hover-stay-time="60" bindtap="onPhCls">辅音<text class="ph-cls__n">{{consCount}}</text></view>
+          hover-class="ph-cls--press" hover-stay-time="60" bindtap="onPhCls">辅音</view>
   </view>
 
   <!-- 子类筛选：全部 + 当前大类的子类 -->
@@ -161,6 +160,7 @@
       </view>
     </view>
   </view>
+  <view class="tk-note">点任意音标看讲解；例词可直接点读（离线也能听）。共 {{phonTotal}} 个音标（元音 {{vowelCount}} / 辅音 {{consCount}}）。</view>
 </view>
 
 <!-- ⑤ 术语小词典（v1.1.94，v1.1.97 定名）：零基础用户在词卡释义（me（宾格））和词性标签（n./v.）里
@@ -168,12 +168,11 @@
      结构与音标卡同构（分类段控 → 胶囊网格 → 常驻面板），默认选中第一条所以永不留白。
      命名经用户确认：「语法术语速查」六字拗口 →「术语小词典」；卡片量词与音标卡统一为「个」。 -->
 <view class="card">
-  <view class="section-label">术语小词典（{{glTotal}} 个）</view>
-  <view class="ph-hint">{{glHint}}</view>
+  <view class="section-label">术语小词典</view>
 
   <view class="ph-class">
     <view class="ph-cls {{glGroup === item.id ? 'on' : ''}}" wx:for="{{glGroups}}" wx:key="id" data-id="{{item.id}}"
-          hover-class="ph-cls--press" hover-stay-time="60" bindtap="onGlGrp">{{item.name}}<text class="ph-cls__n">{{item.items.length}}</text></view>
+          hover-class="ph-cls--press" hover-stay-time="60" bindtap="onGlGrp">{{item.name}}</view>
   </view>
 
   <view class="ph-grid">
@@ -192,7 +191,7 @@
       <view class="gl-eg">{{gl.e}}</view>
     </view>
   </view>
-  <view class="tk-note">共 {{glTotal}} 个术语，分「词性缩写」和「语法术语」两类；词卡上遇到看不懂的小字，来这里查一条就走。</view>
+  <view class="tk-note">共 {{glTotal}} 个术语，分两类：「词性缩写」指单词卡上单词后面的小标签（n. / v. / adj. …），说明这个词属于哪一类词；「语法术语」指释义括弧里、语法讲解里出现的行话。卡上遇到看不懂的小字，来这里查一条就走。</view>
 </view>
 
 <!-- ④ 语法速查：本页只给目录（全文在分包，避免撑大启动包） -->
@@ -202,7 +201,6 @@
     <view class="cat-cell" wx:for="{{cats}}" wx:key="id" data-id="{{item.id}}"
           hover-class="cat-cell--press" hover-stay-time="80" bindtap="onCatTap">
       <view class="cat-name">{{item.name}}</view>
-      <view class="cat-count">{{item.count}} 个</view>
       <view class="cat-cell__go"></view>
     </view>
   </view>

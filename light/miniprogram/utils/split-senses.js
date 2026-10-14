@@ -266,6 +266,14 @@ module.exports = {
     sub: { p: 'v.', m: '缠绕（wind 的过去式）', ipa: '/waʊnd/', uk: '/waʊnd/', ai: 8241,
       e: 'She wound the scarf around her neck.', cn: '她把围巾绕在脖子上。' },
   },
+
+  // ── v1.1.99 补录（用户真机验收反馈）──────────────────────────────
+  // record：释义/音标都是名词读音，动词读音义项未收录 → 补成副卡
+  record: {
+    p1: 'n.', m1: '记录；履历；记载',
+    sub: { p: 'v.', m: '记录；录制', ipa: '/rɪˈkɔːrd/', uk: '/rɪˈkɔːd/', ai: 8242,
+      e: 'She likes to record her own songs.', cn: '她喜欢录下自己唱的歌。' },
+  },
 };
 
 // ── 展开逻辑（今日页渲染层调用；输入 must 为浅拷贝数组，本函数会原地改写副本）──
