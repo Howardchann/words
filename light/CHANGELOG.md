@@ -2,7 +2,70 @@
 
 > 本实例由 cloud 实例 v1.1.38（仓库提交 `dbe76dc` 的 cloud/ 树）派生，**共享全部产品与机制历史**——完整变更史见 `../cloud/CHANGELOG.md`，此处只记录本实例自身的差异与后续变更。
 
-## 2026-10-14 · 工具页去量词 / 三区注释统一 / 拆卡播放隔离 / record 补副卡 / 裁词余量修正（v1.1.99，已上传体验版）
+## 2026-10-14 · 36 词异音全量复扫：3 词补拆卡 + 10 词音标修正 + 76 音频（v1.1.100，仅本地）
+
+> **触发**：v1.1.99 验收反馈里用户追问「record 这种是否还有其他单词也有同样的情况」。全量复扫后，词表内异音词共 76 个，其中 **36 个未拆卡**（`_hetero82.txt` 白名单只覆盖 191 词，扫不到）。用户授权「按之前的逻辑实施就行」。
+> **处置口径**（沿用 v1.1.98）：**看「另一读音的义项有没有收进释义」** —— 收了就拆卡；没收就不拆，但必须保证音标/释义/例句三者落在同一读音上。
+
+### ① 分类结论：36 词 = 3 拆卡 + 10 修音标 + 23 自洽不动
+
+| 类别 | 数量 | 判据 |
+|---|---|---|
+| **A · 补拆卡** | 3 | 释义收了两个读音的义项（或例句与释义的读音互相矛盾） |
+| **B · 只修音标** | 10 | 释义只一个读音的义项，但音标的**美/英两栏各自取了不同读音** |
+| **C · 自洽不动** | 23 | 音标（两栏）/释义/例句全部落在同一读音上 |
+
+**根因**：词表的**美音音标**与**英音音标**来自两套源，各自取「首读音」，而两套源的读音排序不同 → 同一个词的美/英两栏会指向**两个不同读音**（例：conduct 美 `/ˈkɑndəkt/` 是名词、英 `/kənˈdʌkt/` 是动词）。这**不是英美差异**，是取音错误。
+
+- **A 类**：conduct、digest、permit
+- **B 类**：content、discharge、exploit、export、import、increase、insult、research、transfer、upset
+- **C 类（23）**：attribute、bow、compound、conflict、contrast、decrease、duplicate、entrance、excuse、frequent、house、invalid、minute、perfect、present、progress、resume、row、separate、sewer、subject、suspect、survey
+
+### ② A 类 · 3 词补拆卡（改 `words.js` + `split-senses.js`）
+
+| 词 | 主卡（改后） | 副卡（新增，ai 号段 8243~8245） |
+|---|---|---|
+| conduct | n. 行为；举动；为人 · 美 `/ˈkɑndəkt/` 英 `/ˈkɒndəkt/`（**英音由动词音改为名词音**） | v. 实施；进行；指挥 · `/kənˈdʌkt/` · **8243** |
+| digest | n. 文摘 · 美 `/ˈdaɪdʒɛst/` 英 `/ˈdaɪdʒɛst/`（**英音由动词音改为名词音**） | v. 消化；理解 · `/daɪˈdʒɛst/` · **8244** |
+| permit | n. 许可证 · 美 `/ˈpɜrˌmɪt/` 英 `/ˈpɜːmɪt/`（**英音由动词音改为名词音**） | v. 许可；允许 · 美 `/pərˈmɪt/` 英 `/pəˈmɪt/` · **8245** |
+
+- **conduct 主卡例句被换掉**：原例句 "The study was conducted in 2022." 是动词用法，与主卡的名词释义/音标矛盾 → 主卡改为 "His conduct at the meeting was excellent."，动词义另立副卡；digest / permit 同理换了主卡名词例句，原动词例句移给副卡。
+- 副卡数 **43 → 46**，号段 8200~8245 **连续无断档**。
+- **实现边界**：主卡词性/释义收敛走 overlay 的 `p1`/`m1`（与既有 43 张同款）；**音标与例句 overlay 无对应字段，必须改 `words.js`**（本轮共 22 处字段）。
+- 主表 `words.js` 条数仍 **8115**（只改字段内容，不增删行）；搜索 / 复习 / 云同步快照仍以主卡为准。
+
+### ③ B 类 · 10 词音标修正（13 处，全部改 `words.js`）
+
+| 词 | 改前 | 改后 | 依据 |
+|---|---|---|---|
+| content | 美 `/ˈkɑntɛnt/` 英 `/ˈkɒntɛnt/` | 美/英 `/kənˈtent/` | 形容词「满足的」重音在第二音节 |
+| discharge | 美 `/ˈdɪsˌtʃɑrdʒ/` | 美 `/dɪsˈtʃɑrdʒ/` | 例句 "Factories discharge…" 是动词 |
+| exploit | 美 `/ˈɛksˌplɔɪt/` | 美 `/ɪkˈsplɔɪt/` | 词性 v. + 例句是动词 |
+| export | 美 `/ˈɛkspɔrt/` 英 `/ˈɛkspɔːt/` | 美 `/ɪkˈspɔrt/` 英 `/ɪkˈspɔːt/` | 例句 "China exports…" 是动词 |
+| import | 美 `/ˈɪmˌpɔrt/` 英 `/ˈɪmpɔːt/` | 美 `/ɪmˈpɔrt/` 英 `/ɪmˈpɔːt/` | 例句 "The UK imports…" 是动词 |
+| increase | 美 `/ˈɪnˌkris/` | 美 `/ɪnˈkris/` | 例句 "Sales increased…" 是动词 |
+| insult | 英 `/ɪnˈsʌlt/` | 英 `/ˈɪnsʌlt/` | 例句 "It is an insult…" 是名词 |
+| research | 英 `/rɪˈsɜːtʃ/` | 英 `/ˈrisɜːtʃ/` | 例句 "The research lasted…" 是名词 |
+| transfer | 美 `/ˈtrænsfər/` | 美 `/trænsˈfɜr/` | 例句 "She was transferred…" 是动词 |
+| upset | 美 `/ˈʌpˌsɛt/` | 美 `/ˌʌpˈsɛt/` | upset 重音固定在第二音节 |
+
+### ④ 音频 · 76 个文件（`w/` 32 + `wuk/` 32 + `s/` 12）
+
+- **A 类 6 张卡的单词音频一律「从该卡自己的例句裁词」**（载体 = 例句本身，`cut` = 目标词）→ 单词读音与例句读音**同源**，物理上不可能矛盾，**不依赖声学推断**。
+  - conduct 副卡为此换了含原形的例句："She will conduct the survey next week." / 她下周将进行这项调查。
+- **B 类 10 词**用载语逼音（名词 `an insult` / `the research`，动词 `to discharge` / `to export` / `to import` / `to increase` / `to transfer`，形/动 `he is content`、`to be upset`、`to exploit`）—— 与 v1.1.98 主卡同法。
+- 云端校验 **76/76 命中、0 缺失、0 陈旧**。
+
+**验证留档（诚实记录）**：
+- `_probe_stress_1100.py`（能量质心）+ `_probe_syll_1100.py`（音节时长）两个声学指标**只能部分判读**：conduct / permit 的名词版与动词版差异明显（0.226 / 0.159，来自元音音段不同）；**digest 因两个读音的音段完全相同**（只重音移位）指标不敏感——这正是把 digest 改成「例句裁词」的原因。
+- `_diag_cut_1100.py` 证明**裁词边界没有切掉词尾**：permit 在句中 TTS 的真实时长就是 0.362s（下一个词 `to` 的起点紧接在 0.762s，没有可扩空间）。句中 0.39s 与载语版 0.64s 都是正确读音，只是语速不同。
+
+### ⑤ 未动范围（供后续参考）
+
+- **C 类 23 词**：音标/释义/例句自洽，且都只教一个读音 → 不动。
+- **次要项（非错误、属「不完整」）**：`conflict`/`contrast`/`progress`/`survey` 等词性标了 `n./v.` 而音标只给名词读音；`excuse` 释义含名词义「申辩；致歉」而音标是动词读音（差异仅词尾 s/z）；`frequent` 释义含罕用动词义「时常来访」。改这类需要动 `words.js` 的词性字段（overlay 的 `p1` 只在有 `sub` 时生效）。
+
+
 
 > **触发**：v1.1.98 真机验收反馈 —— ①工具页量词层层重复（标题「44 个」+ 段控「20 / 24」+ 卡片「5 个」）②拆卡「点单张卡喇叭、主副两张一起亮」③「A1 里 record 的异音指什么」（我的判定期漏了它）④「project 英音开头像多读了个 the」⑤三区「标题下 + 卡片末尾」两条注释重复或不一致。
 > 用户授权：「以上修复完直接盖章上传，开发者工具现在上传就是覆盖了旧的体验版不需要去后台选择」。用户认可项：收藏按钮两卡同收、中文两卡同显 —— 本轮**保留不动**。

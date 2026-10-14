@@ -274,6 +274,30 @@ module.exports = {
     sub: { p: 'v.', m: '记录；录制', ipa: '/rɪˈkɔːrd/', uk: '/rɪˈkɔːd/', ai: 8242,
       e: 'She likes to record her own songs.', cn: '她喜欢录下自己唱的歌。' },
   },
+
+  // ── v1.1.100 补录（36 词全量复扫：释义确实收了两个读音的义项）──────
+  // conduct：释义「行为；举动；为人」是名词读音，但原例句 "was conducted" 是动词用法，
+  //   词性又写 n./v. → 三者不自洽。主卡收敛为 n. + 换名词例句（words.js 已改），
+  //   动词义另立副卡（原例句正好给副卡用）。
+  conduct: {
+    p1: 'n.',
+    sub: { p: 'v.', m: '实施；进行；指挥', ipa: '/kənˈdʌkt/', uk: '/kənˈdʌkt/', ai: 8243,
+      e: 'She will conduct the survey next week.', cn: '她下周将进行这项调查。' },
+  },
+
+  // digest：释义含「文摘」（名词读音）+「消化；理解」（动词读音）两类 → 拆
+  digest: {
+    p1: 'n.', m1: '文摘',
+    sub: { p: 'v.', m: '消化；理解', ipa: '/daɪˈdʒɛst/', uk: '/daɪˈdʒɛst/', ai: 8244,
+      e: "I know it's a lot to digest.", cn: '我知道这信息量不小。' },
+  },
+
+  // permit：释义含「许可证」（名词读音）+「许可；允许」（动词读音）两类 → 拆
+  permit: {
+    p1: 'n.', m1: '许可证',
+    sub: { p: 'v.', m: '许可；允许', ipa: '/pərˈmɪt/', uk: '/pəˈmɪt/', ai: 8245,
+      e: 'Permit me to do that for you.', cn: '请允许我帮你做这件事。' },
+  },
 };
 
 // ── 展开逻辑（今日页渲染层调用；输入 must 为浅拷贝数组，本函数会原地改写副本）──
