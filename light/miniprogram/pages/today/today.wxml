@@ -65,7 +65,7 @@
     <view class="speak-all-row">
       <button class="btn-ghost btn-speak-all {{playingMode === 'queue' ? 'btn-speak-all--active' : ''}}" hover-class="btn-press" bindtap="onSpeakAll"><view class="ico {{playingMode === 'queue' ? 'ico-stop' : 'ico-play'}}"></view>{{playingMode === 'queue' ? '停止朗读' : '朗读全部'}}</button>
     </view>
-    <block wx:for="{{vocab}}" wx:key="w">
+    <block wx:for="{{vocab}}" wx:key="k">
       <view class="group-tag" wx:if="{{index === 0 && coreCount > 0}}">主题词 · {{coreCount}}</view>
       <view class="group-tag group-tag--extra" wx:if="{{index === extraStart}}">扩展词 · {{extraCount}}</view>
       <view class="word-row{{hlWord === item.w ? ' word-row--hl' : ''}}" id="w{{index}}">

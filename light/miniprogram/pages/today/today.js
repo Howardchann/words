@@ -19,6 +19,7 @@ const store = require('../../utils/store.js');
 const theme = require('../../utils/theme.js');
 const speech = require('../../utils/speech.js');
 const wordforms = require('../../utils/wordforms.js');
+const splitSenses = require('../../utils/split-senses.js');   // 拆卡 overlay（v1.1.98）
 
 Page({
   data: {
@@ -223,7 +224,10 @@ Page({
     if (dayData) delete dayData.v;
     // 词形标签（v1.1.80）：换成 wfNotes —— 正向（原形→不规则变化）+ 反向（变体→原形，如 were→原形 be）。
     // 原来只用 noteFor，功能词包里的 was/were/been/am/is/are 作今日单词时词形行是空的。
-    const list = (raw && raw.v ? raw.v : []).map(v => Object.assign({}, v, { starred: store.isStarred(v.w), wf: wordforms.wfNotes(v.w) }));
+    // 拆卡展开（v1.1.98）：命中 split-senses 的词拆成主/副两张卡（主卡在前）。
+    // expand 只改写这里传入的浅拷贝，plan 缓存与 words.js 主表零改动。
+    const _exp = splitSenses.expand((raw && raw.v ? raw.v : []).map(v => Object.assign({}, v, { starred: store.isStarred(v.w), wf: wordforms.wfNotes(v.w) })));
+    const list = _exp.list;
     // 例句精读（v1.1.85）：这些句子在模板里是 `data-kind="g"` 且**没有词表编号** → 走文本哈希（g/ 桶）。
     // ⚠️ 两点：① 含汉字的句子（「每天 5 分钟回忆，胜过 20 分钟抄写。」）没有可朗读的英文 → 标 spk=false，
     //    模板据此不渲染喇叭（此前它们带喇叭，点下去是在线 TTS 读中文）；② 句子文本要提前收进 g/ 桶，
@@ -257,7 +261,7 @@ Page({
       dayData,
       prLines,
       vocab: list,
-      extraStart: coreCount < list.length ? coreCount : -1,
+      extraStart: _exp.extraIdx >= 0 ? _exp.extraIdx : -1,
       coreCount: coreCount,
       extraCount: list.length - coreCount,
       checked: store.isChecked(info.wIdx + 1, info.k),
@@ -376,7 +380,8 @@ Page({
     if (!v) return;
     const starred = store.toggleStar(v);
     const patch = {};
-    patch['vocab[' + i + '].starred'] = starred;
+    // 拆卡后同词有主/副两卡（v1.1.98）：收藏态按 w 同步到两张卡
+    this.data.vocab.forEach((it, j) => { if (it.w === v.w) patch['vocab[' + j + '].starred'] = starred; });
     this.setData(patch);
   },
 
