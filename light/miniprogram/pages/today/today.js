@@ -358,8 +358,9 @@ Page({
       return;
     }
     const ai = Number(ds.ai) || 0;
+    this.setData({ playingKey: key });   // 先落 key 再 speak：speak 内 notify 是同步回调，
+                                         // 后设会先渲染一帧「主副同亮」（v1.1.100 验收修复）
     speech.speak(text, { ai: ai, kind: ds.kind || 's', accent: accent });
-    this.setData({ playingKey: key });   // 立即设 key, playingText 等 speech 回传
     // 滑动窗口（v1.1.72）：以正在播的词为基点，往后备 2 个词的音频
     const vi = this.data.vocab.findIndex(v => v.ai === ai);
     if (vi >= 0) this._prefetchWindow(vi);

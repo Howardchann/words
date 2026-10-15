@@ -31,6 +31,9 @@
   border-right: 3rpx solid currentColor; border-bottom: 3rpx solid currentColor;
   transform: rotate(-45deg); }
 .rec-stat__label { margin-top: 4rpx; font-size: 22rpx; color: var(--muted); }
+/* 入口格量词（v1.1.102）：数值与第一行 .rec-unit 完全一致（24rpx / 600 / 6rpx），
+   颜色继承 .rec-stat__num 的 --green，无底色。 */
+.rec-stat__unit { font-size: 24rpx; font-weight: 600; margin-left: 6rpx; }
 
 /* ② 查单词 */
 .search-card { padding: 24rpx 28rpx; }

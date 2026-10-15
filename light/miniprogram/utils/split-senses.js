@@ -43,7 +43,7 @@ module.exports = {
 
   alternate: {
     p1: 'v.', m1: '交替；轮流',
-    sub: { p: 'adj.', m: '交替的；轮流的', ipa: '/ˈɔːltərnət/', uk: '/ˈɔːltənət/', ai: 8204,
+    sub: { p: 'adj.', m: '交替的；轮流的', ipa: '/ˈɔːltərnət/', uk: '/ɔːlˈtɜːnət/', ai: 8204,
       e: 'My sister and I take alternate turns doing the dishes.', cn: '我和妹妹轮流洗碗。' },
   },
 

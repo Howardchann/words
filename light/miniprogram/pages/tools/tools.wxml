@@ -31,14 +31,14 @@
           data-pk="starred" data-url="/pages/review/review" data-tab="starred"
           bindtouchstart="onStatDown" bindtouchmove="onStatMove" bindtouchend="onStatEnd"
           bindtouchcancel="onStatCancel" bindtap="onStatTap">
-      <view class="rec-stat__num">{{starredCount}}<text class="rec-stat__go"></text></view>
+      <view class="rec-stat__num">{{starredCount}}<text class="rec-stat__unit">个</text><text class="rec-stat__go"></text></view>
       <view class="rec-stat__label">重点词</view>
     </view>
     <view class="rec-stat {{statPress === 'review' ? 'rec-stat--press' : ''}}"
           data-pk="review" data-url="/pages/review/review" data-tab="random"
           bindtouchstart="onStatDown" bindtouchmove="onStatMove" bindtouchend="onStatEnd"
           bindtouchcancel="onStatCancel" bindtap="onStatTap">
-      <view class="rec-stat__num">{{reviewCount}}<text class="rec-stat__go"></text></view>
+      <view class="rec-stat__num">{{reviewCount}}<text class="rec-stat__unit">次</text><text class="rec-stat__go"></text></view>
       <view class="rec-stat__label">复习记录</view>
     </view>
   </view>
