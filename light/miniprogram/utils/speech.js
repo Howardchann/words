@@ -37,11 +37,13 @@ let playToken = 0, audioTimeout = null, audioOptDone = false;
 //          appropriate/advocate/aggregate/duplicate/contest），**云端替换的是同名同路径文件**
 //          → 老设备本地缓存会继续播旧读音。同样用换根目录强制重取（au2 → au3）。
 // 旧目录在模块加载时一次性清除（失败静默，下次启动再试）。
-const CACHE_ROOT = (wx.env && wx.env.USER_DATA_PATH ? wx.env.USER_DATA_PATH : '') + '/au3';
-const CACHE_ROOT_OLD = (wx.env && wx.env.USER_DATA_PATH ? wx.env.USER_DATA_PATH : '') + '/au2';
-const CACHE_ROOT_OLD2 = (wx.env && wx.env.USER_DATA_PATH ? wx.env.USER_DATA_PATH : '') + '/au';
+const CACHE_ROOT = (wx.env && wx.env.USER_DATA_PATH ? wx.env.USER_DATA_PATH : '') + '/au4';
+const CACHE_ROOT_OLD = (wx.env && wx.env.USER_DATA_PATH ? wx.env.USER_DATA_PATH : '') + '/au3';
+const CACHE_ROOT_OLD2 = (wx.env && wx.env.USER_DATA_PATH ? wx.env.USER_DATA_PATH : '') + '/au2';
+const CACHE_ROOT_OLD3 = (wx.env && wx.env.USER_DATA_PATH ? wx.env.USER_DATA_PATH : '') + '/au';
 try { wx.getFileSystemManager().rmdirSync(CACHE_ROOT_OLD, true); } catch (e) {}
 try { wx.getFileSystemManager().rmdirSync(CACHE_ROOT_OLD2, true); } catch (e) {}
+try { wx.getFileSystemManager().rmdirSync(CACHE_ROOT_OLD3, true); } catch (e) {}
 const CACHE_MAX = 2000;      // 缓存文件数上限，超出按最久未用淘汰
 const SLOW_GATE = 0.85;      // ≤ 此速率使用慢速音频
 const URL_TTL = 60 * 60 * 1000;   // 签名链接按 2 小时有效估算，取一半留余量

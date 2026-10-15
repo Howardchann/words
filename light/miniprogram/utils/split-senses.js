@@ -37,7 +37,7 @@ module.exports = {
 
   aggregate: {
     p1: 'n./adj.', m1: '合计；合计的',
-    sub: { p: 'v.', m: '总计；合计', ipa: '/ˈæɡrɪɡeɪt/', uk: '/ˈæɡrɪɡeɪt/', ai: 8203,
+    sub: { p: 'v.', m: '总计；合计', ipa: '/ˈæɡrəɡeɪt/', uk: '/ˈæɡrɪɡeɪt/', ai: 8203,
       e: 'We aggregate the numbers to find the total.', cn: '我们把这些数字合计起来求出总数。' },
   },
 
@@ -109,7 +109,7 @@ module.exports = {
 
   delegate: {
     p1: 'n.', m1: '代表',
-    sub: { p: 'v.', m: '委派；把…委托给', ipa: '/ˈdelɪɡeɪt/', uk: '/ˈdelɪɡeɪt/', ai: 8215,
+    sub: { p: 'v.', m: '委派；把…委托给', ipa: '/ˈdeləɡeɪt/', uk: '/ˈdelɪɡeɪt/', ai: 8215,
       e: 'The manager delegated the job to her assistant.', cn: '经理把这项工作委派给了她的助手。' },
   },
 
@@ -145,7 +145,7 @@ module.exports = {
 
   intimate: {
     p1: 'adj.', m1: '亲密的；私人的',
-    sub: { p: 'v.', m: '暗示', ipa: '/ˈɪntɪmeɪt/', uk: '/ˈɪntɪmeɪt/', ai: 8221,
+    sub: { p: 'v.', m: '暗示', ipa: '/ˈɪntəmeɪt/', uk: '/ˈɪntɪmeɪt/', ai: 8221,
       e: 'He intimated that he was unhappy with the new plan.', cn: '他暗示自己对这项新计划不满意。' },
   },
 
