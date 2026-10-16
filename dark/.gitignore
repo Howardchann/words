@@ -13,3 +13,6 @@ miniprogram_npm/
 
 # 系统文件
 Thumbs.db
+
+# 音频管线工作目录（中间产物 + 本地输出镜像，可随时删）
+tools/audio-pipeline/_work/

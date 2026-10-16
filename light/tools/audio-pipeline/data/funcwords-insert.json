@@ -1,0 +1,1152 @@
+[
+ [
+  "bye",
+  "int.",
+  "再见；拜拜",
+  "OK, bye. See you tomorrow.",
+  "8001",
+  "/baɪ/",
+  "/baɪ/",
+  "好的，再见，明天见。"
+ ],
+ [
+  "be",
+  "v.",
+  "是；存在",
+  "Be happy, be yourself.",
+  "8002",
+  "/bi/",
+  "/biː/",
+  "开心点，做你自己。"
+ ],
+ [
+  "am",
+  "v.",
+  "是（我）",
+  "I am a student.",
+  "8003",
+  "/æm/",
+  "/æm/",
+  "我是学生。"
+ ],
+ [
+  "is",
+  "v.",
+  "是（他她它）",
+  "This is my book.",
+  "8004",
+  "/ɪz/",
+  "/ɪz/",
+  "这是我的书。"
+ ],
+ [
+  "are",
+  "v.",
+  "是（你们我们他们）",
+  "You are my best friend.",
+  "8005",
+  "/ɑr/",
+  "/ɑː/",
+  "你是我最好的朋友。"
+ ],
+ [
+  "was",
+  "v.",
+  "是（过去）",
+  "I was at home last night.",
+  "8006",
+  "/wɑz/",
+  "/wɒz/",
+  "我昨晚在家。"
+ ],
+ [
+  "were",
+  "v.",
+  "是（过去，复数）",
+  "They were happy together.",
+  "8007",
+  "/wɜr/",
+  "/wɜː/",
+  "他们曾在一起很开心。"
+ ],
+ [
+  "been",
+  "v.",
+  "是（完成时）",
+  "I have been here for years.",
+  "8008",
+  "/bɪn/",
+  "/biːn/",
+  "我在这里好几年了。"
+ ],
+ [
+  "being",
+  "v.",
+  "是（进行时）",
+  "He is being funny again.",
+  "8009",
+  "/ˈbiɪŋ/",
+  "/ˈbiːɪŋ/",
+  "他又在搞笑了。"
+ ],
+ [
+  "I",
+  "pron.",
+  "我",
+  "I like music.",
+  "8010",
+  "/aɪ/",
+  "/aɪ/",
+  "我喜欢音乐。"
+ ],
+ [
+  "you",
+  "pron.",
+  "你；你们",
+  "You look great today.",
+  "8011",
+  "/ju/",
+  "/juː/",
+  "你今天气色很好。"
+ ],
+ [
+  "he",
+  "pron.",
+  "他",
+  "He is my brother.",
+  "8012",
+  "/hi/",
+  "/hiː/",
+  "他是我哥哥。"
+ ],
+ [
+  "she",
+  "pron.",
+  "她",
+  "She works in a bank.",
+  "8013",
+  "/ʃi/",
+  "/ʃiː/",
+  "她在银行工作。"
+ ],
+ [
+  "it",
+  "pron.",
+  "它",
+  "It is a nice day.",
+  "8014",
+  "/ɪt/",
+  "/ɪt/",
+  "今天天气不错。"
+ ],
+ [
+  "we",
+  "pron.",
+  "我们",
+  "We go to school together.",
+  "8015",
+  "/wi/",
+  "/wiː/",
+  "我们一起上学。"
+ ],
+ [
+  "they",
+  "pron.",
+  "他们；她们；它们",
+  "They live next door.",
+  "8016",
+  "/ðeɪ/",
+  "/ðeɪ/",
+  "他们住在隔壁。"
+ ],
+ [
+  "me",
+  "pron.",
+  "我（宾格）",
+  "Call me tonight.",
+  "8017",
+  "/mi/",
+  "/miː/",
+  "今晚打电话给我。"
+ ],
+ [
+  "him",
+  "pron.",
+  "他（宾格）",
+  "Give him the pen.",
+  "8018",
+  "/hɪm/",
+  "/hɪm/",
+  "把笔给他。"
+ ],
+ [
+  "us",
+  "pron.",
+  "我们（宾格）",
+  "Come with us.",
+  "8019",
+  "/ʌs/",
+  "/ʌs/",
+  "跟我们一起去吧。"
+ ],
+ [
+  "them",
+  "pron.",
+  "他们（宾格）",
+  "I know them well.",
+  "8020",
+  "/ðɛm/",
+  "/ðɛm/",
+  "我跟他们很熟。"
+ ],
+ [
+  "my",
+  "det.",
+  "我的",
+  "My family is big.",
+  "8021",
+  "/maɪ/",
+  "/maɪ/",
+  "我家人口很多。"
+ ],
+ [
+  "your",
+  "det.",
+  "你的；你们的",
+  "Your bag is here.",
+  "8022",
+  "/jɔr/",
+  "/jɔː/",
+  "你的包在这儿。"
+ ],
+ [
+  "his",
+  "det.",
+  "他的",
+  "His car is red.",
+  "8023",
+  "/hɪz/",
+  "/hɪz/",
+  "他的车是红色的。"
+ ],
+ [
+  "its",
+  "det.",
+  "它的",
+  "The dog eats its food.",
+  "8024",
+  "/ɪts/",
+  "/ɪts/",
+  "狗在吃它的饭。"
+ ],
+ [
+  "our",
+  "det.",
+  "我们的",
+  "Our team won!",
+  "8025",
+  "/ˈaʊər/",
+  "/ˈaʊə/",
+  "我们队赢了！"
+ ],
+ [
+  "their",
+  "det.",
+  "他们的",
+  "Their house is near.",
+  "8026",
+  "/ðɛr/",
+  "/ðeə/",
+  "他们的房子很近。"
+ ],
+ [
+  "mine",
+  "pron.",
+  "我的（东西）",
+  "This book is mine.",
+  "8027",
+  "/maɪn/",
+  "/maɪn/",
+  "这本书是我的。"
+ ],
+ [
+  "yours",
+  "pron.",
+  "你的（东西）",
+  "Is this seat yours?",
+  "8028",
+  "/jɔrz/",
+  "/jɔːz/",
+  "这个座位是你的吗？"
+ ],
+ [
+  "hers",
+  "pron.",
+  "她的（东西）",
+  "That key is hers.",
+  "8029",
+  "/hɜrz/",
+  "/hɜːz/",
+  "那把钥匙是她的。"
+ ],
+ [
+  "ours",
+  "pron.",
+  "我们的（东西）",
+  "The victory is ours.",
+  "8030",
+  "/ˈaʊərz/",
+  "/ˈaʊəz/",
+  "胜利属于我们。"
+ ],
+ [
+  "theirs",
+  "pron.",
+  "他们的（东西）",
+  "Those shoes are theirs.",
+  "8031",
+  "/ðɛrz/",
+  "/ðeəz/",
+  "那些鞋是他们的。"
+ ],
+ [
+  "do",
+  "v.",
+  "做；用于提问和否定",
+  "Do you like tea?",
+  "8032",
+  "/du/",
+  "/duː/",
+  "你喜欢喝茶吗？"
+ ],
+ [
+  "does",
+  "v.",
+  "做（第三人称单数）",
+  "Does he play football?",
+  "8033",
+  "/dʌz/",
+  "/dʌz/",
+  "他踢足球吗？"
+ ],
+ [
+  "did",
+  "v.",
+  "做（过去）",
+  "Did you sleep well?",
+  "8034",
+  "/dɪd/",
+  "/dɪd/",
+  "你睡得好吗？"
+ ],
+ [
+  "have",
+  "v.",
+  "有；完成时助动词",
+  "I have two sisters.",
+  "8035",
+  "/hæv/",
+  "/hæv/",
+  "我有两个姐姐。"
+ ],
+ [
+  "has",
+  "v.",
+  "有（第三人称单数）",
+  "She has a new phone.",
+  "8036",
+  "/hæz/",
+  "/hæz/",
+  "她有一部新手机。"
+ ],
+ [
+  "had",
+  "v.",
+  "有（过去/完成）",
+  "We had a good time.",
+  "8037",
+  "/hæd/",
+  "/hæd/",
+  "我们玩得很开心。"
+ ],
+ [
+  "can",
+  "v.",
+  "能；会；可以",
+  "I can swim.",
+  "8038",
+  "/kæn/",
+  "/kæn/",
+  "我会游泳。"
+ ],
+ [
+  "could",
+  "v.",
+  "能（过去/委婉）",
+  "Could you help me?",
+  "8039",
+  "/kʊd/",
+  "/kʊd/",
+  "你能帮我一下吗？"
+ ],
+ [
+  "will",
+  "v.",
+  "将要；愿意",
+  "I will call you later.",
+  "8040",
+  "/wɪl/",
+  "/wɪl/",
+  "我晚点打给你。"
+ ],
+ [
+  "would",
+  "v.",
+  "会（委婉）；想要",
+  "I would like some water.",
+  "8041",
+  "/wʊd/",
+  "/wʊd/",
+  "我想要点水。"
+ ],
+ [
+  "shall",
+  "v.",
+  "要不要（提议）",
+  "Shall we go now?",
+  "8042",
+  "/ʃæl/",
+  "/ʃæl/",
+  "我们现在走吗？"
+ ],
+ [
+  "should",
+  "v.",
+  "应该",
+  "You should rest more.",
+  "8043",
+  "/ʃʊd/",
+  "/ʃʊd/",
+  "你该多休息。"
+ ],
+ [
+  "may",
+  "v.",
+  "可以；可能",
+  "May I come in?",
+  "8044",
+  "/meɪ/",
+  "/meɪ/",
+  "我可以进来吗？"
+ ],
+ [
+  "might",
+  "v.",
+  "可能（更不确定）",
+  "It might rain today.",
+  "8045",
+  "/maɪt/",
+  "/maɪt/",
+  "今天可能下雨。"
+ ],
+ [
+  "must",
+  "v.",
+  "必须；一定",
+  "You must try this cake.",
+  "8046",
+  "/mʌst/",
+  "/mʌst/",
+  "你一定要尝尝这个蛋糕。"
+ ],
+ [
+  "a",
+  "art.",
+  "一个（辅音开头）",
+  "I have a dream.",
+  "8047",
+  "/ə/",
+  "/ə/",
+  "我有一个梦想。"
+ ],
+ [
+  "an",
+  "art.",
+  "一个（元音开头）",
+  "She is an artist.",
+  "8048",
+  "/æn/",
+  "/ən/",
+  "她是一名艺术家。"
+ ],
+ [
+  "the",
+  "art.",
+  "这个；那个（特指）",
+  "The sun is bright.",
+  "8049",
+  "/ðə/",
+  "/ðə/",
+  "太阳很明亮。"
+ ],
+ [
+  "no",
+  "det.",
+  "没有",
+  "No money, no problem.",
+  "8050",
+  "/noʊ/",
+  "/nəʊ/",
+  "没钱，也没问题。"
+ ],
+ [
+  "both",
+  "det.",
+  "两者都",
+  "Both answers are right.",
+  "8051",
+  "/boʊθ/",
+  "/bəʊθ/",
+  "两个答案都对。"
+ ],
+ [
+  "this",
+  "det.",
+  "这；这个",
+  "This is my seat.",
+  "8052",
+  "/ðɪs/",
+  "/ðɪs/",
+  "这是我的座位。"
+ ],
+ [
+  "that",
+  "det.",
+  "那；那个",
+  "That sounds good.",
+  "8053",
+  "/ðæt/",
+  "/ðæt/",
+  "听起来不错。"
+ ],
+ [
+  "these",
+  "det.",
+  "这些",
+  "These apples are sweet.",
+  "8054",
+  "/ðiz/",
+  "/ðiːz/",
+  "这些苹果很甜。"
+ ],
+ [
+  "those",
+  "det.",
+  "那些",
+  "Those stars are bright.",
+  "8055",
+  "/ðoʊz/",
+  "/ðəʊz/",
+  "那些星星很亮。"
+ ],
+ [
+  "what",
+  "pron.",
+  "什么",
+  "What is your name?",
+  "8056",
+  "/hwʌt/",
+  "/wɒt/",
+  "你叫什么名字？"
+ ],
+ [
+  "where",
+  "adv.",
+  "在哪里",
+  "Where are you from?",
+  "8057",
+  "/hwɛr/",
+  "/weə/",
+  "你来自哪里？"
+ ],
+ [
+  "when",
+  "adv.",
+  "什么时候",
+  "When does the bus come?",
+  "8058",
+  "/hwɛn/",
+  "/wɛn/",
+  "公交车什么时候来？"
+ ],
+ [
+  "why",
+  "adv.",
+  "为什么",
+  "Why not try again?",
+  "8059",
+  "/hwaɪ/",
+  "/waɪ/",
+  "为什么不试试呢？"
+ ],
+ [
+  "how",
+  "adv.",
+  "怎样；多么",
+  "How are you today?",
+  "8060",
+  "/haʊ/",
+  "/haʊ/",
+  "你今天好吗？"
+ ],
+ [
+  "who",
+  "pron.",
+  "谁",
+  "Who is that girl?",
+  "8061",
+  "/hu/",
+  "/huː/",
+  "那个女孩是谁？"
+ ],
+ [
+  "whose",
+  "pron.",
+  "谁的",
+  "Whose cup is this?",
+  "8062",
+  "/huz/",
+  "/huːz/",
+  "这是谁的杯子？"
+ ],
+ [
+  "which",
+  "pron.",
+  "哪一个",
+  "Which color do you like?",
+  "8063",
+  "/hwɪtʃ/",
+  "/wɪtʃ/",
+  "你喜欢哪个颜色？"
+ ],
+ [
+  "in",
+  "prep.",
+  "在……里",
+  "The keys are in the box.",
+  "8064",
+  "/ɪn/",
+  "/ɪn/",
+  "钥匙在盒子里。"
+ ],
+ [
+  "on",
+  "prep.",
+  "在……上",
+  "The book is on the desk.",
+  "8065",
+  "/ɑn/",
+  "/ɒn/",
+  "书在桌上。"
+ ],
+ [
+  "at",
+  "prep.",
+  "在（某点）",
+  "Meet me at the gate.",
+  "8066",
+  "/æt/",
+  "/æt/",
+  "在大门口见我。"
+ ],
+ [
+  "to",
+  "prep.",
+  "到；向",
+  "Go to the door.",
+  "8067",
+  "/tu/",
+  "/tuː/",
+  "走到门口去。"
+ ],
+ [
+  "of",
+  "prep.",
+  "……的",
+  "A cup of tea, please.",
+  "8068",
+  "/ʌv/",
+  "/ɒv/",
+  "请给我一杯茶。"
+ ],
+ [
+  "for",
+  "prep.",
+  "为了；给",
+  "This gift is for you.",
+  "8069",
+  "/fɔr/",
+  "/fɔː/",
+  "这份礼物是给你的。"
+ ],
+ [
+  "with",
+  "prep.",
+  "和……一起；用",
+  "I walk with my dog.",
+  "8070",
+  "/wɪð/",
+  "/wɪð/",
+  "我和狗一起散步。"
+ ],
+ [
+  "by",
+  "prep.",
+  "通过；被；在旁",
+  "We went home by bus.",
+  "8071",
+  "/baɪ/",
+  "/baɪ/",
+  "我们坐公交回家的。"
+ ],
+ [
+  "from",
+  "prep.",
+  "从；来自",
+  "I am from China.",
+  "8072",
+  "/frʌm/",
+  "/frɒm/",
+  "我来自中国。"
+ ],
+ [
+  "about",
+  "prep.",
+  "关于；大约",
+  "Tell me about it.",
+  "8073",
+  "/əˈbaʊt/",
+  "/əˈbaʊt/",
+  "跟我说说这事。"
+ ],
+ [
+  "into",
+  "prep.",
+  "进入",
+  "She walked into the room.",
+  "8074",
+  "/ˈɪntu/",
+  "/ˈɪntʊ/",
+  "她走进了房间。"
+ ],
+ [
+  "over",
+  "prep.",
+  "在……上方；超过",
+  "The lamp hangs over the table.",
+  "8075",
+  "/ˈoʊvər/",
+  "/ˈəʊvə/",
+  "灯挂在桌子上方。"
+ ],
+ [
+  "under",
+  "prep.",
+  "在……下面",
+  "The cat is under the bed.",
+  "8076",
+  "/ˈʌndər/",
+  "/ˈʌndə/",
+  "猫在床底下。"
+ ],
+ [
+  "after",
+  "prep.",
+  "在……之后",
+  "Rest after dinner.",
+  "8077",
+  "/ˈæftər/",
+  "/ˈɑːftə/",
+  "晚饭后休息一下。"
+ ],
+ [
+  "before",
+  "prep.",
+  "在……之前",
+  "Wash hands before meals.",
+  "8078",
+  "/bɪˈfɔr/",
+  "/bɪˈfɔː/",
+  "饭前要洗手。"
+ ],
+ [
+  "between",
+  "prep.",
+  "在……之间",
+  "The bank is between two shops.",
+  "8079",
+  "/bɪˈtwin/",
+  "/bɪˈtwiːn/",
+  "银行在两家店之间。"
+ ],
+ [
+  "through",
+  "prep.",
+  "穿过；通过",
+  "We walked through the park.",
+  "8080",
+  "/θru/",
+  "/θruː/",
+  "我们穿过公园。"
+ ],
+ [
+  "near",
+  "prep.",
+  "在……附近",
+  "I live near the school.",
+  "8081",
+  "/nɪr/",
+  "/nɪə/",
+  "我住在学校附近。"
+ ],
+ [
+  "and",
+  "conj.",
+  "和；并且",
+  "Bread and milk, please.",
+  "8082",
+  "/ænd/",
+  "/ænd/",
+  "请给我面包和牛奶。"
+ ],
+ [
+  "but",
+  "conj.",
+  "但是",
+  "He is small but strong.",
+  "8083",
+  "/bʌt/",
+  "/bʌt/",
+  "他个子小但很强壮。"
+ ],
+ [
+  "or",
+  "conj.",
+  "或者",
+  "Tea or coffee?",
+  "8084",
+  "/ɔr/",
+  "/ɔː/",
+  "喝茶还是咖啡？"
+ ],
+ [
+  "so",
+  "conj.",
+  "所以",
+  "It was late, so I left.",
+  "8085",
+  "/soʊ/",
+  "/səʊ/",
+  "天晚了，所以我走了。"
+ ],
+ [
+  "because",
+  "conj.",
+  "因为",
+  "I smiled because I was happy.",
+  "8086",
+  "/bɪˈkɑz/",
+  "/bɪˈkɒz/",
+  "我笑了，因为我很开心。"
+ ],
+ [
+  "if",
+  "conj.",
+  "如果",
+  "If it rains, stay home.",
+  "8087",
+  "/ɪf/",
+  "/ɪf/",
+  "如果下雨就待在家里。"
+ ],
+ [
+  "while",
+  "conj.",
+  "当……时候；然而",
+  "Listen while you walk.",
+  "8088",
+  "/hwaɪl/",
+  "/waɪl/",
+  "走路时也可以听。"
+ ],
+ [
+  "although",
+  "conj.",
+  "虽然",
+  "Although it was cold, we went out.",
+  "8089",
+  "/ˌɔlˈðoʊ/",
+  "/ɒlˈðəʊ/",
+  "虽然很冷，我们还是出门了。"
+ ],
+ [
+  "than",
+  "conj.",
+  "比",
+  "Today is hotter than yesterday.",
+  "8090",
+  "/ðæn/",
+  "/ðæn/",
+  "今天比昨天热。"
+ ],
+ [
+  "not",
+  "adv.",
+  "不；没",
+  "I am not tired.",
+  "8091",
+  "/nɑt/",
+  "/nɒt/",
+  "我不累。"
+ ],
+ [
+  "also",
+  "adv.",
+  "也",
+  "She also likes tea.",
+  "8092",
+  "/ˈɔlsoʊ/",
+  "/ˈɒlsəʊ/",
+  "她也喜欢喝茶。"
+ ],
+ [
+  "too",
+  "adv.",
+  "也；太",
+  "The tea is too hot.",
+  "8093",
+  "/tu/",
+  "/tuː/",
+  "茶太烫了。"
+ ],
+ [
+  "very",
+  "adv.",
+  "很；非常",
+  "Thank you very much.",
+  "8094",
+  "/ˈvɛri/",
+  "/ˈvɛri/",
+  "非常感谢你。"
+ ],
+ [
+  "just",
+  "adv.",
+  "刚刚；只是",
+  "I just arrived.",
+  "8095",
+  "/dʒʌst/",
+  "/dʒʌst/",
+  "我刚到。"
+ ],
+ [
+  "only",
+  "adv.",
+  "只；仅仅",
+  "I have only one apple.",
+  "8096",
+  "/ˈoʊnli/",
+  "/ˈəʊnli/",
+  "我只有一个苹果。"
+ ],
+ [
+  "then",
+  "adv.",
+  "然后；那时",
+  "First wash, then eat.",
+  "8097",
+  "/ðɛn/",
+  "/ðɛn/",
+  "先洗手，然后吃饭。"
+ ],
+ [
+  "here",
+  "adv.",
+  "这里",
+  "Come here, please.",
+  "8098",
+  "/hir/",
+  "/hɪə/",
+  "请过来这边。"
+ ],
+ [
+  "there",
+  "adv.",
+  "那里",
+  "The shop is over there.",
+  "8099",
+  "/ðɛr/",
+  "/ðeə/",
+  "商店在那边。"
+ ],
+ [
+  "again",
+  "adv.",
+  "再；又",
+  "Say it again, please.",
+  "8100",
+  "/əˈgeɪn/",
+  "/əˈgɛn/",
+  "请再说一遍。"
+ ],
+ [
+  "still",
+  "adv.",
+  "仍然；还",
+  "He is still young.",
+  "8101",
+  "/stɪl/",
+  "/stɪl/",
+  "他还年轻。"
+ ],
+ [
+  "already",
+  "adv.",
+  "已经",
+  "I have already eaten.",
+  "8102",
+  "/ɔlˈrɛdi/",
+  "/ɔːlˈredi/",
+  "我已经吃过了。"
+ ],
+ [
+  "yet",
+  "adv.",
+  "还（没）；已经",
+  "Dinner is not ready yet.",
+  "8103",
+  "/jɛt/",
+  "/jɛt/",
+  "晚饭还没好。"
+ ],
+ [
+  "two",
+  "num.",
+  "二",
+  "Two coffees, please.",
+  "8104",
+  "/tu/",
+  "/tuː/",
+  "请来两杯咖啡。"
+ ],
+ [
+  "three",
+  "num.",
+  "三",
+  "We have three cats.",
+  "8105",
+  "/θri/",
+  "/θriː/",
+  "我们有三只猫。"
+ ],
+ [
+  "four",
+  "num.",
+  "四",
+  "The class starts at four.",
+  "8106",
+  "/fɔr/",
+  "/fɔː/",
+  "四点开始上课。"
+ ],
+ [
+  "five",
+  "num.",
+  "五",
+  "Give me five minutes.",
+  "8107",
+  "/faɪv/",
+  "/faɪv/",
+  "给我五分钟。"
+ ],
+ [
+  "six",
+  "num.",
+  "六",
+  "Dinner is at six.",
+  "8108",
+  "/sɪks/",
+  "/sɪks/",
+  "六点吃晚饭。"
+ ],
+ [
+  "seven",
+  "num.",
+  "七",
+  "Seven days in a week.",
+  "8109",
+  "/ˈsɛvən/",
+  "/ˈsɛvən/",
+  "一周有七天。"
+ ],
+ [
+  "eight",
+  "num.",
+  "八",
+  "Eight hours of sleep.",
+  "8110",
+  "/eɪt/",
+  "/eɪt/",
+  "睡满八小时。"
+ ],
+ [
+  "nine",
+  "num.",
+  "九",
+  "Nine out of ten doctors agree.",
+  "8111",
+  "/naɪn/",
+  "/naɪn/",
+  "十有九个医生都同意。"
+ ],
+ [
+  "ten",
+  "num.",
+  "十",
+  "Count to ten.",
+  "8112",
+  "/tɛn/",
+  "/tɛn/",
+  "数到十。"
+ ],
+ [
+  "eleven",
+  "num.",
+  "十一",
+  "The store closes at eleven.",
+  "8113",
+  "/ɪˈlɛvən/",
+  "/ɪˈlɛvən/",
+  "商店十一点关门。"
+ ],
+ [
+  "twelve",
+  "num.",
+  "十二",
+  "Twelve months in a year.",
+  "8114",
+  "/twɛlv/",
+  "/twɛlv/",
+  "一年有十二个月。"
+ ],
+ [
+  "third",
+  "num.",
+  "第三",
+  "She finished third.",
+  "8115",
+  "/θɜrd/",
+  "/θɜːd/",
+  "她得了第三名。"
+ ]
+]
