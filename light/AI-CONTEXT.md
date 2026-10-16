@@ -18,6 +18,7 @@
 - 本轮学习数据审查：词表 **8115 条**；多义词副卡编号 **8200–8245（46 个）**。机器审计入口：`node tools/learning-data-audit.js`；策略/复盘日的空例句有显式豁免名单。
 - 功能词教学口径：单词页音标标注独立读词的常见词典形式；例句音频使用自然语流，`to/of/and/can` 等可能弱读，不要求把句中弱读音写成词卡主音标。`what/where/when/why/which` 美音采用常见 General American `/w/` 读法，若后续真实资产与此不符，先核对语音模型/地区口音，再决定改音标还是重生成音频。
 - 音频核验状态与待重生成任务见 `tools/audio-pipeline/AUDIO-AUDIT.md` 与 `data/pending-sentence-audio.json`。本轮**没有生成、上传或听核音频**；14 条例句资产需由负责音频的 AI 重生成并上传。
+- 真机只需验收功能与布局，无需用户自行判断英语：按 `tools/LEARNING-DATA-MANUAL-CHECK.md` 检查今日/搜索/复习主副卡、音频按钮、中文显隐、收藏与进度。截图/录屏用于反馈版式问题。
 - 候选分支测试状态：已新增 `tools/learning-data-audit.js`，但当前 GitHub 连接器环境不能直接运行 Node.js；候选分支的测试脚本**尚未实际执行**，不得视为通过。请在检出该分支的本地工作区运行 CHANGELOG 中列出的四组测试，再做微信开发者工具预览/真机验收。
 - `utils/words.js` 的历史生成源 `_wordbank/generate_course_files78.py` 与 `utils/phonetic.js` 的历史生成源 `_ipa_build/build_study_data.js` 未包含在当前仓库中。词条正文通过 `utils/learning-corrections.js` 运行时覆盖层修正，音标例词通过 `utils/phonetic-corrections.js` 覆盖；若恢复生成源，必须把修正回填源文件。`words.js` 首行历史注释仍写「8000 词表」，但运行时/审计实际为 8115 条；本次不直接重写 1.17MB 生成文件，避免整文件覆盖风险。
 
