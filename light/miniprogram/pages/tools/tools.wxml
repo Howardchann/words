@@ -113,7 +113,7 @@
      说明文字也移到最前，不再吊在最底。 -->
 <view class="card">
   <view class="section-label">音标</view>
-  <view class="ph-note">本表以英式 RP 音标体系为参照；例词播放口音跟随当前英美音设置。英美差异明显的音，请切换英音核对符号与发音。</view>
+  <view class="ph-note">本表以英式 RP 音标体系为参照；例词播放口音跟随当前英美音设置。词卡音标标注单独读词的常见形式；例句按自然语流播放，to、of、and 等功能词可能弱读，两者并不矛盾。英美差异明显的音，请切换英音核对符号与发音。</view>
 
   <!-- 大类：元音 / 辅音 -->
   <view class="ph-class">
