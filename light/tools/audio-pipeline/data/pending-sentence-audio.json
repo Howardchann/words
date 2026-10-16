@@ -1,109 +1,13 @@
 [
   {
-    "ai": 7825,
-    "word": "isle",
-    "text": "The small isle is home to many birds.",
-    "reason": "修正 isle/aisle 混淆",
+    "ai": 11,
+    "word": "some",
+    "text": "Some of the best players in the world train here.",
+    "reason": "补全句子",
     "kind": "s",
     "accent": "US",
-    "normal_key": "s/7/7825.mp3",
-    "slow_key": "s/7/7825s.mp3",
-    "status": {
-      "code_routed": true,
-      "asset_generated": false,
-      "asset_uploaded": false,
-      "listened_verified": false
-    }
-  },
-  {
-    "ai": 7922,
-    "word": "catching",
-    "text": "Laughter is catching.",
-    "reason": "改为展示形容词 catching",
-    "kind": "s",
-    "accent": "US",
-    "normal_key": "s/7/7922.mp3",
-    "slow_key": "s/7/7922s.mp3",
-    "status": {
-      "code_routed": true,
-      "asset_generated": false,
-      "asset_uploaded": false,
-      "listened_verified": false
-    }
-  },
-  {
-    "ai": 7877,
-    "word": "reinforced",
-    "text": "The reinforced bridge can carry heavier trucks.",
-    "reason": "修正不自然例句",
-    "kind": "s",
-    "accent": "US",
-    "normal_key": "s/7/7877.mp3",
-    "slow_key": "s/7/7877s.mp3",
-    "status": {
-      "code_routed": true,
-      "asset_generated": false,
-      "asset_uploaded": false,
-      "listened_verified": false
-    }
-  },
-  {
-    "ai": 7930,
-    "word": "bitumen",
-    "text": "Workers used bitumen to seal the roof.",
-    "reason": "修正不自然例句",
-    "kind": "s",
-    "accent": "US",
-    "normal_key": "s/7/7930.mp3",
-    "slow_key": "s/7/7930s.mp3",
-    "status": {
-      "code_routed": true,
-      "asset_generated": false,
-      "asset_uploaded": false,
-      "listened_verified": false
-    }
-  },
-  {
-    "ai": 7868,
-    "word": "oblong",
-    "text": "The box is oblong.",
-    "reason": "修正语序与标点",
-    "kind": "s",
-    "accent": "US",
-    "normal_key": "s/7/7868.mp3",
-    "slow_key": "s/7/7868s.mp3",
-    "status": {
-      "code_routed": true,
-      "asset_generated": false,
-      "asset_uploaded": false,
-      "listened_verified": false
-    }
-  },
-  {
-    "ai": 7821,
-    "word": "conservatory",
-    "text": "She studies piano at the conservatory.",
-    "reason": "匹配音乐学院义项",
-    "kind": "s",
-    "accent": "US",
-    "normal_key": "s/7/7821.mp3",
-    "slow_key": "s/7/7821s.mp3",
-    "status": {
-      "code_routed": true,
-      "asset_generated": false,
-      "asset_uploaded": false,
-      "listened_verified": false
-    }
-  },
-  {
-    "ai": 7841,
-    "word": "expedient",
-    "text": "It was expedient to wait until morning.",
-    "reason": "改为更清楚的语境",
-    "kind": "s",
-    "accent": "US",
-    "normal_key": "s/7/7841.mp3",
-    "slow_key": "s/7/7841s.mp3",
+    "normal_key": "s/0/0011.mp3",
+    "slow_key": "s/0/0011s.mp3",
     "status": {
       "code_routed": true,
       "asset_generated": false,
@@ -128,14 +32,14 @@
     }
   },
   {
-    "ai": 6924,
-    "word": "sow",
-    "text": "Farmers sow seeds in spring.",
-    "reason": "修正语法错误",
+    "ai": 3597,
+    "word": "aisle",
+    "text": "Please leave the aisle clear.",
+    "reason": "修正 aisle 例句并统一 isle/aisle 音标",
     "kind": "s",
     "accent": "US",
-    "normal_key": "s/6/6924.mp3",
-    "slow_key": "s/6/6924s.mp3",
+    "normal_key": "s/3/3597.mp3",
+    "slow_key": "s/3/3597s.mp3",
     "status": {
       "code_routed": true,
       "asset_generated": false,
@@ -160,14 +64,126 @@
     }
   },
   {
-    "ai": 11,
-    "word": "some",
-    "text": "Some of the best players in the world train here.",
-    "reason": "补全句子",
+    "ai": 6924,
+    "word": "sow",
+    "text": "Farmers sow seeds in spring.",
+    "reason": "修正语法错误",
     "kind": "s",
     "accent": "US",
-    "normal_key": "s/0/0011.mp3",
-    "slow_key": "s/0/0011s.mp3",
+    "normal_key": "s/6/6924.mp3",
+    "slow_key": "s/6/6924s.mp3",
+    "status": {
+      "code_routed": true,
+      "asset_generated": false,
+      "asset_uploaded": false,
+      "listened_verified": false
+    }
+  },
+  {
+    "ai": 7821,
+    "word": "conservatory",
+    "text": "She studies piano at the conservatory.",
+    "reason": "匹配音乐学院义项",
+    "kind": "s",
+    "accent": "US",
+    "normal_key": "s/7/7821.mp3",
+    "slow_key": "s/7/7821s.mp3",
+    "status": {
+      "code_routed": true,
+      "asset_generated": false,
+      "asset_uploaded": false,
+      "listened_verified": false
+    }
+  },
+  {
+    "ai": 7825,
+    "word": "isle",
+    "text": "The small isle is home to many birds.",
+    "reason": "修正 isle/aisle 混淆",
+    "kind": "s",
+    "accent": "US",
+    "normal_key": "s/7/7825.mp3",
+    "slow_key": "s/7/7825s.mp3",
+    "status": {
+      "code_routed": true,
+      "asset_generated": false,
+      "asset_uploaded": false,
+      "listened_verified": false
+    }
+  },
+  {
+    "ai": 7841,
+    "word": "expedient",
+    "text": "It was expedient to wait until morning.",
+    "reason": "改为更清楚的语境",
+    "kind": "s",
+    "accent": "US",
+    "normal_key": "s/7/7841.mp3",
+    "slow_key": "s/7/7841s.mp3",
+    "status": {
+      "code_routed": true,
+      "asset_generated": false,
+      "asset_uploaded": false,
+      "listened_verified": false
+    }
+  },
+  {
+    "ai": 7868,
+    "word": "oblong",
+    "text": "The box is oblong.",
+    "reason": "修正语序与标点",
+    "kind": "s",
+    "accent": "US",
+    "normal_key": "s/7/7868.mp3",
+    "slow_key": "s/7/7868s.mp3",
+    "status": {
+      "code_routed": true,
+      "asset_generated": false,
+      "asset_uploaded": false,
+      "listened_verified": false
+    }
+  },
+  {
+    "ai": 7877,
+    "word": "reinforced",
+    "text": "The reinforced bridge can carry heavier trucks.",
+    "reason": "修正不自然例句",
+    "kind": "s",
+    "accent": "US",
+    "normal_key": "s/7/7877.mp3",
+    "slow_key": "s/7/7877s.mp3",
+    "status": {
+      "code_routed": true,
+      "asset_generated": false,
+      "asset_uploaded": false,
+      "listened_verified": false
+    }
+  },
+  {
+    "ai": 7922,
+    "word": "catching",
+    "text": "Laughter is catching.",
+    "reason": "改为展示形容词 catching",
+    "kind": "s",
+    "accent": "US",
+    "normal_key": "s/7/7922.mp3",
+    "slow_key": "s/7/7922s.mp3",
+    "status": {
+      "code_routed": true,
+      "asset_generated": false,
+      "asset_uploaded": false,
+      "listened_verified": false
+    }
+  },
+  {
+    "ai": 7930,
+    "word": "bitumen",
+    "text": "Workers used bitumen to seal the roof.",
+    "reason": "修正不自然例句",
+    "kind": "s",
+    "accent": "US",
+    "normal_key": "s/7/7930.mp3",
+    "slow_key": "s/7/7930s.mp3",
     "status": {
       "code_routed": true,
       "asset_generated": false,
