@@ -16,7 +16,7 @@ var GROUPS = [
       { k: 'n.', d: '名词：人、物、地方、概念的名字。', e: 'book 书 · water 水 · China 中国' },
       { k: 'v.', d: '动词：表示动作或状态。', e: 'run 跑 · be 是 · like 喜欢' },
       { k: 'adj.', d: '形容词：说明名词「什么样」。', e: 'big 大的 · happy 高兴的' },
-      { k: 'adv.', d: '副词：说明动作「怎么发生」。', e: 'quickly 快速地 · very 非常' },
+      { k: 'adv.', d: '副词：可修饰动词、形容词、副词或整句话，表示方式、程度、频率等。', e: 'quickly 快速地 · very 非常 · often 经常' },
       { k: 'pron.', d: '代词：代替名词，避免重复。', e: 'I 我 · you 你 · it 它' },
       { k: 'prep.', d: '介词：表示时间、位置、方向等关系，后面接名词。', e: 'in · on · at · with' },
       { k: 'det.', d: '限定词：放在名词前，划定它指的是哪一个或多少。', e: 'the · this · my · some' },
@@ -27,7 +27,7 @@ var GROUPS = [
       { k: 'pl.', d: '复数：这个词条只以复数形式使用。', e: 'proceeds 收益' },
       { k: 'phr.', d: '短语：几个词固定搭配成一个整体来用。', e: 'take care 保重' },
       { k: 'phr.v.', d: '动词短语：动词 + 介词/副词，整体当一个动词用。', e: 'look after 照顾' },
-      { k: 'pref.', d: '前缀：加在词前面改变意思。', e: 'auto- 自己的 → auto 汽车' }
+      { k: 'pref.', d: '前缀：加在词前面改变意思。', e: 'auto- 自己、自身 → autobiography 自传' }
     ]
   },
   {
@@ -54,7 +54,8 @@ var GROUPS = [
       { k: '助动词', d: '帮忙构成时态、疑问、否定的词。', e: 'do / have / be' },
       { k: '不定式', d: 'to + 动词原形。', e: 'I want to go.' },
       { k: '动名词', d: '动词的 -ing 形式，当名词用。', e: 'Swimming is fun.' },
-      { k: '物主代词', d: '表示「谁的」。', e: 'my · your · mine · theirs' },
+      { k: '物主限定词', d: '放在名词前，说明所属关系。', e: 'my book · your bag · their house' },
+      { k: '名词性物主代词', d: '独立使用，代替「物主限定词 + 名词」。', e: 'mine · yours · hers · ours · theirs' },
       { k: '反身代词', d: '动作落回自己身上时用的词。', e: 'myself · yourself · herself' },
       { k: '特指', d: '说话双方都知道的那个，前面用 the。', e: 'Close the door.' },
       { k: '泛指', d: '不特指某一个，用 a / an 或复数。', e: 'a book · books' },
