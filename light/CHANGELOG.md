@@ -2,6 +2,34 @@
 
 > 本实例由 cloud 实例 v1.1.38（仓库提交 `dbe76dc` 的 cloud/ 树）派生，**共享全部产品与机制历史**——完整变更史见 `../cloud/CHANGELOG.md`，此处只记录本实例自身的差异与后续变更。
 
+## 2026-10-17 · 学习数据一致性审查（候选 v1.1.104，独立分支，未合并/未上传）
+
+> 基线：`cloud-sync` HEAD `ae2755c03984a5c4ae3a42444a9ef9e32bbcb67e`；工作分支 `audit/light-learning-data-2026-10-17`。不改小程序名称，不重构 546 天课程，不改云同步进度身份标识。
+
+### 内容与逻辑修正
+
+- 词表运行时仍为 **8115 条**，不增删行；通过 `utils/learning-corrections.js` 修正 isle/aisle 混淆、catching、reinforced、bitumen、oblong、conservatory、expedient、moderate、sow、recount、tear、use、go、make、one、think、some 等词条的例句、词性或释义。
+- 修正 `what/where/when/why/which` 的美音音标为常见 General American `/w/` 读法；英音字段不变。对应的功能词输入清单同步更新；仍需后续对照真实云端音频核听。
+- `split-senses.js` 的编号说明更新为 8200–8245；修正 addict / alternate 副卡例句，并暴露同一副卡查询接口，今日、搜索、复习页复用统一的主/副义数据。
+- `wordforms.js` 不再把 read/cut/cost 等同拼写形式显示成可点读的重复标签；`must` 不应被标成普通过去式。read 的过去式与原形拼写相同但读音不同，待有读音专用呈现方式后再单独教。
+- 音标教学 `/r/` 示例换为 `right`，`/w/` 示例避免把 `qu` 整体高亮；通过 `phonetic-corrections.js` 覆盖例词，页面明确音标表以英式 RP 为参照、例词播放口音随当前设置变化。
+- 术语词典拆分物主限定词与名词性物主代词，修正 auto- 前缀例词；搜索和复习页增加副读音义项展示与对应音频路由。
+- 新增 `tools/learning-data-audit.js`：核对 8115 条、字段完整性、唯一拼写、46 个副卡编号、词形边界、12 类 / 71 个语法知识点，以及 31 个策略/复盘日的空例句豁免；未来新增空例句需显式审核。
+
+### 音频交接状态（尚未完成）
+
+- 新增 `tools/audio-pipeline/AUDIO-AUDIT.md` 与 `data/pending-sentence-audio.json`，列出 13 条因例句改文需要重生成的 `s/` 正常速/慢速资产。
+- 本轮只更新代码文本与路由，不生成、不上传、不声称已听核音频。`asset-generated` / `asset-uploaded` / `listened-verified` 均待负责音频的 AI 完成并提供证据。
+- `utils/words.js` 的历史生成源与 `utils/phonetic.js` 的历史生成源未包含在仓库中：词条正文由 `utils/learning-corrections.js` 运行时覆盖层修正，音标例词由 `utils/phonetic-corrections.js` 覆盖；恢复源脚本后必须回填修正。`words.js` 首行注释仍遗留「8000 词表」，但运行时数据与审计均为 8115 条；本次未整文件重写 1.17MB 生成文件。
+
+### 验证
+
+- `node tools/verify-structure.js`：全部通过（31/31 JS 语法、页面/组件/WXML/WXSS 结构）。
+- `node tools/cloudsync-test/run_tests.js`：75/75 通过。
+- `node tools/audio-pipeline/selftest.js`：全部通过，6 份输入数据、7 个内核文件与云端 manifest 可见。
+- `node tools/learning-data-audit.js`：全部通过；词表 8115 条、副卡 46 个唯一 ID、语法 12 类 / 71 点、策略/复盘空例句 31 天。
+- 尚未执行微信开发者工具真机/预览验收；正式预览/上传前必须在真实 Git 工作区运行 `node tools/stamp-build.js` 重新生成 `utils/build-info.js`。
+
 ## 2026-10-16 · B 档例句修复 + addict 副卡换官方音频 + 缓存 au6（v1.1.103，未上传）
 
 > **触发**：10 月需求盘点 B 组三项用户拍板——B 档 7 词例句修复；take/taken 变体核对（结论：机制已存在，无需改）；addict 副卡告别 TTS 例外。
@@ -195,7 +223,6 @@ v1.1.101 提交 `4cc342a` 时漏 `today.js`（工作区有改动但未 `git add`
 
 - **音标/音频基准 = Cambridge Dictionary**（`_cambridge_db.json` 61 词存档 + `_cam_fetch.js`/`_cam_check.js`/`_cam_audio_build.js`）。
 - 复扫结论不变：46 副卡无一同音误拆；abuse 族（close/diffuse/misuse/use）维度本来就对，错在音频韵律——随方案 A 一并解决。
-
 
 
 ## 2026-10-14 · 36 词异音全量复扫：3 词补拆卡 + 10 词音标修正 + 76 音频（v1.1.100，已上传体验版）
@@ -697,7 +724,6 @@ v1.1.96 / v1.1.98 标题原写「仅本地未上传」，实际均已上传体�
 - **自查踩坑**：自检脚本第一版里 `\{\{karaLit\}<\/text>` 漏写了一个 `\}`（正确是 `\{\{karaLit\}\}<\/text>`），使正则少匹配一个 `}` → 误报失败，白排查一轮。**教训**：这种"把代码结构写成断言"的检查别用长正则硬拼，改用 `indexOf` 拼接位置判断。
 
 ## 2026-10-11 · 易错点对句音频链路彻底修复（v1.1.82，未上传）
-
 > **触发**：v1.1.81 上传后用户真机复测——「易错点的句子依旧是线上形式吗？不是和其他单词一样走的云盘预读？因为点击很久才播放而且音色也不一样」。**用户判断全对**。
 
 - **⚠️ 上轮「154 个已上传」根本没落到位（根因一）**：`tcb storage upload ./_g_new g` 的语义是**把目录内容放到目标路径下** → 实际写成了 `g/g/0/xxx.mp3`（多一层 `g/`）。云端 `g/` 下**没有任何 10-11 的文件**，10-11 的 154 个全在 `g/g/` 里。已 `storage rm g/g --dir` 清理（165 项）。**铁律：`tcb storage upload <本地目录> <云端目录>` = 把本地目录的「内容」铺到云端目录下；要传 `g/0/x.mp3` 就该传 `./xxx/g` 而不是 `./xxx`。上传后必须 `storage list` 核对 key 前缀。**
@@ -1297,7 +1323,6 @@ CLI 实际入口 `…/node/workspace/node_modules/@cloudbase/cli/dist/standalone
 - 待用户确认排版方案后实施（含 UK 数据归一化流水线，en_UK 重音符贴音节尾需前移）。
 
 ## 2026-09-29 · 搜索页「点卡片偶发不跳」定位并修复（v1.1.49）
-
 > **范围**：只改 light 的搜索页 + 今日页定位重试次数；未推远端。
 
 **背景**：真机复测 v1.1.48 —— 输入法问题已解决，但**点搜索结果卡片仍偶发不跳**（用户明确说明：点的不是底部 `Day N` 指引那一行，就是单词卡片本身）。
