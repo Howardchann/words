@@ -298,6 +298,13 @@ Page({
     ];
     if (c.uk) items.push({ ai: c.ai, kind: 'w', slow: false, accent: 'uk' });
     if (c.e) items.push({ ai: c.ai, kind: 's' });
+    // 多义词副卡使用独立 ai 编号，抽到主卡时同步预取，避免副读音第一次点击才等待签名/下载。
+    if (c.subSense && c.subSense.ai) {
+      items.push({ ai: c.subSense.ai, kind: 'w' });
+      items.push({ ai: c.subSense.ai, kind: 'w', slow: true });
+      if (c.subSense.uk) items.push({ ai: c.subSense.ai, kind: 'w', accent: 'uk' });
+      if (c.subSense.e) items.push({ ai: c.subSense.ai, kind: 's' });
+    }
     speech.prefetch(items);
   },
 
