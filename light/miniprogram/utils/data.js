@@ -16,6 +16,8 @@
 // 偏移量在启动时一次算好（DAY_OFF），运行时零查表开销。
 // 每个词带 ai（音频编号）——音频文件名用的是词频序排名，与本表顺序不同，故必须显式携带。
 const wordforms = require('./wordforms.js');
+const splitSenses = require('./split-senses.js');
+const learningCorrections = require('./learning-corrections.js');
 const p1 = require('./data-p1.js');
 const p2 = require('./data-p2.js');
 const p3 = require('./data-p3.js');
@@ -77,7 +79,6 @@ const DAY_OFF = [];
     for (let k = 0; k < 5; k++) { DAY_OFF.push(off); off += RAMP[w]; }
   }
 })();
-
 // 词表延迟解析：8115 行只在首次取词时拆一次，避免启动开销
 let _words = null;
 function allWords() {
@@ -86,7 +87,13 @@ function allWords() {
   const out = new Array(lines.length);
   for (let i = 0; i < lines.length; i++) {
     const c = lines[i].split('\t');
-    out[i] = { w: c[0], p: c[1], m: c[2], e: c[3], ai: c[4] | 0, ipa: c[5] || '', uk: c[6] || '', cn: c[7] || '' };
+    const sense = splitSenses.mainFor(c[0]);
+    const correction = learningCorrections[c[0].toLowerCase()] || {};
+    out[i] = {
+      w: c[0], p: correction.p || (sense && sense.p) || c[1], m: correction.m || (sense && sense.m) || c[2],
+      e: correction.e || c[3], ai: c[4] | 0, ipa: correction.ipa || c[5] || '', uk: correction.uk || c[6] || '', cn: correction.cn || c[7] || '',
+      subSense: splitSenses.subFor(c[0]),
+    };
   }
   _words = out;
   return out;
@@ -129,7 +136,7 @@ function wordsOfStudyDay(di, perDay) {
   const ws = allWords().slice(start, start + perDay);
   const cn = CORE_CNT[di] || 0;
   for (let i = 0; i < ws.length; i++) {
-    ws[i] = { w: ws[i].w, m: ws[i].m, p: ws[i].p, e: ws[i].e, ai: ws[i].ai, ipa: ws[i].ipa || '', uk: ws[i].uk || '', cn: ws[i].cn || '', core: i < cn };
+    ws[i] = { w: ws[i].w, m: ws[i].m, p: ws[i].p, e: ws[i].e, ai: ws[i].ai, ipa: ws[i].ipa || '', uk: ws[i].uk || '', cn: ws[i].cn || '', subSense: ws[i].subSense || null, core: i < cn };
   }
   return ws;
 }
@@ -271,9 +278,10 @@ function searchWords(kw, limit) {
     const info = dayInfo(day);
     return {
       w: it.w, p: it.p, m: it.m, e: it.e, ai: it.ai, ipa: it.ipa || '', uk: it.uk || '', cn: it.cn || '',
+      subSense: it.subSense || null,
       day: day, dow: DOW[info.k - 1], wn: info.wIdx + 1,
       via: viaMap[i] || '',
-      wf: wordforms.noteFor(it.w),   // [{label:'过去式',form:'took'},...]，无不规则形式为 []
+      wf: wordforms.wfNotes(it.w),   // [{label:'过去式',form:'took'},...]，无不规则形式为 []
     };
   });
   return { total: total, list: list };
