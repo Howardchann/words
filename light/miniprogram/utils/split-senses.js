@@ -7,7 +7,7 @@
 // 只在今日页渲染层展开（today.js renderDay → expand），主表 words.js、DAY_OFF 索引、
 // 云同步快照、WORD_TOTAL 全部零改动。搜索/复习仍以主卡为准。
 //
-// 副卡音频编号 = 8200~8241 新号段（勿动 8001~8115 的 AI 释义号段）：
+// 副卡音频编号 = 8200~8245 新号段（勿动 8001~8115 的 AI 释义号段）：
 //   美音单词 w/8/82xx.mp3（慢速 82xxs.mp3）
 //   英音单词 wuk/8/82xx.mp3（慢速 82xxs.mp3）
 //   美音例句 s/8/82xx.mp3（慢速 82xxs.mp3）
@@ -26,7 +26,7 @@ module.exports = {
   addict: {
     p1: 'n.', m1: '入迷的人',
     sub: { p: 'v.', m: '使沉溺；使上瘾', ipa: '/əˈdɪkt/', uk: '/əˈdɪkt/', ai: 8201,
-      e: 'He was addicted to video games as a teenager.', cn: '他十几岁时对电子游戏上瘾了。' },
+      e: 'This game can addict young players.', cn: '这款游戏可能使年轻玩家上瘾。' },
   },
 
   advocate: {
@@ -44,7 +44,7 @@ module.exports = {
   alternate: {
     p1: 'v.', m1: '交替；轮流',
     sub: { p: 'adj.', m: '交替的；轮流的', ipa: '/ˈɔːltərnət/', uk: '/ɔːlˈtɜːnət/', ai: 8204,
-      e: 'My sister and I take alternate turns doing the dishes.', cn: '我和妹妹轮流洗碗。' },
+      e: 'We work on alternate days.', cn: '我们隔天轮流工作。' },
   },
 
   associate: {
@@ -237,9 +237,8 @@ module.exports = {
     sub: { p: 'n.', m: '母猪', ipa: '/saʊ/', uk: '/saʊ/', ai: 8236,
       e: 'The farmer keeps a big sow and ten little pigs.', cn: '农夫养了一头大母猪和十只小猪。' },
   },
-
   use: {
-    p1: 'n.', m1: '使用；习惯',
+    p1: 'n.', m1: '用处；用途；使用',
     sub: { p: 'v.', m: '利用；使用', ipa: '/juːz/', uk: '/juːz/', ai: 8237,
       e: 'Can I use your phone to call my mom?', cn: '我可以用你的手机给我妈妈打个电话吗？' },
   },
@@ -327,3 +326,13 @@ function expand(list) {
 }
 
 module.exports.expand = expand;
+
+// 供搜索与复习页读取同一份副卡数据，避免只有今日页知道多义词的另一读音。
+module.exports.subFor = function (word) {
+  const item = MAP[String(word || '').toLowerCase()];
+  return item && item.sub ? item.sub : null;
+};
+module.exports.mainFor = function (word) {
+  const item = MAP[String(word || '').toLowerCase()];
+  return item ? { p: item.p1 || '', m: item.m1 || '' } : null;
+};
