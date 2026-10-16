@@ -71,8 +71,9 @@ const expected = {
 const aisle = runtimeWords.get('aisle');
 check(!!aisle, '运行时缺少 aisle 词条');
 if (aisle) {
-  check(aisle.e === 'I entered the aisle and saw her.', 'aisle 例句意外变化');
-  check(aisle.m === '走廊；侧廊', 'aisle 释义意外变化：' + aisle.m);
+  check(aisle.e === 'Please leave the aisle clear.', 'aisle 例句修正未生效');
+  check(aisle.m === '过道；通道', 'aisle 释义修正未生效：' + aisle.m);
+  check(aisle.cn === '请保持过道畅通。', 'aisle 翻译修正未生效');
 }
 Object.keys(expected).forEach(w => {
   const actual = runtimeWords.get(w), e = expected[w];
