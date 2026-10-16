@@ -21,7 +21,7 @@
 
 ## 优先抽听的异音多义词
 
-先抽查 \`abuse\`、\`addict\`、\`close\`、\`record\`、\`conduct\`、\`lead\`、\`live\`、\`recount\`、\`read\`、\`refuse\`、\`tear\`、\`wind\`、\`wound\`、\`use\`、\`moderate\`、\`sow\`。重点判断主/副卡的 \`ai\` 是否对应正确词性读音，尤其同拼写异读；再抽听功能词 \`what/where/when/why/which\` 的美音是否与常见 General American \`/w/\` 音标相符。
+先抽查 \`isle/aisle\`、\`abuse\`、\`addict\`、\`close\`、\`record\`、\`conduct\`、\`lead\`、\`live\`、\`recount\`、\`read\`、\`refuse\`、\`tear\`、\`wind\`、\`wound\`、\`use\`、\`moderate\`、\`sow\`。重点判断主/副卡的 \`ai\` 是否对应正确词性读音，尤其同拼写异读；再抽听功能词 \`what/where/when/why/which\` 的美音是否与常见 General American \`/w/\` 音标相符。
 
 **这些项目目前只是待核验样本，不表示已发现音频错误或已完成听核。**
 
