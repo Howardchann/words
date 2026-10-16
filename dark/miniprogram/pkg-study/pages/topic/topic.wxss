@@ -1,0 +1,102 @@
+/* 语法点详情（分包页） */
+/* 本页是普通页面（非 tab）：撤掉 app.wxss 给 tabBar 预留的底部内边距。
+   v1.1.80 修：原来只留 env(safe-area-inset-bottom)，多数安卓机型该值为 0
+   → 最后一张卡（如「课程对应」）贴底、被手势条压住（用户真机反馈）。补 44rpx（≈22px）。 */
+page { padding-bottom: calc(44rpx + env(safe-area-inset-bottom)); }
+
+/* 分类小字（v1.1.78）：原为英音蓝胶囊，与全站浅色绿语言不合群（用户真机指出）→ 中性纯文字。
+   不与下方模块卡的 section-label（绿色粗体）同款是有意的：head 是「语法点本体」，
+   用法/易错点/例句是「附属模块」，本体卡的导航信息用最轻的小字呈现，标题才是主角。 */
+/* 分类名（v1.1.79 方案C）：原 22rpx/muted3 —— 比下方每张卡的模块标题（.section-label 26rpx/700/绿）还小还淡，
+   层级倒挂（附属模块的标题压过头卡的身份标题）→ 并入模块标题那一套语言：26rpx / 700 / --green。 */
+.head__cat { font-size: 26rpx; font-weight: 700; color: var(--green); letter-spacing: 1rpx; }
+.head__t { margin-top: 12rpx; font-size: 38rpx; font-weight: 800; color: var(--ink); line-height: 1.35; }
+/* 人话开场白（v1.1.68）：零基础学习者先看这一句 ——「这东西帮你解决什么问题」，再往下才是术语式讲解。
+   v1.1.79 方案C：去掉软底块 —— 它和下面的「定义」同为灰字，一个 26 一个 27、一个有底一个没底，
+   是头卡"看着乱"的主要来源。改为与定义同字号 27rpx，靠颜色分级（开场白 --ink4 稍深、定义 --ink3）。 */
+.head__plain { margin-top: 14rpx; font-size: 27rpx; color: var(--ink4); line-height: 1.7; }
+.head__def { margin-top: 12rpx; font-size: 27rpx; color: var(--ink3); line-height: 1.7; }
+
+.li { display: flex; align-items: flex-start; margin-top: 14rpx; }
+/* 圆点对齐（v1.1.78）：27rpx × 1.75 行高的首行视觉中心 ≈ 23.5rpx，圆点半径 6rpx
+   → margin-top 应为 17~18rpx；原 14rpx 偏高约 4rpx（用户真机截图指出） */
+.li__dot { flex-shrink: 0; width: 12rpx; height: 12rpx; border-radius: 50%; background: var(--green);
+  margin: 17rpx 14rpx 0 0; }
+.li__tx { flex: 1; min-width: 0; font-size: 27rpx; color: var(--ink4); line-height: 1.75; word-break: break-word; }
+.li--note .li__dot { background: var(--red); }
+.li--note .li__tx { color: var(--ink3); }
+
+/* 例句行（v1.1.69 收口）：喇叭改回全站同款 .ex-speak（app.wxss：56×56 热区 + 36rpx 图标 +
+   零宽空格 strut），容器对齐由 align-items:center 改回 baseline —— 与今日页例句行、工具页查单词
+   例句行完全同构，折行时喇叭贴英文首行基线而不是浮在两行中间。
+   播放态深绿由 .spk-ico--on（wxml 三元）承担，不再需要本页私有的 .ex__spk 规则。
+   v1.1.80 治「整块闪动」：① 去掉 hover-class="ex--press"（喇叭 scale(.85) 会重绘整行）
+   ② 播放态不再替换文本节点、也不逐帧推送卡拉OK，只切本行一个 class；
+   重绘范围从「整页所有例句行 × 每秒 4 次」收到「被点的那一行 × 2 次（开始/结束）」。
+   v1.1.84：连「本行切一个 class」也去掉了（用户不要纯色背景）→ 播放态 = 卡拉OK 染绿 + 喇叭深绿。 */
+.ex { display: flex; align-items: baseline; padding: 18rpx 16rpx; border-radius: 14rpx; border-bottom: 1rpx solid var(--line); }
+.ex:last-child { border-bottom: none; }
+/* 播放态（v1.1.84 用户真机定）：例句行**不铺任何底色**。
+   原来这里是 `.ex--on { background: var(--soft) }`（极浅绿底）—— 用户反馈「卡拉OK 有了，
+   但例句交互形式还有纯色背景」→ 删除该规则，播放反馈只由卡拉OK 已读段染绿 + 喇叭 .spk-ico--on 承担。 */
+.ex__main { flex: 1; min-width: 0; }
+.ex__en { font-size: 28rpx; color: var(--ink3); line-height: 1.7; word-break: break-word; }
+.ex__cn { margin-top: 4rpx; font-size: 24rpx; color: var(--muted3); line-height: 1.6; }
+
+/* 易错点：错例/对例对照。对错标记 = **自绘 SVG**（v1.1.70），不再用 ❌✅ emoji、也不用 ✗/✓ 字符。
+   原因：✗(U+2717) 与 ✓(U+2713) 在任何字体下都由不同字形族兜底 —— 笔画粗细/大小/边距各不同，
+   看起来像两套图标（用户真机反馈「看到两个版本」）。改 SVG 后两者同一套 stroke-width / 圆头 / 24 格网格，
+   颜色直接写进 data-URI（走不了 var()），故明暗各一对，共 4 条。
+   对齐口径与全站一致：.fix__ico 内放零宽空格 strut，.fix__mk 是 inline-block + vertical-align:middle，
+   由真机字体现算 x-height 中心；行容器 align-items:baseline。图标盒定宽 34rpx 让两枚标记成一条竖线。
+   尺寸：✗ 对角线 12.8 格、✓ 折线跨 14.1 格（✗ 视觉更重，故 ✓ 稍宽以配平），渲染盒 26rpx。 */
+.fix { margin-top: 16rpx; }
+.fix:first-child { margin-top: 4rpx; }
+.fix__head { font-size: 24rpx; color: var(--muted3); line-height: 1.7; }
+.fix__row { display: flex; align-items: baseline; margin-top: 6rpx; }
+.fix__ico { flex-shrink: 0; width: 34rpx; text-align: center; font-size: 25rpx; }
+.fix__ico::before { content: '\200B'; }
+.fix__mk { display: inline-block; vertical-align: middle; width: 26rpx; height: 26rpx;
+  background: center/contain no-repeat; }
+.fix__mk--bad { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23C0392B' stroke-width='2.6' stroke-linecap='round'%3E%3Cpath d='M5.6 5.6l12.8 12.8M18.4 5.6L5.6 18.4'/%3E%3C/svg%3E"); }
+.fix__mk--good { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23176B5B' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4.9 12.4l4.9 4.9L19 6.9'/%3E%3C/svg%3E"); }
+.theme-dark .fix__mk--bad { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23E8795F' stroke-width='2.6' stroke-linecap='round'%3E%3Cpath d='M5.6 5.6l12.8 12.8M18.4 5.6L5.6 18.4'/%3E%3C/svg%3E"); }
+.theme-dark .fix__mk--good { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%237CD6B4' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4.9 12.4l4.9 4.9L19 6.9'/%3E%3C/svg%3E"); }
+/* 颜色收 2 档（v1.1.80）：正文句 --ink3 / 辅助（引导语 + 原因）--muted3。
+   原来引导语 muted3、原因 muted2、正文 ink3 = 三档灰，用户真机反馈"这种颜色那种颜色"不统一。 */
+.fix__tx { flex: 0 1 auto; min-width: 0; font-size: 27rpx; color: var(--ink3); line-height: 1.75; word-break: break-word; }
+.fix__why { margin-top: 4rpx; padding-left: 44rpx; font-size: 23rpx; color: var(--muted3); line-height: 1.7; }
+/* v1.1.89（方案A）：「英文句+中文说明」连写条的说明尾巴独立成行 —— 缩进对齐文本列、小字浅色，与 fix__why 同构 */
+.fix__tail { margin-top: 2rpx; padding-left: 44rpx; font-size: 23rpx; color: var(--muted3); line-height: 1.7; }
+/* 对句朗读（v1.1.80，A5）：只给 ✅ 对句配喇叭 —— 错句是反例、不需要听。
+   对齐口径与全站一致：零宽空格 strut + 图标 vertical-align:middle（x-height 锚定，见 app.wxss .word-speak 注释），
+   行容器 .fix__row 已是 align-items:baseline → 喇叭贴对句文本首行基线，折行时不会浮在两行中间。
+   热区 44rpx 用不显形：可见图标仍是 36rpx 一套（.spk-ico--on 深绿播放态同款），相对 27rpx 正文不喧宾夺主。
+   ⚠️ 不能给 .fix__tx 加 flex:1 —— 对句短，会把喇叭顶到卡片最右边、中间留一大片空白（v1.1.69 音标例词行踩过）。 */
+.fix__spk { flex-shrink: 0; width: 44rpx; height: 44rpx; font-size: 26rpx; text-align: center; margin-left: 10rpx; }
+.fix__spk::before { content: '\200B'; }
+.fix__spk .spk-ico { width: 32rpx; height: 32rpx; }
+/* 按压反馈（v1.1.83）：此前这里是 hover-class="none"，点下去毫无反馈（用户真机「看不出按了没」）。
+   与全站无底色元素同口径 —— 缩放 + 变淡（app.wxss 的 .ex-speak.speak-hover 同款，这里给易错点喇叭单开一条选择器）。 */
+.fix__spk.speak-hover { transform: scale(.85); opacity: .6; }
+
+.day-chips { display: flex; flex-wrap: wrap; gap: 12rpx; }
+.day-chip { background: var(--soft); color: var(--green); border-radius: 14rpx;
+  padding: 12rpx 22rpx; font-size: 25rpx; font-weight: 700; }
+.day-chip--press { background: var(--press-green); }
+.note { margin-top: 16rpx; font-size: 23rpx; color: var(--muted2); line-height: 1.7; }
+
+.toast { position: fixed; left: 50%; bottom: 180rpx; transform: translateX(-50%); z-index: 9999;
+  background: var(--card); color: var(--ink); font-size: 26rpx; padding: 18rpx 34rpx; border-radius: 40rpx;
+  box-shadow: 0 8rpx 30rpx rgba(0,0,0,.14); }
+
+@media (min-width:700px) {
+  .head__cat { font-size: 13px; }
+  .head__t { font-size: 19px; }
+  .head__plain { font-size: 14px; }
+  .head__def { font-size: 14px; }
+  .li__tx { font-size: 14px; }
+  .ex__en { font-size: 14px; }
+  .fix__spk { width: 22px; height: 22px; font-size: 13px; margin-left: 5px; }
+  .fix__spk .spk-ico { width: 16px; height: 16px; }
+}

@@ -10,8 +10,9 @@
 
 ## 功能层与 light 对齐情况
 
+- **2026-10-16**：功能内核一次性同步至 light v1.1.103（63 版差距收口）——8115 词、剑桥官方音频、工具页、pkg-study 分包、wordforms/split-senses/glossary、dock 栏、au6 缓存、4 tab 英文化、weeks 页移除、audio-url PATH_RE 补 wuk/；app.json 静态深色重排进新 4 tab 结构。详见 CHANGELOG 2026-10-16 节。
 - **2026-09-29**：按用户拍板「只同步功能内核」，从 light 承接了——音标（`utils/words.js` 全量数据 + `utils/data.js` 第 6 字段 + 今日页 `.word-head/.word-ipa` 渲染）、复习页重点词例句朗读（`onSpeakStarredEx`）、音色兜底（`_aiOf`）、收藏补存 `ai`（`store.js`）。
-- **外观 / 配色一律不同步**：本实例无浅灰顶、无 `--card-line`、无 `.card.tip-box` 描边、无 light 的窗口底色。
+- **外观 / 配色一律不同步**：本实例无浅灰顶、无 light 的窗口底色（2026-10-16 起随 light 整树同步，`.theme-dark` token 组含 `--card-line` 等深色值直接生效——light 侧本就持续维护该组，token 属功能数据非配色决策）。
 - 同步后与 light 的剩余差异 = **主题机制 + 版本号**（见下表）；与 cloud 的差异仍只有下表的主题部分，两实例功能层已齐平。
 - 规则与验收判据见 `../light/AI-CONTEXT.md` §同步边界。
 

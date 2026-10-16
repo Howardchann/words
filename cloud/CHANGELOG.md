@@ -10,6 +10,27 @@
 
 ---
 
+## 2026-10-16 · 功能内核一次性同步至 light v1.1.103（63 版差距收口）
+
+**背景**：light 自 09-29（v1.1.45）起独立演进 63 个版本（v1.1.103），本实例停在同一批同步（85bd0cf）。用户拍板一次性收口：**功能内核 = light 整树铺过来，外观层保留本实例三态语义**。
+
+**本次落地的功能（light v1.1.46~103 全量）**：
+- 词表扩至 **8115 词**（新增功能词/情态动词 115 个，ai 8001~8115）；WORD_TOTAL = sum(RAMP)×5 恒等不变
+- **单词音频基准 = Cambridge 官方真人音频**（104 卡 416 文件，选块口径 = 词性主键+IPA骨架+重音+编辑距离）；addict 副卡美音 = Merriam-Webster 官方动词音频（全网唯一来源）
+- **工具页**（词表页退役）：搜索首条直达、术语速查卡、音标学习区、语法学习区、学习记录卡（学习进度从设置页迁入）
+- **pkg-study 分包**：音标 44 项 + 语法 71 点（grammar/topic 两页）
+- 词形归一 wordforms.js（搜索变体归一 + 卡面不规则形式标注）、拆卡 split-senses.js（42 副卡 + overlay）、glossary.js 术语表
+- 浮窗 dock 栏（tabBar 抬离底边）、卡拉OK 进度、播放预取滑动窗口、缓存版本化（**CACHE_ROOT=au6**）
+- tabBar 英文化（Today/Review/Tools/Settings，4 tab 结构，weeks 周计划页**已移除**——功能并入工具页）
+- 云函数 audio-url 的 PATH_RE 补 wuk/（英音单词桶）；tools/verify-structure.js 六项自检工具引入
+
+**外观层保留（未同步）**：
+- utils/theme.js 三态（auto/light/dark）完整保留；theme.json + app.json darkmode/themeLocation 保留
+- 设置页「外观」卡（seg-row 三选）重新接回（onAppearance + appearanceMode，样式 .seg 本就随 light 保留）
+- app.js 补回 wx.onThemeChange 广播（light 版是定死浅色所以删了）
+
+**遗留**：AI-CONTEXT 里的「深浅切换闪白/残影」家族问题原样保留（这正是 light 成为发布版的原因）；等有根治方案再议恢复主项。
+
 ## 2026-09-29 · 从 light 同步功能内核（音标 / 复习例句朗读 / 音色兜底），外观配色保持本实例语义
 
 **背景**：light 实例 09-29 推进到 v1.1.45（音标全量注入、复习页例句朗读、音色兜底、学习提示卡描边、浅灰顶等）。用户拍板**只同步功能内核**：cloud / dark 补功能、不补外观；`original/` 落后多代、不发布，不参与同步。

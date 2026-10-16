@@ -15,7 +15,15 @@
   width: 100vw;
   box-sizing: border-box; /* 官方同款：height 含 padding-top（状态栏） */
 }
-.nav-bar__left { flex-shrink: 0; }
+/* 左区：固定宽度（inline style 给）保证标题在「左区 | 胶囊区」之间真正居中。
+   v1.1.46 起左区从「纯占位」变为「可选容器」：box-sizing 收进 padding，
+   内部控制 padding-left 而不是外面 —— 否则左区变宽会把标题推偏。
+   里面可能有两种东西：back 返回键（搜索页用）或默认 slot（今日页放放大镜）。 */
+.nav-bar__left { flex-shrink: 0; box-sizing: border-box; padding-left: 12px; display: flex; align-items: center; }
+/* 返回键用字符 «‹» 而非 SVG data-URI：颜色直接继承 --nav-fg，深浅主题零成本适配，
+   与今日页「‹ 前一天」的文字按钮同一语言 */
+.nav-bar__back { font-size: 16px; padding-right: 6px; }
+.nav-bar__back--press { opacity: .5; }
 .nav-bar__center {
   flex: 1;
   display: flex;

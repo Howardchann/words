@@ -1,6 +1,11 @@
-<!-- 轻提示：白卡 + 绿勾，屏幕中上部 -->
-<view class="fb-toast" wx:if="{{toast.show}}">
-  <view class="fb-toast-ico">✓</view>
+<!-- 轻提示：白卡 + 线稿绿勾，屏幕中上部
+     勾（v1.1.71）：v1.1.70 曾改成「绿圆底 + 白勾」整枚 SVG，但绿圆是一大块实色，
+     与全站线稿图标（易错点 ✗✓、设置页勾、tab 图标全是 1.8~2.6 描边、无底色）不是一个观感
+     （用户真机反馈「勾有大面积颜色」）。改回纯线稿勾：与 settings 的 sheet-check 完全同一张图，
+     深色主题靠 fb-dark 类切变体图（组件 styleIsolation 隔离，.theme-dark 选择器够不到组件内部，
+     所以由 JS 在弹出时读主题挂类，而不是靠页面根类穿透）。 -->
+<view class="fb-toast {{toast.dark ? 'fb-dark' : ''}}" wx:if="{{toast.show}}">
+  <view class="fb-toast-ico"></view>
   <text class="fb-toast-msg">{{toast.msg}}</text>
 </view>
 

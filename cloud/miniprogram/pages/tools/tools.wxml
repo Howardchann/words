@@ -1,0 +1,211 @@
+<page-meta page-style="{{pageStyle}}" />
+<view class="page-root {{dark ? 'theme-dark' : ''}}">
+<nav-bar title="{{navTitle}}" />
+
+<!-- ① 学习记录（v1.1.95）：三格进度 + 两个入口（重点词 / 复习记录，由设置页顶部迁入，
+     设置页从此只剩「设置」，不再出现第二张学习记录卡）。
+     已学天数分母 = 可打卡天数（弹性日不占名额，口径写在设置-关于） -->
+<view class="card rec-card">
+  <view class="section-label">学习记录</view>
+  <view class="rec-row">
+    <view class="rec-item">
+      <view class="rec-num">{{learnedDays}}<text class="rec-unit">天</text></view>
+      <view class="rec-label">已学</view>
+    </view>
+    <view class="rec-div"></view>
+    <view class="rec-item">
+      <view class="rec-num">{{learnedWords}}<text class="rec-unit">个</text></view>
+      <view class="rec-label">已学单词</view>
+    </view>
+    <view class="rec-div"></view>
+    <view class="rec-item">
+      <view class="rec-num">{{leftDays}}<text class="rec-unit">天</text></view>
+      <view class="rec-label">预计还剩</view>
+    </view>
+  </view>
+
+  <!-- 两个入口格：点数字直接落到复习页对应 tab（重点词 → starred / 复习记录 → random）。
+       按压态沿用设置页那套 data.statPress 手动按压：切 tab 返回后微信清理 hover 残影不可靠。 -->
+  <view class="rec-entry">
+    <view class="rec-stat {{statPress === 'starred' ? 'rec-stat--press' : ''}}"
+          data-pk="starred" data-url="/pages/review/review" data-tab="starred"
+          bindtouchstart="onStatDown" bindtouchmove="onStatMove" bindtouchend="onStatEnd"
+          bindtouchcancel="onStatCancel" bindtap="onStatTap">
+      <view class="rec-stat__num">{{starredCount}}<text class="rec-stat__unit">个</text><text class="rec-stat__go"></text></view>
+      <view class="rec-stat__label">重点词</view>
+    </view>
+    <view class="rec-stat {{statPress === 'review' ? 'rec-stat--press' : ''}}"
+          data-pk="review" data-url="/pages/review/review" data-tab="random"
+          bindtouchstart="onStatDown" bindtouchmove="onStatMove" bindtouchend="onStatEnd"
+          bindtouchcancel="onStatCancel" bindtap="onStatTap">
+      <view class="rec-stat__num">{{reviewCount}}<text class="rec-stat__unit">次</text><text class="rec-stat__go"></text></view>
+      <view class="rec-stat__label">复习记录</view>
+    </view>
+  </view>
+</view>
+
+<!-- ② 查单词 -->
+<view class="card search-card">
+  <view class="section-label">查单词</view>
+  <view class="tk-bar">
+    <view class="ico ico-search tk-bar__ico"></view>
+    <input class="tk-bar__input" value="{{kw}}" focus="{{focus}}" confirm-type="search"
+           hold-keyboard="{{true}}"
+           placeholder="输入单词或中文释义" placeholder-class="tk-bar__ph"
+           bindinput="onInput" bindfocus="onFocus" bindblur="onBlur" bindconfirm="onConfirm" />
+    <view class="tk-bar__clear" wx:if="{{kw}}" hover-class="hover-dim" hover-stay-time="120" bindtap="onClear">×</view>
+  </view>
+
+  <view class="tk-hint" wx:if="{{!kw}}">全库共 <text class="tk-hint__n">{{wordTotal}}</text> 个单词；只输入前几个字母也能搜到（如 nano → nanotechnology）。</view>
+  <view class="tk-meta" wx:if="{{kw && total > 0}}">找到 <text class="tk-meta__n">{{total}}</text> 个结果{{more ? '，仅显示前 ' + list.length + ' 个' : ''}}</view>
+
+  <!-- 结果行与今日页词行同构：图标 = 朗读，其它位置 = 跳到该词所在的 Day -->
+  <block wx:for="{{list}}" wx:key="w">
+    <view class="word-row tk-row" data-w="{{item.w}}" data-day="{{item.day}}" data-via="{{item.via}}"
+          hover-class="tk-row--press" hover-start-time="0" hover-stay-time="60" bindtap="onJump">
+      <view class="word-main">
+        <view class="word-head"><text class="word-en"><text wx:if="{{playingText === item.w}}" class="kara-lit">{{karaLit}}</text>{{playingText === item.w ? karaRest : item.w}}</text><text class="word-pos">{{item.p}}</text><view class="word-zh">{{item.m}}</view>
+          <view class="ipa-row">
+            <view class="ipa-mod {{playingText === item.w && playingAccent === 'us' ? 'on' : ''}}"
+                  hover-class="speak-hover" hover-stay-time="120" hover-stop-propagation="{{true}}"
+                  data-text="{{item.w}}" data-ai="{{item.ai}}" data-kind="w" data-accent="us" catchtap="onSpeak"><view class="spk-ico {{playingText === item.w && playingAccent === 'us' ? 'spk-ico--on' : ''}}"></view><text class="ipa-txt" wx:if="{{item.ipa}}">{{item.ipa}}</text></view>
+            <view class="ipa-mod ipa-mod--uk {{playingText === item.w && playingAccent === 'uk' ? 'on' : ''}}"
+                  wx:if="{{item.uk}}"
+                  hover-class="speak-hover" hover-stay-time="120" hover-stop-propagation="{{true}}"
+                  data-text="{{item.w}}" data-ai="{{item.ai}}" data-kind="w" data-accent="uk" catchtap="onSpeak"><view class="spk-ico {{playingText === item.w && playingAccent === 'uk' ? 'spk-ico--on' : ''}}"></view><text class="ipa-txt">{{item.uk}}</text></view>
+          </view></view>
+        <view class="wf-via" wx:if="{{item.via}}">「{{kw}}」是它的{{item.via}}</view>
+        <view class="wf-note" wx:if="{{item.wf.length}}">
+          <view class="wf-note__t {{wfKey === item.w + ':' + F.form ? 'wf-note__t--on' : ''}}" wx:for="{{item.wf}}" wx:for-item="F" wx:key="form"
+                hover-class="hover-dim" hover-stay-time="120" hover-stop-propagation="{{true}}"
+                data-text="{{F.form}}" data-key="{{item.w}}:{{F.form}}" catchtap="onSpeakWf">{{F.label}} {{F.form}}</view>
+        </view>
+        <view class="word-example-row">
+          <view class="word-example"><text wx:if="{{playingText === item.e}}" class="kara-lit">{{karaLit}}</text>{{playingText === item.e ? karaRest : item.e}}</view>
+          <view class="ex-speak {{playingText === item.e ? 'playing' : ''}}"
+                hover-class="speak-hover" hover-stay-time="120" hover-stop-propagation="{{true}}"
+                data-text="{{item.e}}" data-ai="{{item.ai}}" data-kind="s" catchtap="onSpeak"><view class="spk-ico {{playingText === item.e ? 'spk-ico--on' : ''}}"></view></view>
+        </view>
+        <view class="tk-day">第 {{item.day}} 天<text class="tk-day__go">{{jumpingW === item.w ? ' 跳转中…' : ' ›'}}</text></view>
+      </view>
+    </view>
+  </block>
+
+  <view class="tk-empty" wx:if="{{kw && !list.length}}">
+    <view class="empty-text">没有找到「{{kw}}」</view>
+    <view class="tk-empty__sub">英文支持模糊匹配，中文按释义检索。换个关键词试试。</view>
+  </view>
+</view>
+
+<!-- ③ 音标（分组筛选 + 常驻面板）
+     v1.1.68 改版：原来 44 个音标平铺 2 屏、讲解排在最末 → 点最上面那个音标要滚到底才看得到讲解（用户真机反馈）。
+     现在：大类（元音/辅音）→ 子类（短元音/双元音…）两级筛选，屏幕上最多 3 行音标，面板紧跟其下；
+     说明文字也移到最前，不再吊在最底。 -->
+<view class="card">
+  <view class="section-label">音标</view>
+
+  <!-- 大类：元音 / 辅音 -->
+  <view class="ph-class">
+    <view class="ph-cls {{phCls === 'vowel' ? 'on' : ''}}" data-c="vowel"
+          hover-class="ph-cls--press" hover-stay-time="60" bindtap="onPhCls">元音</view>
+    <view class="ph-cls {{phCls === 'consonant' ? 'on' : ''}}" data-c="consonant"
+          hover-class="ph-cls--press" hover-stay-time="60" bindtap="onPhCls">辅音</view>
+  </view>
+
+  <!-- 子类筛选：全部 + 当前大类的子类 -->
+  <view class="ph-sub">
+    <view class="ph-subchip {{phGrp === '' ? 'on' : ''}}" data-g=""
+          hover-class="ph-subchip--press" hover-stay-time="60" bindtap="onPhGrp">全部</view>
+    <view class="ph-subchip {{phGrp === item ? 'on' : ''}}" wx:for="{{phGrps}}" wx:key="*this" data-g="{{item}}"
+          hover-class="ph-subchip--press" hover-stay-time="60" bindtap="onPhGrp">{{item}}</view>
+  </view>
+
+  <!-- 音标网格（只渲染当前筛选结果） -->
+  <view class="ph-grid">
+    <view class="ph-chip {{ph.s === item.s ? 'on' : ''}}" wx:for="{{phList}}" wx:key="s" data-s="{{item.s}}"
+          hover-class="ph-chip--press" hover-stay-time="80" bindtap="onPhonTap">/{{item.s}}/</view>
+  </view>
+
+  <view class="ph-panel" wx:if="{{ph}}">
+    <view class="ph-head">
+      <view class="ph-big">/{{ph.s}}/</view>
+      <view class="ph-tag">{{ph.grp}}</view>
+    </view>
+    <view class="ph-block">
+      <view class="ph-block__t">怎么读</view>
+      <view class="ph-block__b">{{ph.tips}}</view>
+    </view>
+    <view class="ph-block">
+      <view class="ph-block__t">易混音</view>
+      <view class="ph-block__b">{{ph.mix}}</view>
+    </view>
+    <view class="ph-block">
+      <view class="ph-block__t">例词</view>
+      <!-- 例词行（v1.1.69 方案A）：喇叭挪到行首、独立成一条竖线列，文字左对齐自然宽度。
+           2026-10-10 用户真机反馈「单词的翻译和播放按钮之间大片空白」——根因是文字块 flex:1 被强行
+           撑满、喇叭又被钉死在最右，而例词本身很短（最长的才 television·si·电视，空白占行宽 49%~72%）。
+           喇叭仍是同一枚 36rpx 绿喇叭（.ex-speak 同款热区，只是位置从行尾改为行首列），
+           垂直对齐仍靠 .ex-speak 的零宽空格 strut + .spk-ico vertical-align:middle 取 x-height 基线。
+           v1.1.70：目标字母从「单词后面的独立蓝色小标签」改为**就地染色**（sit 的 i 变绿），
+           由 tools.js 的 hitSegs() 预先切成 item.seg 分段，模板只负责 for 出来。 -->
+      <view class="ph-ex" wx:for="{{ph.ex}}" wx:key="w" data-w="{{item.w}}"
+            hover-class="ph-ex--press" hover-stay-time="80" bindtap="onSpeakPhonEx">
+        <view class="ex-speak ex-speak--lead"><view class="spk-ico {{playingText === item.w ? 'spk-ico--on' : ''}}"></view></view>
+        <view class="ph-ex__txt">
+          <!-- 播放中：整词卡拉 OK（与今日页一致）；常态：目标字母就地染色（item.seg 由 tools.js 的 hitSegs 派生） -->
+          <text class="ph-ex__w" wx:if="{{playingText === item.w}}"><text class="kara-lit">{{karaLit}}</text>{{karaRest}}</text>
+          <text class="ph-ex__w" wx:else><text wx:for="{{item.seg}}" wx:for-item="sg" wx:key="i" class="{{sg.h ? 'ph-ex__seg--hit' : ''}}">{{sg.v}}</text></text>
+          <text class="ph-ex__cn">{{item.cn}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+  <view class="tk-note">共 {{phonTotal}} 个音标（元音 {{vowelCount}} / 辅音 {{consCount}}）。点任意音标看讲解，例词可直接点读（离线也能听）。</view>
+</view>
+
+<!-- ⑤ 术语小词典（v1.1.94，v1.1.97 定名）：零基础用户在词卡释义（me（宾格））和词性标签（n./v.）里
+     撞见「行话」时，语法速查按天编排、当下找不到对应讲解 —— 这里给一页「行话词典」。
+     结构与音标卡同构（分类段控 → 胶囊网格 → 常驻面板），默认选中第一条所以永不留白。
+     命名经用户确认：「语法术语速查」六字拗口 →「术语小词典」；卡片量词与音标卡统一为「个」。 -->
+<view class="card">
+  <view class="section-label">术语小词典</view>
+
+  <view class="ph-class">
+    <view class="ph-cls {{glGroup === item.id ? 'on' : ''}}" wx:for="{{glGroups}}" wx:key="id" data-id="{{item.id}}"
+          hover-class="ph-cls--press" hover-stay-time="60" bindtap="onGlGrp">{{item.name}}</view>
+  </view>
+
+  <view class="ph-grid">
+    <view class="ph-chip gl-chip {{gl.k === item.k ? 'on' : ''}}" wx:for="{{glList}}" wx:key="k" data-k="{{item.k}}"
+          hover-class="ph-chip--press" hover-stay-time="80" bindtap="onGlTap">{{item.k}}</view>
+  </view>
+
+  <view class="ph-panel" wx:if="{{gl}}">
+    <view class="ph-head"><view class="ph-big gl-big">{{gl.k}}</view></view>
+    <view class="ph-block">
+      <view class="ph-block__t">通俗说</view>
+      <view class="ph-block__b">{{gl.d}}</view>
+    </view>
+    <view class="ph-block">
+      <view class="ph-block__t">例子</view>
+      <view class="gl-eg">{{gl.e}}</view>
+    </view>
+  </view>
+  <view class="tk-note">共 {{glTotal}} 个术语。词性缩写 = 单词卡上单词后的小标签（n. / v. / adj. …）；语法术语 = 释义括弧、语法讲解里的行话。卡上遇到看不懂的小字，来这里查一条就走。</view>
+</view>
+
+<!-- ④ 语法速查：本页只给目录（全文在分包，避免撑大启动包） -->
+<view class="card">
+  <view class="section-label">语法速查</view>
+  <view class="cat-grid">
+    <view class="cat-cell" wx:for="{{cats}}" wx:key="id" data-id="{{item.id}}"
+          hover-class="cat-cell--press" hover-stay-time="80" bindtap="onCatTap">
+      <view class="cat-name">{{item.name}}</view>
+      <view class="cat-cell__go"></view>
+    </view>
+  </view>
+  <view class="tk-note">共 {{catTotal}} 个语法点：一句人话开场白 + 定义 + 用法 + 易错点 + 例句，能对应上课程的还会挂出「课程里讲过哪几天」。点分类进入；也可以进速查页按「用在什么场合」筛。</view>
+</view>
+
+<feedback id="fb"/>
+</view>

@@ -22,6 +22,18 @@
 
 ---
 
+## 2026-10-16 · 功能内核一次性同步至 light v1.1.103（63 版差距收口）
+
+**背景**：light 自 09-29（v1.1.45）起独立演进 63 个版本（v1.1.103），本实例停在同一批同步（85bd0cf）。用户拍板一次性收口：**功能内核 = light 整树铺过来，外观层保留本实例定死深色语义**。
+
+**功能清单**：与 cloud 实例同批（见 cloud/CHANGELOG.md 2026-10-16 节）：8115 词、剑桥官方音频、工具页、pkg-study 分包、wordforms/split-senses/glossary、dock 栏、au6 缓存、4 tab 英文化、weeks 页移除、audio-url PATH_RE 补 wuk/。
+
+**外观层保留（未同步）**：
+- utils/theme.js 定死深色版保留（isDark 恒真，根 view 恒挂 .theme-dark）
+- app.json 窗口/tabBar 静态深色（#0E1618 / #58B394）重排进 light 的新 4 tab 结构；无 darkmode/theme.json
+- 设置页**无**外观选择卡（定死深色实例不需要）；app.js 无 onThemeChange
+- 深色 token 适配：light 的 app.wxss 本就持续维护 .theme-dark token 组（含 v1.1.42 --card-line、v1.1.51 双音标 us-*/uk-* 的深色值），随树直接生效；深色图标 darkicons auto 块同样随树同步
+
 ## 2026-09-27 · 首点闪白定性更新（light 录屏结论同步，文档修订）
 
 - light 实例 v1.1.39 真机录屏逐帧定性「首点 4 tab 闪白」：**与色系无关**，冷启动（后台无小程序）后首访各 tab 即闪，1~2 帧容器底色帧（webview 冷创建首绘帧）；首页不闪；

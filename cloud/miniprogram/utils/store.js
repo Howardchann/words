@@ -16,6 +16,8 @@
 const KEY = 'ielts-365-store';
 const SYNC_FN = 'sync';
 const plan = require('./data.js');
+// 旧的固定阶梯 [1,2,4,7,14,30,60,120]：v1.1.52 起 SRS 改为 SM-2 自适应，
+// 本表只用于「老数据迁移」与 level 字段兼容，不再参与计算。
 const DEFAULT_INTERVALS = [1, 2, 4, 7, 14, 30, 60, 120];
 const DAY_KEY = /^w\d{1,2}d[1-7]$/;
 const BACKUP_TAG = 'ielts-365';
@@ -28,12 +30,12 @@ const MAX_DIRTY_PER_SYNC = 400; // 单次最多上送多少个单词的复习记
 const SETTINGS_KEYS = { startDate: 1, rate: 1, accent: 1, engineMode: 1 };
 
 const defaults = () => ({
-  startDate: plan.DEFAULT_START,   // 计划开始日（周一）
+  startDate: '',                   // 计划开始日（新装默认「未开学」→ 今日页准备期；v1.1.88 起由今日页「开始学习」置为当天）
   checkedDays: {},                 // { 'w1d1': 打卡时间戳 }   ← 旧版值是 1，两个都能用
   uncheckedDays: {},               // { 'w1d1': 取消打卡时间戳 } 防止另一端把取消掉的打卡复活
   starredWords: [],                // [ { w, m, p, e, ts } ]
   unstarredWords: {},              // { 单词: 取消收藏时间戳 }
-  reviewStats: {},                 // { 单词: { correct, wrong, level, nextReviewAt, lastReviewedAt } }
+  reviewStats: {},                 // { 单词: { correct, wrong, reps, ef, ivl, step, level, nextReviewAt, lastReviewedAt } }
   rate: 0.9,                       // 朗读语速
   accent: 'us',                    // 美音 | 英音
   engine: 'online',                // 朗读引擎（预生成音频不可用时的兜底）
@@ -77,7 +79,7 @@ function init() {
   if (data.syncEnabled) sync();     // 启动即与云端对齐
 }
 
-// 页面 onShow 会调这里（今日 / 周计划 / 复习三个页面都调），必须节流
+// 页面 onShow 会调这里（今日 / 等级 / 复习三个页面都调），必须节流
 function onResume() {
   if (!data.syncEnabled || !cloudSupported()) return;
   if (syncing) return;
@@ -130,11 +132,17 @@ function toggleCheck(w, k) {
   return checked;
 }
 function checkedCount() { return Object.keys(data.checkedDays || {}).length; }
+// 已学单词数（去重）：工具页学习记录的「已学单词 N 个」用它。
+// 口径 = 所有已打卡学习日词汇的并集（周日/弹性日不产生新词，不计入）。
+function checkedWordCount() {
+  const plan = require('./data.js');
+  return plan.learnedWords(data.checkedDays || {}).length;
+}
 
 // 进度游标：第一个「需要打卡且未打卡」的学习日。
 // 没学 / 没学完，第二天打开仍停在这一天 —— 进度由打卡驱动，不由自然日驱动
 // （自然日只作「回到今天 Day N」的参照，见 today 页）。
-// 周六弹性日（type='sat'）没有打卡按钮，跳过；无内容的天也跳过。
+// 弹性日（type='sat'）没有打卡按钮，跳过；无内容的天也跳过。
 // 返回 0 = 全部完成，由调用方回退自然日。
 function firstUnfinishedDay() {
   for (let day = 1; day <= plan.TOTAL_DAYS; day++) {
@@ -166,29 +174,95 @@ function toggleStar(item) {
   return added;
 }
 
-// ---------------- 间隔复习（轻量 SRS） ----------------
-// 正确：1/2/4/7/14/30/60/120 天逐级延长；错误：等级归零并立即可复习。
-function reviewWord(word, remembered) {
-  if (!word) return null;
-  const now = Date.now();
-  const old = data.reviewStats[word] || { correct: 0, wrong: 0, level: 0, nextReviewAt: 0, lastReviewedAt: 0 };
-  let level, nextReviewAt;
-  if (remembered) {
-    level = Math.min((Number(old.level) || 0) + 1, DEFAULT_INTERVALS.length);
-    nextReviewAt = now + DEFAULT_INTERVALS[level - 1] * 86400000;
-  } else {
-    level = 0; nextReviewAt = now;
+// ---------------- 间隔复习（SM-2 简版 · 四档：忘记 / 困难 / 一般 / 简单） ----------------
+// 每词维护：
+//   ef   难度因子 1.3~2.8（默认 2.5，越小越难，直接缩放下次的间隔倍数）
+//   ivl  当前间隔天数（0 = 还在学习步，尚未毕业到天级）
+//   step 学习步序号（配合「忘记后 10 分钟再考一次」）
+//   reps 连续答对次数（仅用于展示与旧 level 字段兼容）
+//   nextReviewAt 下次到期时间戳
+// 关键改动：答「忘记」不再立刻重抽同一个词（旧版体验极差），而是进 10 分钟学习步。
+const EF_MIN = 1.3, EF_MAX = 2.8, EF_DEFAULT = 2.5;
+const LEARN_STEP_MS = 10 * 60 * 1000;   // 学习步：10 分钟后重来
+const GRADUATE_DAYS = 1;                // 「一般」毕业间隔（天）
+const EASY_DAYS = 4;                    // 「简单」毕业间隔（天）
+const DAY_MS = 86400000;
+
+// 老数据（只有 level 的固定阶梯）无损迁移到 ef/ivl：level = 已达成的阶梯级数
+function reviewStateOf(s) {
+  const o = Object.assign(
+    { correct: 0, wrong: 0, reps: 0, ef: EF_DEFAULT, ivl: 0, step: 0, level: 0, nextReviewAt: 0, lastReviewedAt: 0 },
+    s || {}
+  );
+  if (!s || s.ivl === undefined) {
+    const lv = Math.max(0, Math.min(DEFAULT_INTERVALS.length, Math.floor(Number(s && s.level) || 0)));
+    o.reps = lv; o.ivl = lv > 0 ? DEFAULT_INTERVALS[lv - 1] : 0; o.ef = EF_DEFAULT; o.level = lv;
   }
+  return o;
+}
+
+// grade: 'again' | 'hard' | 'good' | 'easy'；兼容旧调用 true=记得了 / false=不太会
+function reviewWord(word, grade) {
+  if (!word) return null;
+  if (grade === true) grade = 'good';
+  else if (grade === false) grade = 'again';
+  if (['again', 'hard', 'good', 'easy'].indexOf(grade) < 0) grade = 'good';
+
+  const now = Date.now();
+  const old = reviewStateOf(data.reviewStats[word]);
+  let ef = old.ef, ivl = old.ivl, step = old.step, reps = old.reps, due = now, ok = false;
+
+  if (grade === 'again') {
+    ef = Math.max(EF_MIN, ef - 0.20);
+    ivl = 0; step = 0; reps = 0;
+    due = now + LEARN_STEP_MS;              // 10 分钟后再来，不立刻重抽
+  } else if (grade === 'hard') {
+    if (ivl === 0) {
+      due = now + LEARN_STEP_MS;            // 学习步内原地重来
+    } else {
+      ef = Math.max(EF_MIN, ef - 0.15);
+      ivl = Math.max(1, Math.round(ivl * 1.2));
+      due = now + ivl * DAY_MS; ok = true;
+    }
+  } else if (grade === 'good') {
+    if (ivl === 0) ivl = GRADUATE_DAYS;     // 新词答对 → 毕业后 1 天
+    else ivl = Math.max(1, Math.round(ivl * ef));
+    due = now + ivl * DAY_MS; reps += 1; ok = true;
+  } else {                                   // easy
+    if (ivl === 0) ivl = EASY_DAYS;
+    else { ef = Math.min(EF_MAX, ef + 0.15); ivl = Math.max(1, Math.round(ivl * ef * 1.3)); }
+    due = now + ivl * DAY_MS; reps += 1; ok = true;
+  }
+
   data.reviewStats[word] = {
-    correct: (old.correct || 0) + (remembered ? 1 : 0), wrong: (old.wrong || 0) + (remembered ? 0 : 1),
-    level, nextReviewAt, lastReviewedAt: now
+    correct: (old.correct || 0) + (ok ? 1 : 0),
+    wrong: (old.wrong || 0) + (ok ? 0 : 1),
+    reps, ef: Math.round(ef * 100) / 100, ivl, step,
+    level: Math.min(DEFAULT_INTERVALS.length, reps),   // 旧字段保留（导出/校验兼容）
+    nextReviewAt: due, lastReviewedAt: now
   };
   data.reviewDirty[word] = 1;      // 只推变动过的单词，不必每次上送 8000 条
   data.updatedAt = now; saveLocal(); schedulePush(); emit();
   return data.reviewStats[word];
 }
 function getReviewStats(word) {
-  return (data.reviewStats || {})[word] || { correct: 0, wrong: 0, level: 0, nextReviewAt: 0, lastReviewedAt: 0 };
+  return reviewStateOf((data.reviewStats || {})[word]);
+}
+
+// 预览四档各自会产生的「下次间隔天数」（0 = 仍在 10 分钟学习步），供复习按钮显示提示。
+// 纯计算、不写盘：与 reviewWord 的分支保持一一对应。
+function gradePreview(word) {
+  const st = reviewStateOf(data.reviewStats[word]);
+  const out = {};
+  ['again', 'hard', 'good', 'easy'].forEach(g => {
+    let ef = st.ef, ivl = st.ivl;
+    if (g === 'again') ivl = 0;
+    else if (g === 'hard') ivl = ivl === 0 ? 0 : Math.max(1, Math.round(ivl * 1.2));
+    else if (g === 'good') ivl = ivl === 0 ? GRADUATE_DAYS : Math.max(1, Math.round(ivl * ef));
+    else ivl = ivl === 0 ? EASY_DAYS : Math.max(1, Math.round(ivl * ef * 1.3));
+    out[g] = ivl;
+  });
+  return out;
 }
 function dueWords(words) {
   const now = Date.now();
@@ -271,7 +345,9 @@ function applyMerged(r, sentWords, sentVersions) {
   data.starredWords = sm.starredWords;
   data.unstarredWords = sm.unstarredWords;
 
-  if (c.startDate) data.startDate = c.startDate;
+  // v1.1.77：startDate 改 settingsAt 新者胜 —— 空串（清空=未开学）也要能从云端同步过来；
+  // 相等说明本地就是最新（自己刚上送），不必采纳
+  if (c.startDate !== undefined && (Number(c.settingsAt) || 0) > (Number(data.settingsAt) || 0)) data.startDate = c.startDate;
   if (c.rate) data.rate = c.rate;
   if (c.accent) data.accent = c.accent;
   if (c.engineMode) data.engineMode = c.engineMode;
@@ -477,12 +553,17 @@ function sanitizeReviewStats(raw) {
     if (!word || word.length > 100) return;
     const s = raw[word];
     if (!s || typeof s !== 'object') return;
+    const st = reviewStateOf(s);      // 老数据（只有 level）在此完成到 ef/ivl 的迁移
     out[String(word).slice(0, 100)] = {
-      correct: Math.max(0, Math.min(999999, Number(s.correct) || 0)),
-      wrong: Math.max(0, Math.min(999999, Number(s.wrong) || 0)),
-      level: Math.max(0, Math.min(DEFAULT_INTERVALS.length, Math.floor(Number(s.level) || 0))),
-      nextReviewAt: Math.max(0, Number(s.nextReviewAt) || 0),
-      lastReviewedAt: Math.max(0, Number(s.lastReviewedAt) || 0)
+      correct: Math.max(0, Math.min(999999, Number(st.correct) || 0)),
+      wrong: Math.max(0, Math.min(999999, Number(st.wrong) || 0)),
+      reps: Math.max(0, Math.min(9999, Math.floor(Number(st.reps) || 0))),
+      ef: Math.max(EF_MIN, Math.min(EF_MAX, Number(st.ef) || EF_DEFAULT)),
+      ivl: Math.max(0, Math.min(3650, Math.round(Number(st.ivl) || 0))),
+      step: Math.max(0, Math.min(9, Math.floor(Number(st.step) || 0))),
+      level: Math.max(0, Math.min(DEFAULT_INTERVALS.length, Math.floor(Number(st.level) || 0))),
+      nextReviewAt: Math.max(0, Number(st.nextReviewAt) || 0),
+      lastReviewedAt: Math.max(0, Number(st.lastReviewedAt) || 0)
     };
   });
   return out;
@@ -588,7 +669,7 @@ function activeReviewCount() {
 //    · 复习   → 每个有记录的词写一条 lastReviewedAt=now 的零记录（云端按 lastReviewedAt 新者胜）
 //    墓碑/零记录走常规 dirty 通道分轮上送；其他设备下次同步会一并收敛到空。
 //    之后重新打卡/收藏/复习都从零开始累计（旧墓碑被更晚的时间戳自然压过，无需清理）。
-//    startDate 回到默认（下一个周一，进准备期）；语速/口音/朗读方式等偏好保留。
+//    startDate 回到默认（v1.1.66 起为「今天」，即重新从第 1 天开始）；语速/口音/朗读方式等偏好保留。
 function resetProgress() {
   const now = Date.now();
   Object.keys(data.checkedDays || {}).forEach(k => { data.uncheckedDays[k] = now; });
@@ -597,12 +678,12 @@ function resetProgress() {
   data.starredWords = [];
   const zero = {};
   Object.keys(data.reviewStats || {}).forEach(w => {
-    zero[w] = { correct: 0, wrong: 0, level: 0, nextReviewAt: 0, lastReviewedAt: now };
+    zero[w] = { correct: 0, wrong: 0, reps: 0, ef: EF_DEFAULT, ivl: 0, step: 0, level: 0, nextReviewAt: 0, lastReviewedAt: now };
   });
   data.reviewStats = zero;
   data.reviewDirty = {};
   Object.keys(zero).forEach(w => { data.reviewDirty[w] = 1; });
-  data.startDate = plan.DEFAULT_START;
+  data.startDate = '';   // 清空 = 回到「未开学」（今日页准备期）；开学改由今日页「开始学习」按钮
   data.settingsAt = now;            // startDate 走 settingsAt 更晚者胜的合并规则
   data.updatedAt = now;
   saveLocal(); schedulePush(); emit();
@@ -610,8 +691,8 @@ function resetProgress() {
 
 module.exports = {
   init, onResume, flush, onChange, get, set,
-  isChecked, toggleCheck, checkedCount, firstUnfinishedDay, weekCheckedCount, weekCheckedMap,
-  isStarred, toggleStar, reviewWord, getReviewStats, dueWords, activeReviewCount, resetProgress,
+  isChecked, toggleCheck, checkedCount, checkedWordCount, firstUnfinishedDay, weekCheckedCount, weekCheckedMap,
+  isStarred, toggleStar, reviewWord, getReviewStats, gradePreview, dueWords, activeReviewCount, resetProgress,
   sync, syncNow, setSyncEnabled, cloudStatus,
   exportBackup, importBackup
 };

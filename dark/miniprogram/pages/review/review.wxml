@@ -4,35 +4,86 @@
 <view class="page-veil" wx:if="{{veil}}"></view>
 <!-- 复习页 -->
 <view class="tab-row">
-  <view class="tab {{tab === 'random' ? 'tab--on' : ''}}" data-tab="random" hover-class="hover-dim" hover-stay-time="120" bindtap="onTab">随机抽查</view>
-  <view class="tab {{tab === 'due' ? 'tab--on' : ''}}" data-tab="due" hover-class="hover-dim" hover-stay-time="120" bindtap="onTab">到期复习</view>
-  <view class="tab {{tab === 'starred' ? 'tab--on' : ''}}" data-tab="starred" hover-class="hover-dim" hover-stay-time="120" bindtap="onTab">重点词（{{starred.length}}）</view>
+  <view class="tab {{tab === 'random' ? 'tab--on' : ''}}" data-tab="random" hover-class="none" hover-stay-time="0" bindtap="onTab">随机抽查</view>
+  <view class="tab {{tab === 'due' ? 'tab--on' : ''}}" data-tab="due" hover-class="none" hover-stay-time="0" bindtap="onTab">到期复习</view>
+  <view class="tab {{tab === 'cloze' ? 'tab--on' : ''}}" data-tab="cloze" hover-class="none" hover-stay-time="0" bindtap="onTab">填空</view>
+  <view class="tab {{tab === 'starred' ? 'tab--on' : ''}}" data-tab="starred" hover-class="none" hover-stay-time="0" bindtap="onTab">重点词（{{starred.length}}）</view>
 </view>
 <block wx:if="{{tab === 'random'}}">
   <view class="card pool-info"><text class="muted">可抽查词汇 {{poolSize}} 个，随学习进度增加</text></view>
   <view class="card random-card" wx:if="{{currentRandom}}">
-    <view class="random-head"><text class="random-word"><text wx:if="{{playingWord === currentRandom.w}}" class="kara-lit">{{karaLit}}</text>{{playingWord === currentRandom.w ? karaRest : currentRandom.w}}</text><view class="word-speak {{playingWord === currentRandom.w ? 'playing' : ''}}" hover-class="speak-hover" hover-stay-time="0" bindtap="onSpeakCurrent"><view class="spk-ico {{playingWord === currentRandom.w ? 'spk-ico--on' : ''}}"></view></view></view>
-    <view class="random-pos">{{currentRandom.p}}</view>
-    <view class="random-zh" wx:if="{{showZh}}"><view class="random-zh-main">{{currentRandom.m}}</view><view class="random-zh-ex"><text class="random-zh-text"><text wx:if="{{playingWord === currentRandom.e}}" class="kara-lit">{{karaLit}}</text>{{playingWord === currentRandom.e ? karaRest : currentRandom.e}}</text><view class="ex-speak {{playingWord === currentRandom.e ? 'playing' : ''}}" hover-class="speak-hover" hover-stay-time="0" bindtap="onSpeakExample"><view class="spk-ico {{playingWord === currentRandom.e ? 'spk-ico--on' : ''}}"></view></view></view></view>
-    <button class="btn-ghost btn-c btn-fit" wx:else hover-class="btn-press" hover-stay-time="0" bindtap="onShowZh"><view class="ico ico-eye"></view>显示释义</button>
+    <view class="random-head"><text class="random-word"><text wx:if="{{playingWord === currentRandom.w}}" class="kara-lit">{{karaLit}}</text>{{playingWord === currentRandom.w ? karaRest : currentRandom.w}}</text><text class="random-pos">{{currentRandom.p}}</text></view>
+    <view class="ipa-row">
+      <view class="ipa-mod {{playingWord === currentRandom.w && playingAccent === 'us' ? 'on' : ''}}" hover-class="speak-hover" hover-stay-time="0" data-accent="us" bindtap="onSpeakCurrent"><view class="spk-ico {{playingWord === currentRandom.w && playingAccent === 'us' ? 'spk-ico--on' : ''}}"></view><text class="ipa-txt" wx:if="{{currentRandom.ipa}}">{{currentRandom.ipa}}</text></view>
+      <view class="ipa-mod ipa-mod--uk {{playingWord === currentRandom.w && playingAccent === 'uk' ? 'on' : ''}}" wx:if="{{currentRandom.uk}}" hover-class="speak-hover" hover-stay-time="0" data-accent="uk" bindtap="onSpeakCurrent"><view class="spk-ico {{playingWord === currentRandom.w && playingAccent === 'uk' ? 'spk-ico--on' : ''}}"></view><text class="ipa-txt">{{currentRandom.uk}}</text></view>
+    </view>
+    <!-- 其他词形（v1.1.80，D）：固定显示；点标签即读该形式（g/ 桶）。wfText 独立态防误亮卡片上的单词/例句 -->
+    <view class="rv-wf" wx:if="{{currentRandom.wf.length}}">
+      <view class="rv-wf__t {{wfKey === currentRandom.w + ':' + F.form ? 'rv-wf__t--on' : ''}}" wx:for="{{currentRandom.wf}}" wx:for-item="F" wx:key="form"
+            hover-class="none" hover-stay-time="0" data-text="{{F.form}}" data-key="{{currentRandom.w}}:{{F.form}}" bindtap="onSpeakWf">{{F.label}} {{F.form}}</view>
+    </view>
+    <view class="random-zh-main" wx:if="{{showZh}}">{{currentRandom.m}}</view>
+    <view class="random-ex"><text class="random-ex-text"><text wx:if="{{playingWord === currentRandom.e}}" class="kara-lit">{{karaLit}}</text>{{playingWord === currentRandom.e ? karaRest : currentRandom.e}}</text><view class="ex-speak {{playingWord === currentRandom.e ? 'playing' : ''}}" hover-class="speak-hover" hover-stay-time="0" bindtap="onSpeakExample"><view class="spk-ico {{playingWord === currentRandom.e ? 'spk-ico--on' : ''}}"></view></view></view>
+    <view class="ex-cn" wx:if="{{showZh && currentRandom.cn}}">{{currentRandom.cn}}</view>
+    <view class="zh-toggle" hover-class="none" hover-stay-time="0" bindtap="onShowZh"><view class="eye-ico {{showZh ? 'eye-ico--on' : ''}}"></view></view>
     <view class="random-actions"><view class="star-big {{currentRandom.starred ? 'on' : ''}}" hover-class="hover-dim" hover-stay-time="120" bindtap="onStarCurrent"><view class="star-ico {{currentRandom.starred ? 'star-ico--on' : 'star-ico--off'}}"></view><text>{{currentRandom.starred ? '已收藏' : '收藏'}}</text></view><button class="btn-primary" hover-class="btn-press" hover-stay-time="0" bindtap="onNext">下一个</button></view>
   </view>
-  <view class="card" wx:else><view class="empty-text">从已学词汇中随机抽一个，先自己回忆，再点「显示释义」对照</view><button class="btn-primary btn-fit" hover-class="btn-press" hover-stay-time="0" bindtap="onNext">开始抽查</button></view>
+  <view class="card" wx:else><view class="empty-text">从已学词汇中随机抽一个，先自己回忆，再点眼睛图标对照</view><button class="btn-primary btn-fit" hover-class="btn-press" hover-stay-time="0" bindtap="onNext">开始抽查</button></view>
 </block>
 <block wx:if="{{tab === 'due'}}">
   <view class="card pool-info"><text class="muted">今日到期 {{dueCount}} 词，答完自动进入下一个</text></view>
   <view class="card random-card" wx:if="{{currentDue}}">
-    <view class="random-head"><text class="random-word {{playingWord === currentDue.w ? 'random-word--playing' : ''}}"><text wx:if="{{playingWord === currentDue.w}}" class="kara-lit">{{karaLit}}</text>{{playingWord === currentDue.w ? karaRest : currentDue.w}}</text><view class="word-speak {{playingWord === currentDue.w ? 'playing' : ''}}" hover-class="speak-hover" hover-stay-time="0" bindtap="onSpeakCurrent"><view class="spk-ico {{playingWord === currentDue.w ? 'spk-ico--on' : ''}}"></view></view></view>
-    <view class="random-pos">{{currentDue.p}}</view>
-    <view class="random-zh" wx:if="{{showZh}}"><view class="random-zh-main">{{currentDue.m}}</view><view class="random-zh-ex"><text class="random-zh-text"><text wx:if="{{playingWord === currentDue.e}}" class="kara-lit">{{karaLit}}</text>{{playingWord === currentDue.e ? karaRest : currentDue.e}}</text><view class="ex-speak {{playingWord === currentDue.e ? 'playing' : ''}}" hover-class="speak-hover" hover-stay-time="0" bindtap="onSpeakExample"><view class="spk-ico {{playingWord === currentDue.e ? 'spk-ico--on' : ''}}"></view></view></view></view>
-    <button class="btn-ghost btn-c btn-fit" wx:else hover-class="btn-press" hover-stay-time="0" bindtap="onShowZh"><view class="ico ico-eye"></view>显示释义</button>
-    <view class="review-result-row"><button class="btn-ghost btn-c review-result-btn" data-result="wrong" hover-class="btn-press" hover-stay-time="0" bindtap="onReviewResult"><view class="ico ico-ask"></view>不太会</button><button class="btn-primary review-result-btn" data-result="remember" hover-class="btn-press" hover-stay-time="0" bindtap="onReviewResult">记得了</button></view>
+    <view class="random-head"><text class="random-word {{playingWord === currentDue.w ? 'random-word--playing' : ''}}"><text wx:if="{{playingWord === currentDue.w}}" class="kara-lit">{{karaLit}}</text>{{playingWord === currentDue.w ? karaRest : currentDue.w}}</text><text class="random-pos">{{currentDue.p}}</text></view>
+    <view class="ipa-row">
+      <view class="ipa-mod {{playingWord === currentDue.w && playingAccent === 'us' ? 'on' : ''}}" hover-class="speak-hover" hover-stay-time="0" data-accent="us" bindtap="onSpeakCurrent"><view class="spk-ico {{playingWord === currentDue.w && playingAccent === 'us' ? 'spk-ico--on' : ''}}"></view><text class="ipa-txt" wx:if="{{currentDue.ipa}}">{{currentDue.ipa}}</text></view>
+      <view class="ipa-mod ipa-mod--uk {{playingWord === currentDue.w && playingAccent === 'uk' ? 'on' : ''}}" wx:if="{{currentDue.uk}}" hover-class="speak-hover" hover-stay-time="0" data-accent="uk" bindtap="onSpeakCurrent"><view class="spk-ico {{playingWord === currentDue.w && playingAccent === 'uk' ? 'spk-ico--on' : ''}}"></view><text class="ipa-txt">{{currentDue.uk}}</text></view>
+    </view>
+    <!-- 其他词形（v1.1.80，D）：同上 -->
+    <view class="rv-wf" wx:if="{{currentDue.wf.length}}">
+      <view class="rv-wf__t {{wfKey === currentDue.w + ':' + F.form ? 'rv-wf__t--on' : ''}}" wx:for="{{currentDue.wf}}" wx:for-item="F" wx:key="form"
+            hover-class="none" hover-stay-time="0" data-text="{{F.form}}" data-key="{{currentDue.w}}:{{F.form}}" bindtap="onSpeakWf">{{F.label}} {{F.form}}</view>
+    </view>
+    <view class="random-zh-main" wx:if="{{showZh}}">{{currentDue.m}}</view>
+    <view class="random-ex"><text class="random-ex-text"><text wx:if="{{playingWord === currentDue.e}}" class="kara-lit">{{karaLit}}</text>{{playingWord === currentDue.e ? karaRest : currentDue.e}}</text><view class="ex-speak {{playingWord === currentDue.e ? 'playing' : ''}}" hover-class="speak-hover" hover-stay-time="0" bindtap="onSpeakExample"><view class="spk-ico {{playingWord === currentDue.e ? 'spk-ico--on' : ''}}"></view></view></view>
+    <view class="ex-cn" wx:if="{{showZh && currentDue.cn}}">{{currentDue.cn}}</view>
+    <view class="zh-toggle" hover-class="none" hover-stay-time="0" bindtap="onShowZh"><view class="eye-ico {{showZh ? 'eye-ico--on' : ''}}"></view></view>
+    <view class="review-result-row review-result-row--4">
+      <view class="grade-btn grade-btn--again" data-grade="again" hover-class="grade-press" hover-stay-time="0" bindtap="onReviewResult"><text class="grade-name">忘记</text><text class="grade-hint">{{dueHint.again}}</text></view>
+      <view class="grade-btn grade-btn--hard" data-grade="hard" hover-class="grade-press" hover-stay-time="0" bindtap="onReviewResult"><text class="grade-name">困难</text><text class="grade-hint">{{dueHint.hard}}</text></view>
+      <view class="grade-btn grade-btn--good" data-grade="good" hover-class="grade-press" hover-stay-time="0" bindtap="onReviewResult"><text class="grade-name">一般</text><text class="grade-hint">{{dueHint.good}}</text></view>
+      <view class="grade-btn grade-btn--easy" data-grade="easy" hover-class="grade-press" hover-stay-time="0" bindtap="onReviewResult"><text class="grade-name">简单</text><text class="grade-hint">{{dueHint.easy}}</text></view>
+    </view>
   </view>
   <view class="card" wx:else><view class="empty-text">暂无到期词汇——学过的词到复习周期后会自动出现在这里</view></view>
 </block>
+<block wx:if="{{tab === 'cloze'}}">
+  <view class="card pool-info"><text class="muted">看中文例句，选出「____」处该填的单词（{{clozePoolSize}} 词可出题）</text></view>
+  <view class="card cloze-card" wx:if="{{cloze}}">
+    <view class="cloze-zh">{{cloze.zh}}</view>
+    <view class="cloze-blank">{{cloze.blank}}</view>
+    <view class="cloze-opts">
+      <view class="cloze-opt {{item.state ? 'cloze-opt--' + item.state : ''}}"
+            wx:for="{{cloze.options}}" wx:key="w"
+            hover-class="none" hover-stay-time="0"
+            data-w="{{item.w}}" bindtap="onClozePick"><text>{{item.w}}</text></view>
+    </view>
+    <!-- 答对后给出英文原句 + 喇叭（v1.1.80，C6）：可整句听；四个选项故意不加喇叭（一读出来就能听音猜词=泄题） -->
+    <view class="cloze-en-row" wx:if="{{cloze.done}}">
+      <view class="cloze-en"><text wx:if="{{playingWord === cloze.en}}" class="kara-lit">{{karaLit}}</text>{{playingWord === cloze.en ? karaRest : cloze.en}}</view>
+      <view class="ex-speak {{playingWord === cloze.en ? 'playing' : ''}}"
+            hover-class="speak-hover" hover-stay-time="0"
+            bindtap="onSpeakClozeEn"><view class="spk-ico {{playingWord === cloze.en ? 'spk-ico--on' : ''}}"></view></view>
+    </view>
+    <view class="cloze-foot" wx:if="{{cloze.done}}">
+      <view class="cloze-verdict {{cloze.right ? 'cloze-verdict--ok' : 'cloze-verdict--bad'}}">{{cloze.right ? '答对了' : '正确答案：' + cloze.answer}}</view>
+      <button class="btn-primary btn-fit" hover-class="btn-press" hover-stay-time="0" bindtap="onNextCloze">下一题</button>
+    </view>
+  </view>
+  <view class="card" wx:else><view class="empty-text">暂无可出题词汇——等例句中文准备好后，这里会跟着你的学习进度出题</view></view>
+</block>
 <block wx:if="{{tab === 'starred'}}">
   <view class="card" wx:if="{{!starred.length}}"><view class="empty-text">还没有重点词——在学习页点词右侧的<view class="ico-inline ico-heart"></view>即可收藏，随机抽查会优先复习它们</view></view>
-  <view class="star-list" wx:else><view class="star-tile" wx:for="{{starred}}" wx:key="w"><view class="word-row"><view class="word-speak {{playingWord === item.w ? 'playing' : ''}}" hover-class="speak-hover" hover-stay-time="0" data-word="{{item.w}}" bindtap="onSpeakStarred"><view class="spk-ico {{playingWord === item.w ? 'spk-ico--on' : ''}}"></view></view><view class="word-main"><view><text class="word-en">{{item.w}}</text><text class="word-pos">{{item.p}}</text></view><view class="word-zh">{{item.m}}</view><view class="word-example-row"><view class="word-example" data-word="{{item.e}}" bindtap="onSpeakStarredEx"><text wx:if="{{playingWord === item.e}}" class="kara-lit">{{karaLit}}</text>{{playingWord === item.e ? karaRest : item.e}}</view><view class="ex-speak {{playingWord === item.e ? 'playing' : ''}}" hover-class="speak-hover" hover-stay-time="0" data-word="{{item.e}}" bindtap="onSpeakStarredEx"><view class="spk-ico {{playingWord === item.e ? 'spk-ico--on' : ''}}"></view></view></view></view><view class="word-remove" data-index="{{index}}" hover-class="word-remove--press" hover-stay-time="0" bindtap="onRemoveStarred"><view class="rm-ico"></view></view></view></view></view>
+  <view class="star-list" wx:else><view class="star-tile" wx:for="{{starred}}" wx:key="w"><view class="word-row"><view class="word-main"><view class="word-head"><text class="word-en">{{item.w}}</text><text class="word-pos">{{item.p}}</text><view class="word-zh">{{item.m}}</view><view class="rv-wf rv-wf--tile" wx:if="{{item.wf.length}}"><view class="rv-wf__t {{wfKey === item.w + ':' + F.form ? 'rv-wf__t--on' : ''}}" wx:for="{{item.wf}}" wx:for-item="F" wx:key="form" hover-class="none" hover-stay-time="0" data-text="{{F.form}}" data-key="{{item.w}}:{{F.form}}" bindtap="onSpeakWf">{{F.label}} {{F.form}}</view></view><view class="ipa-row"><view class="ipa-mod {{playingWord === item.w && playingAccent === 'us' ? 'on' : ''}}" hover-class="speak-hover" hover-stay-time="0" data-word="{{item.w}}" data-accent="us" bindtap="onSpeakStarred"><view class="spk-ico {{playingWord === item.w && playingAccent === 'us' ? 'spk-ico--on' : ''}}"></view><text class="ipa-txt" wx:if="{{item.ipa}}">{{item.ipa}}</text></view><view class="ipa-mod ipa-mod--uk {{playingWord === item.w && playingAccent === 'uk' ? 'on' : ''}}" wx:if="{{item.uk}}" hover-class="speak-hover" hover-stay-time="0" data-word="{{item.w}}" data-accent="uk" bindtap="onSpeakStarred"><view class="spk-ico {{playingWord === item.w && playingAccent === 'uk' ? 'spk-ico--on' : ''}}"></view><text class="ipa-txt">{{item.uk}}</text></view></view></view><view class="word-example-row"><view class="word-example" data-word="{{item.e}}" bindtap="onSpeakStarredEx"><text wx:if="{{playingWord === item.e}}" class="kara-lit">{{karaLit}}</text>{{playingWord === item.e ? karaRest : item.e}}</view><view class="ex-speak {{playingWord === item.e ? 'playing' : ''}}" hover-class="speak-hover" hover-stay-time="0" data-word="{{item.e}}" bindtap="onSpeakStarredEx"><view class="spk-ico {{playingWord === item.e ? 'spk-ico--on' : ''}}"></view></view><view class="ex-eye" wx:if="{{item.cn}}" hover-class="none" hover-stay-time="0" data-w="{{item.w}}" catchtap="onToggleExZh"><view class="eye-ico {{zhOpen[item.w] ? 'eye-ico--on' : ''}}"></view></view></view><view class="ex-cn" wx:if="{{item.cn && zhOpen[item.w]}}">{{item.cn}}</view></view><view class="word-remove" data-index="{{index}}" hover-class="word-remove--press" hover-stay-time="0" bindtap="onRemoveStarred"><view class="rm-ico"></view></view></view></view></view>
 </block>
 
 <feedback id="fb"/>

@@ -4,13 +4,18 @@
 // ──────────
 //   ① 预生成音频（本地缓存）—— 微软 Azure 语音，音色自然，零延迟
 //   ② 预生成音频（云函数签名临时链接 → 播放 + 后台落本地缓存）
-//   ③ 在线兜底：有道整句 → 有道逐词连播 → 百度整句
+//   ③ 在线兜底：有道整句 → 有道逐词连播 → 百度整句（百度只给美音，见下）
 //
 // 音频文件命名（预生成时用「词表序号」而非文本哈希 —— 8000 词的哈希映射表会
 // 膨胀到 1MB+ 直接吃掉 2MB 主包，序号命名让运行时靠 ai 字段直接拼路径，零映射表）：
-//   w/0001.mp3    单词 正常速        s/0001.mp3    例句 正常速
-//   w/0001s.mp3   单词 慢速(-30%)    s/0001s.mp3   例句 慢速
+//   w/0001.mp3    美音单词 正常速      s/0001.mp3    美音例句 正常速
+//   w/0001s.mp3   美音单词 慢速(-30%)  s/0001s.mp3   美音例句 慢速
+//   wuk/0001.mp3  英音单词 正常速      wuk/0001s.mp3 英音单词 慢速(-33%)
 // 每 1000 个分一个子目录，避免单目录上万文件。
+//
+// ⚠️ 英音只有**单词**两套（正常速 + 慢速）；英音的例句与语法例句无预生成版本 → 走在线有道 type=1。
+//    因此英音链里**不能**挂百度兜底：fanyi.baidu.com/gettts 的 lan=en 读的是美音，
+//    挂在英音链上会让用户听起来仍是美音 —— 对零基础用户是错误示范，宁可不发声。
 //
 // 为什么走云函数签名而不是 wx.cloud.downloadFile：见 utils/cloud.js 顶部注释
 // （免费期存储权限锁定为「仅创建者可读写」，客户端云 API 被安全规则拒绝）。
@@ -21,12 +26,25 @@ const cloudCfg = require('./cloud.js');
 
 const state = {
   engine: 'pregen', engineMode: 'auto',   // engineMode: auto=预生成优先 | pregen=仅预生成 | online=仅在线TTS
-  rate: 0.9, accent: 'us', audio: null,
+  rate: 0.9, accent: 'us', playingAccent: '', audio: null,
   playingText: '', queueMode: false, queue: [], playing: false, paused: false, listeners: [],
 };
 let playToken = 0, audioTimeout = null, audioOptDone = false;
 
-const CACHE_ROOT = (wx.env && wx.env.USER_DATA_PATH ? wx.env.USER_DATA_PATH : '') + '/au';
+// v1.1.76 缓存版本化：v1.1.74 功能词音频生成事故期间，预取把污染文件落进了旧缓存目录；
+// 云端已全量替换，但本地缓存优先播放、设备无从感知内容已更新 → 换新根目录强制全量重取。
+// v1.1.98：拆卡同步重做了 10 个主卡单词音频（object/project/console/attribute/extract/
+//          appropriate/advocate/aggregate/duplicate/contest），**云端替换的是同名同路径文件**
+//          → 老设备本地缓存会继续播旧读音。同样用换根目录强制重取（au2 → au3）。
+// v1.1.103：B 档 7 例句音频替换（s/0、s/7）+ addict 副卡 8201 换 MW 官方音频（w/8、wuk/8）→ au5 → au6。
+// 旧目录在模块加载时一次性清除（失败静默，下次启动再试）。
+const CACHE_ROOT = (wx.env && wx.env.USER_DATA_PATH ? wx.env.USER_DATA_PATH : '') + '/au6';
+const CACHE_ROOT_OLD = (wx.env && wx.env.USER_DATA_PATH ? wx.env.USER_DATA_PATH : '') + '/au5';
+const CACHE_ROOT_OLD2 = (wx.env && wx.env.USER_DATA_PATH ? wx.env.USER_DATA_PATH : '') + '/au4';
+const CACHE_ROOT_OLD3 = (wx.env && wx.env.USER_DATA_PATH ? wx.env.USER_DATA_PATH : '') + '/au3';
+try { wx.getFileSystemManager().rmdirSync(CACHE_ROOT_OLD, true); } catch (e) {}
+try { wx.getFileSystemManager().rmdirSync(CACHE_ROOT_OLD2, true); } catch (e) {}
+try { wx.getFileSystemManager().rmdirSync(CACHE_ROOT_OLD3, true); } catch (e) {}
 const CACHE_MAX = 2000;      // 缓存文件数上限，超出按最久未用淘汰
 const SLOW_GATE = 0.85;      // ≤ 此速率使用慢速音频
 const URL_TTL = 60 * 60 * 1000;   // 签名链接按 2 小时有效估算，取一半留余量
@@ -46,15 +64,21 @@ function setEngineMode(m) {
 }
 function setAccent(accent) { if (accent === 'uk' || accent === 'us') state.accent = accent; }
 function notify(text, playing, mode, progress) {
-  const p = { text: text || '', playing: !!playing, source: usedSource || '', mode: mode || (state.queueMode ? 'queue' : (playing ? 'single' : 'idle')), progress: typeof progress === 'number' ? progress : 0 };
+  const p = { text: text || '', playing: !!playing, source: usedSource || '', mode: mode || (state.queueMode ? 'queue' : (playing ? 'single' : 'idle')), progress: typeof progress === 'number' ? progress : 0, accent: playing ? (state.playingAccent || '') : '' };
   state.listeners.slice().forEach(fn => { try { fn(p); } catch (e) {} });
 }
 
 // ---------- 预生成音频路径 ----------
+// 词表序号 shard(0~9) → 例：w/0/0001.mp3（美音单词） wuk/0/0001.mp3（英音单词）
 function shard(n) { return Math.floor(n / 1000); }
 function fname(ai, slow) { return ('0000' + ai).slice(-4) + (slow ? 's' : '') + '.mp3'; }
-function relPath(kind, ai, slow) { return kind + '/' + shard(ai) + '/' + fname(ai, slow); }
-function localPath(kind, ai, slow) { return CACHE_ROOT + '/' + relPath(kind, ai, slow); }
+// accent='uk' 且 kind='w' → 英音单词桶 wuk/（v1.1.58 新增，edge-tts en-GB 预生成，正常速+慢速齐）；
+// 其余（英音的例句 s/、语法例句 g/）无英音版本 → 由调用方避免走预生成，直接在线有道 type=1
+function relPath(kind, ai, slow, accent) {
+  const pre = (accent === 'uk' && kind === 'w') ? 'wuk' : kind;
+  return pre + '/' + shard(ai) + '/' + fname(ai, slow);
+}
+function localPath(kind, ai, slow, accent) { return CACHE_ROOT + '/' + relPath(kind, ai, slow, accent); }
 
 function fs() { return wx.getFileSystemManager(); }
 function exists(p) { try { fs().accessSync(p); return true; } catch (e) { return false; } }
@@ -113,7 +137,7 @@ function evict() {
   evicting = true;
   try {
     const all = [];
-    ['w', 's'].forEach(kind => {
+    ['w', 's', 'wuk'].forEach(kind => {
       for (let sh = 0; sh <= 8; sh++) {
         const dir = CACHE_ROOT + '/' + kind + '/' + sh;
         let names = [];
@@ -194,8 +218,7 @@ function playSigned(url, lp, rel, onResult, slow) {
   }, 6000, slow ? 1 : state.rate);
 }
 
-function tryPregenRel(rel, lp, onResult) {
-  const slow = state.rate <= SLOW_GATE;
+function tryPregenRel(rel, lp, onResult, slow) {
   if (exists(lp)) { usedSource = '预生成·本地'; playSrc(lp, true, onResult, 5000, slow ? 1 : state.rate); return; }
   if (!cloudCfg.ready()) { onResult(false); return; }
 
@@ -211,10 +234,21 @@ function tryPregenRel(rel, lp, onResult) {
   });
 }
 
-function tryPregen(kind, ai, onResult) {
-  if (!ai) { onResult(false); return; }
+// 预生成音频修正表（v1.1.50）：编号唯一性已全量验证（8000 编号零共用），
+// 但个别编号的**源音频内容本身有误** —— 已知 ai=15「come」读成 co'me（重音错位）。
+// 列入此表的词（仅单词 kind='w'）跳过预生成、直接走在线 TTS（有道/百度读该词文本，读音正确）。
+// 注意：engineMode=pregen（仅预生成）的用户，表内词将无音源 → 朗读失败 toast，属预期取舍。
+const BAD_PREGEN_AI = new Set([15]);   // 15 = come
+
+function tryPregen(kind, ai, accent, onResult) {
+  const ukWord = (accent === 'uk' && kind === 'w');
+  // BAD_PREGEN_AI 只针对美音 Azure 源音频（如 ai=15 的 come）；英音是 edge-tts 按词文本
+  // 重新合成的独立音频，不继承该缺陷。英音的**非单词**条目（例句/语法例句）无预生成音源。
+  if (!ai || (accent === 'uk' && !ukWord)) { onResult(false); return; }
+  if (!ukWord && kind === 'w' && BAD_PREGEN_AI.has(ai)) { onResult(false); return; }
+  // 慢速文件两套口音都有了（美音 w/ s/、英音 wuk/）→ 直接按 rate 门槛选慢速文件，音高不变
   const slow = state.rate <= SLOW_GATE;
-  tryPregenRel(relPath(kind, ai, slow), localPath(kind, ai, slow), onResult);
+  tryPregenRel(relPath(kind, ai, slow, accent), localPath(kind, ai, slow, accent), onResult, slow);
 }
 
 // 语法例句预生成：按「文本 djb2 哈希」命名（g/{hash%10}/{hash8}.mp3 + s 慢速），
@@ -231,15 +265,19 @@ function gRel(text, slow) {
   return 'g/' + (parseInt(h, 16) % 10) + '/' + h + (slow ? 's' : '') + '.mp3';
 }
 function tryPregenG(text, onResult) {
-  // 中文条目（记忆法说明）没有预生成音频 → 直接走在线，省一次无效的云函数调用与播放报错
-  if (/[^\x20-\x7E]/.test(text)) { onResult(false); return; }
+  // 含汉字的条目没有可朗读的英文 → 直接走在线，省一次无效的云函数调用与播放报错。
+  // v1.1.85：原来判的是 `[^\x20-\x7E]`（任何非 ASCII 都判死）—— 会把「It is vital / crucial / essential。」
+  //          「Rent ↑ 20% since 2020」这类**只是标点/箭头不是 ASCII** 的英文句也推给在线音源。
+  //          现在与生成脚本 `_ipa_build/mk_g_tasks.js` 同口径：**只看有没有汉字**。两处必须成对改。***
+  if (/[\u4e00-\u9fff]/.test(text)) { onResult(false); return; }
   const slow = state.rate <= SLOW_GATE;
   const rel = gRel(text, slow);
-  tryPregenRel(rel, CACHE_ROOT + '/' + rel, onResult);
+  tryPregenRel(rel, CACHE_ROOT + '/' + rel, onResult, slow);
 }
 
 // ---------- ③ 在线兜底链 ----------
-function onlineUrl(text) { return 'https://dict.youdao.com/dictvoice?audio=' + encodeURIComponent(text) + '&type=' + (state.accent === 'uk' ? 1 : 2); }
+// accent：'uk' 时用有道 type=1（英音），否则 type=2（美音）。显式传入优先于全局设置。
+function onlineUrl(text, accent) { return 'https://dict.youdao.com/dictvoice?audio=' + encodeURIComponent(text) + '&type=' + ((accent || state.accent) === 'uk' ? 1 : 2); }
 function fallbackUrl(text) { return 'https://fanyi.baidu.com/gettts?lan=en&spd=3&source=web&text=' + encodeURIComponent(text); }
 function shortErr(e) { return String((e && (e.errMsg || e.errmsg || e.errCode)) || e || '').replace(/^[^:]*:fail\s*/, '').slice(0, 50); }
 
@@ -266,15 +304,15 @@ function tryUrl(url, onResult, ms) {
     playSrc(url, false, onResult, t, state.rate);
   });
 }
-function trySentence(text, onResult) { usedSource = '有道整句'; tryUrl(onlineUrl(text), onResult, 6000); }
-function tryWords(text, onResult) {
+function trySentence(text, accent, onResult) { usedSource = '有道整句'; tryUrl(onlineUrl(text, accent), onResult, 6000); }
+function tryWords(text, accent, onResult) {
   const words = String(text).replace(/[^A-Za-z0-9'\-\s]/g, ' ').split(/\s+/).filter(Boolean);
   if (words.length < 2) { onResult(false); return; }
   usedSource = '有道逐词';
   let i = 0, okAny = false;
   const next = () => {
     if (i >= words.length) { onResult(okAny); return; }
-    playSrc(onlineUrl(words[i++]), false, ok => { if (ok) okAny = true; next(); }, 3500, state.rate);
+    playSrc(onlineUrl(words[i++], accent), false, ok => { if (ok) okAny = true; next(); }, 3500, state.rate);
   };
   next();
 }
@@ -293,22 +331,32 @@ function playItem(item, onDone) {
   if (!text) { if (onDone) onDone(false); return; }
   const ai = isObj ? item.ai : 0;
   const kind = (isObj && item.kind) || 's';
+  // 口音：显式传入优先（点美音/英音音标），否则用设置里的全局口音
+  const accent = (isObj && item.accent) || state.accent;
+  state.playingAccent = accent;
   const useG = (kind === 'g') || (kind === 's' && !ai);   // 无编号的句子 = 语法例句（文本哈希预生成）
 
   // 朗读链按 engineMode 组装：
-  //   auto    → 预生成 → 有道整句 → 百度整句
+  //   auto    → 预生成 → 有道整句 → [美音] 百度整句
   //   pregen  → 仅预生成
-  //   online  → 有道整句 → 百度整句
+  //   online  → 有道整句 → [美音] 百度整句
+  // 预生成音频两套：美音 Azure（w/ s/ g/）、英音 edge-tts（**仅单词** wuk/）。
+  //   → accent='us'：单词/例句/语法例句都有预生成
+  //   → accent='uk'：只有单词有（wuk/）；例句与语法例句无英音版本 → 走在线有道 type=1。
+  //     因此「仅预生成」模式下，英音的非单词条目也必须放行在线，否则永远无音源。
   // 「逐词连播」只保留给单词（kind='w'）——句子逐词蹦体验差，宁可用百度整句兜底。
+  // ⚠️ 百度兜底只挂美音链：它的 TTS 是美音，挂英音链会让「英音」听起来还是美音。
+  const ukWord = (accent === 'uk' && kind === 'w');
   const chain = [];
-  if (state.engineMode !== 'online') {
-    chain.push(useG ? { run: cb => tryPregenG(text, cb) } : { run: cb => tryPregen(kind, ai, cb) });
+  if (state.engineMode !== 'online' && (accent === 'us' || ukWord)) {
+    chain.push(useG ? { run: cb => tryPregenG(text, cb) } : { run: cb => tryPregen(kind, ai, accent, cb) });
   }
-  if (state.engineMode !== 'pregen') {
-    chain.push({ run: cb => trySentence(text, cb) });
-    if (kind === 'w') chain.push({ run: cb => tryWords(text, cb) });
-    chain.push({ run: cb => tryBaidu(text, cb) });
+  if (state.engineMode !== 'pregen' || (accent === 'uk' && !ukWord)) {
+    chain.push({ run: cb => trySentence(text, accent, cb) });
+    if (kind === 'w') chain.push({ run: cb => tryWords(text, accent, cb) });
+    if (accent === 'us') chain.push({ run: cb => tryBaidu(text, cb) });
   }
+  if (!chain.length) chain.push({ run: cb => cb(false) });   // 兜底：链为空时别让 chain[0] 崩
   let i = 0;
   const step = ok => {
     if (ok) { notify(state.playingText, true); if (onDone) onDone(true); return; }
@@ -316,34 +364,58 @@ function playItem(item, onDone) {
     if (i < chain.length) { chain[i].run(step); return; }
     const detail = [...new Set(failNotes)].join('\n');
     console.warn('[speech] 朗读失败：\n' + detail);
-    if (DEBUG_FAIL && detail) wx.showModal({ title: '朗读失败（诊断）', content: detail, showCancel: false, confirmText: '知道了' });
-    else wx.showToast({ title: '朗读失败，请检查网络', icon: 'none' });
+    // 英音链刻意不挂美音兜底 → 失败时要说清「为什么没声」，否则用户会以为是重音没点对
+    const tip = accent === 'uk' ? '（英音音源暂不可用；未降级为美音，以免口音混淆）\n' : '';
+    if (DEBUG_FAIL && detail) wx.showModal({ title: '朗读失败（诊断）', content: tip + detail, showCancel: false, confirmText: '知道了' });
+    else wx.showToast({ title: accent === 'uk' ? '英音音源暂不可用' : '朗读失败，请检查网络', icon: 'none' });
     if (onDone) onDone(false);
   };
   chain[0].run(step);
 }
 
-// 预热：把某天要用的音频链接提前签好（后台静默执行，失败不影响播放）
-function prefetch(items) {
+// 预热：把某天要用的音频链接提前签好（后台静默执行，失败不影响播放）。
+// v1.1.72 滑动窗口配合：①item 可带 slow:true/false 显式指定速度（缺省才看全局 rate 门槛）——
+// 窗口预取要「单词正常速+慢速都备好」，不能跟着全局 rate 走；②diskLimit 控制每批落盘上限，
+// 默认 10（老行为）；传 0 = 只签链接不落盘（今日页全天签链接走这个，落盘交给窗口）。
+function prefetch(items, diskLimit) {
   if (!cloudCfg.ready()) return;
-  const slow = state.rate <= SLOW_GATE;
   const need = [];
   (items || []).forEach(it => {
+    // 语法例句 / 易错点正确句（v1.1.82）：无词表编号，按文本哈希走 g/ 桶。
+    // 此前本函数用 `if (!ai) return` 把 ai=0 的句子一律挡掉 → 这类音频从未预热，
+    // 每次点击都要现场走云函数签名（1~3s），用户真机表现为「点了很久才出声」。
+    const rawText = it && it.text ? String(it.text) : '';
+    if (rawText) {
+      if (state.accent === 'uk') return;                  // g/ 桶只有美音
+      if (/[^\x20-\x7E]/.test(rawText)) return;           // 含中文无预生成（与 tryPregenG 同口径）
+      const slowT = it.slow != null ? !!it.slow : (state.rate <= SLOW_GATE);
+      const relT = gRel(rawText, slowT);
+      if (exists(CACHE_ROOT + '/' + relT)) return;
+      if (urlOf(relT)) return;
+      if (need.indexOf(relT) < 0) need.push(relT);
+      return;
+    }
     const ai = it && it.ai;
     if (!ai) return;
     const kind = it.kind || 's';
-    const rel = relPath(kind, ai, slow);
-    if (exists(localPath(kind, ai, slow))) return;
+    const accent = (it && it.accent) || state.accent;
+    const ukWord = (accent === 'uk' && kind === 'w');
+    if (accent === 'uk' && !ukWord) return;                        // 英音无例句/语法例句音频
+    if (!ukWord && kind === 'w' && BAD_PREGEN_AI.has(ai)) return;
+    const slow = it.slow != null ? !!it.slow : (state.rate <= SLOW_GATE);
+    const rel = relPath(kind, ai, slow, accent);
+    if (exists(localPath(kind, ai, slow, accent))) return;
     if (urlOf(rel)) return;
     if (need.indexOf(rel) < 0) need.push(rel);
   });
   if (!need.length) return;
+  const keep = diskLimit == null ? 10 : diskLimit;
   for (let i = 0; i < need.length; i += SIGN_BATCH) {
     const chunk = need.slice(i, i + SIGN_BATCH);
     signPaths(chunk).then(ok => {
       if (!ok) return;
       // 顺手把前几条落盘，减少下次播放的网络请求（失败静默）
-      chunk.slice(0, 10).forEach(rel => {
+      chunk.slice(0, keep).forEach(rel => {
         const url = urlOf(rel);
         if (url) cacheInBackground(url, rel, CACHE_ROOT + '/' + rel);
       });
@@ -371,7 +443,9 @@ function speakCore(item, onDone) {
 function speak(text, opts) {
   const t = String(text || '').trim();
   if (!t) return;
-  const item = opts && opts.ai ? { text: t, ai: opts.ai, kind: opts.kind || 's' } : t;
+  const o = opts || {};
+  // accent 单独给（如音标模块）时也要走对象通道，否则口音会丢
+  const item = (o.ai || o.accent) ? { text: t, ai: o.ai || 0, kind: o.kind || 's', accent: o.accent || '' } : t;
   if (state.queueMode) { state.queue = []; state.queueMode = false; }
   speakCore(item);
 }

@@ -1,9 +1,19 @@
 {
   "pages": [
     "pages/today/today",
-    "pages/weeks/weeks",
     "pages/review/review",
+    "pages/tools/tools",
     "pages/settings/settings"
+  ],
+  "subPackages": [
+    {
+      "root": "pkg-study",
+      "name": "study",
+      "pages": [
+        "pages/grammar/grammar",
+        "pages/topic/topic"
+      ]
+    }
   ],
   "window": {
     "navigationBarTitleText": "开溜6.5",
@@ -20,25 +30,25 @@
     "list": [
       {
         "pagePath": "pages/today/today",
-        "text": "今日",
+        "text": "Today",
         "iconPath": "images/today.png",
         "selectedIconPath": "images/today-active.png"
       },
       {
-        "pagePath": "pages/weeks/weeks",
-        "text": "周计划",
-        "iconPath": "images/weeks.png",
-        "selectedIconPath": "images/weeks-active.png"
-      },
-      {
         "pagePath": "pages/review/review",
-        "text": "复习",
+        "text": "Review",
         "iconPath": "images/review.png",
         "selectedIconPath": "images/review-active.png"
       },
       {
+        "pagePath": "pages/tools/tools",
+        "text": "Tools",
+        "iconPath": "images/weeks.png",
+        "selectedIconPath": "images/weeks-active.png"
+      },
+      {
         "pagePath": "pages/settings/settings",
-        "text": "设置",
+        "text": "Settings",
         "iconPath": "images/settings.png",
         "selectedIconPath": "images/settings-active.png"
       }

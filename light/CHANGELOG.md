@@ -34,6 +34,9 @@
 - `speech.js` CACHE_ROOT **au5 → au6**（旧链 au5/au4/au3 启动即清）：同路径同名替换了 14 例句 + 4 单词音频，不换根老设备会继续播旧缓存。
 - 踩坑记录：`tcb storage upload` 把 synth 的 raw 中间文件（`*.mp3.raw.mp3`）一并铺上云 → 已删 16 个（s/0 ×12、s/7 ×2、wuk/8 ×2）。后续上传前先清 raw 或改输出目录隔离。
 
+### ④ 内核同步 cloud/dark（本版本内完成）
+
+light v1.1.103 功能内核已整树同步到 cloud/dark（63 版差距一次性收口）：cloud 保留三态外观（theme.js/theme.json/darkmode/设置页外观卡/onThemeChange），dark 保留定死深色（静态色 app.json）；weeks 旧页两实例均已移除；云函数 audio-url 的 PATH_RE 补 wuk/；verify-structure 两实例全过。文档：cloud/dark 各自 CHANGELOG/README/AI-CONTEXT 已记同步。
 ## 2026-10-15 · 剑桥音频选块修正 + 量词 + 抓取截断修复（v1.1.102，已上传体验版）
 
 > **触发**：v1.1.101 验收反馈「abuse 名词/动词音还是不对，美音反倒用重音区分」。「abuse 音标维度本来就对」的旧结论让我回头审 v1.1.101 的**选块脚本**——查出**系统性 bug**：v1.1.101 上传的 104 卡里有 **11 张拿到了错误词性的录音**（abuse 名词卡播的是动词音）。

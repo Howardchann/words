@@ -3,7 +3,20 @@
 .nav-btn--press{transform:scale(.94);transition:transform .08s;color:var(--green-press)}.nav-btn--dis{opacity:.35}.day-title{text-align:center;flex:1}.day-num{font-size:44rpx;font-weight:800;color:var(--ink)}.day-dow{font-size:24rpx;color:var(--muted);margin-top:4rpx}.phase-line{text-align:center;font-size:25rpx;color:var(--green);margin-top:12rpx}.is-today{text-align:center;font-size:24rpx;color:var(--green);margin-top:10rpx;padding:8rpx}.obj-text{font-size:27rpx;color:var(--ink3);margin-top:6rpx}.time-text{font-size:24rpx;color:var(--muted);margin-top:8rpx}.btn-cancel{margin-top:12rpx;color:var(--red);font-size:27rpx}.btn-cancel::after{border:none}.btn-cancel.btn-press{background:var(--red-soft);color:var(--red-press)}.speak-all-row{margin-bottom:10rpx}.btn-speak-all{font-size:27rpx;padding:8rpx 20rpx;display:inline-flex;align-items:center;justify-content:center}.btn-speak-all--active{background:var(--soft);color:var(--green);font-weight:700}.btn-speak-all--active.btn-press{background:var(--press-green);color:var(--green-press)}.word-example--playing{color:var(--green);font-weight:700}.grammar-exp{font-size:26rpx;color:var(--ink3);line-height:1.75;background:var(--soft);border-radius:12rpx;padding:20rpx 22rpx;margin-bottom:6rpx}.practice-text{font-size:26rpx;color:var(--ink3);line-height:1.8;white-space:pre-line}
 .practice-line{font-size:26rpx;color:var(--ink3);line-height:1.8;margin-top:8rpx}
 .prac-no{color:var(--green);font-weight:700;display:inline-block;min-width:36rpx;text-align:center;margin-right:14rpx}
-.practice-line:first-child{margin-top:0}.prestart-card{text-align:center;padding:60rpx 30rpx}.prestart-title{font-size:40rpx;font-weight:800;color:var(--green)}.prestart-sub{font-size:28rpx;color:var(--muted3);margin-top:14rpx}.prestart-days{font-size:60rpx;font-weight:800;color:var(--ink);margin:30rpx 0}
+.practice-line:first-child{margin-top:0}.prestart-card{text-align:center;padding:60rpx 30rpx}.prestart-title{font-size:40rpx;font-weight:800;color:var(--green)}.prestart-sub{font-size:28rpx;color:var(--muted3);margin-top:14rpx}.prestart-days{font-size:60rpx;font-weight:800;color:var(--ink);margin:30rpx 0}.prestart-note{font-size:28rpx;color:var(--muted3);margin:28rpx 0 6rpx}
+/* 准备期行动区（v1.1.92 方案④）：单主按钮 + 文字链接降级。
+   主 = 实心绿大按钮（--green-solid 底 + 白字 + 白箭头），全站首个实心主按钮；
+   次 = 其下一行绿字链接「先看看第 1 天（只预览）」，只预览不打卡。
+   按下反馈：主按钮走 opacity（不用 press 色 —— 深色主题里 --green-press 是浅绿，作底色会失效）；
+   链接按全站「无底色行」约定走 opacity .55。 */
+.prestart-start{display:flex;align-items:center;justify-content:center;height:92rpx;margin-top:22rpx;border-radius:999rpx;background:var(--green-solid);box-shadow:0 8rpx 24rpx rgba(23,107,91,.22)}
+.prestart-start--press{opacity:.86}
+.prestart-start__tt{font-size:30rpx;font-weight:700;color:#fff}
+.prestart-start__go{width:14rpx;height:14rpx;margin-left:16rpx;color:#fff;border-right:3rpx solid currentColor;border-bottom:3rpx solid currentColor;transform:rotate(-45deg)}
+.prestart-preview{display:flex;align-items:center;justify-content:center;margin-top:26rpx;padding:10rpx 0}
+.prestart-preview--press{opacity:.55}
+.prestart-preview__tt{font-size:25rpx;font-weight:600;color:var(--green)}
+.prestart-preview__go{width:12rpx;height:12rpx;margin-left:12rpx;color:var(--green);border-right:3rpx solid currentColor;border-bottom:3rpx solid currentColor;transform:rotate(-45deg)}
 
 /* 词汇分组标签：主题词 / 扩展词（彩点+纯文字，去色块，与文字按钮同语言） */
 .group-tag {
@@ -30,6 +43,13 @@
   background:#85B7EB;
 }
 
+/* 方法日「补充」条（v1.1.91）：无序号、左侧细竖线、浅色小字。
+   方法日没有可点读的英文例句，剩下的中文要点与上方背景色注释区常常是同一件事的两种说法，
+   带着「1. 2.」编号并列显示，观感就像把同一句话说了两遍 → 摘掉序号并降格为附注。
+   point 日（有英文例句）不加此类，仍是绿色序号的例句列表。 */
+.grammar-ex--sup{padding:8rpx 0 8rpx 18rpx;border-bottom:none;border-left:4rpx solid var(--line)}
+.grammar-ex--sup .grammar-ex-text{font-size:24rpx;color:var(--muted3);line-height:1.7}
+
 /* iPad / 宽屏覆盖（纯追加，手机端不受影响），字号 = rpx × 0.5 */
 @media (min-width:700px) {
   .nav-btn { font-size:13px; padding:7px 9px; }
@@ -42,12 +62,21 @@
   .btn-cancel { margin-top:6px; }
   .btn-speak-all { font-size:13px; padding:1px 10px; }
   .grammar-exp { font-size:13px; padding:10px 11px; }
+  .grammar-ex--sup { padding:4px 0 4px 9px; border-left-width:2px; }
+  .grammar-ex--sup .grammar-ex-text { font-size:12px; }
   .practice-text { font-size:13px; }
   .practice-line { font-size:13px; margin-top:4px; }
   .prestart-card { padding:30px 15px; }
   .prestart-title { font-size:20px; }
   .prestart-sub { font-size:14px; margin-top:7px; }
   .prestart-days { font-size:30px; margin:15px 0; }
+  .prestart-note { font-size:14px; margin:14px 0 3px; }
+  .prestart-start { height:46px; margin-top:11px; }
+  .prestart-start__tt { font-size:15px; }
+  .prestart-start__go { width:7px; height:7px; margin-left:8px; border-width:1.5px; }
+  .prestart-preview { margin-top:13px; }
+  .prestart-preview__tt { font-size:12.5px; }
+  .prestart-preview__go { width:6px; height:6px; margin-left:6px; border-width:1.5px; }
   .group-tag { font-size:11px; border-radius:4px; padding:2px 7px; margin:2px 0 1px; }
 }
 /* 准备期预览提示条（09-26）：day-head 上方常驻，比纯文字链接直观 */
@@ -55,3 +84,34 @@
 /* 准备期打卡按钮置灰（JS 拦截 + 提示） */
 .btn-primary.btn-primary--dis { background: var(--disabled-bg); color: var(--disabled-ink); }
 .btn-primary.btn-primary--dis .ico { opacity: .5; }
+
+/* ── 搜索入口（v1.1.46）── */
+/* 放在自定义导航栏左区插槽内：左区本身宽 ≈94px（与右侧胶囊区对称），图标在其内左对齐，
+   标题居中不受影响。点击热区 30px，视觉图标 22px。 */
+.nav-search { width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border-radius: 50%; }
+.nav-search .ico { margin-right: 0; width: 22px; height: 22px; }
+.nav-search--press { opacity: .5; }
+/* 变体标注（v1.1.75）：搜索跳转定位行下的小字，与工具页 .wf-via 同款式 */
+.hl-via { font-size: 22rpx; color: var(--muted3); padding: 4rpx 16rpx 0; line-height: 1.6; }
+
+/* 其他词形（v1.1.77）：固定常驻小标签（只有不规则形式的词才有），点词形即朗读；
+   口径与工具页搜索结果卡的 .wf-note__t 一致（绿字 + 点状下划线），view 实现保证 hover 只亮自身 */
+.wf-line { padding: 6rpx 16rpx 0; }
+.wf-line__t {
+  display: inline-block;
+  margin: 0 18rpx 6rpx 0;
+  font-size: 22rpx;
+  color: var(--green);
+  border-bottom: 2rpx dotted var(--green);
+  padding-bottom: 2rpx;
+}
+/* 词形标签播放态（v1.1.78）：与工具页 .wf-note__t--on 同款；误亮词卡已由 wfText 态隔离修复 */
+.wf-line__t--on { color: var(--green-press); background: var(--press-green); border-bottom-color: var(--green-press); border-radius: 6rpx; }
+
+/* 从搜索页跳来的定位高亮：底色闪一下再淡出（forwards 保持终态全透明，不残留底色） */
+.word-row--hl { border-radius: 14rpx; animation: word-hl 1.9s ease-out forwards; }
+@keyframes word-hl {
+  0%   { background: var(--press2); box-shadow: 0 0 0 14rpx var(--press2); }
+  62%  { background: var(--press2); box-shadow: 0 0 0 14rpx var(--press2); }
+  100% { background: transparent; box-shadow: 0 0 0 14rpx transparent; }
+}

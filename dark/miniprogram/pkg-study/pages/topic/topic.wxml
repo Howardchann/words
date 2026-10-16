@@ -1,0 +1,84 @@
+<view class="page-root" wx:if="{{t}}">
+<!-- 标题区：分类标签 / 标题 / 人话开场白（零基础先看这句）/ 一句话定义 -->
+<view class="card head">
+  <view class="head__cat">{{catName}}</view>
+  <view class="head__t">{{t.t}}</view>
+  <view class="head__plain" wx:if="{{t.plain}}">{{t.plain}}</view>
+  <view class="head__def">{{t.def}}</view>
+</view>
+
+<!-- 用法 -->
+<view class="card">
+  <view class="section-label">用法</view>
+  <view class="li" wx:for="{{t.use}}" wx:key="*this">
+    <text class="li__dot"></text><text class="li__tx">{{item}}</text>
+  </view>
+</view>
+
+<!-- 易错点
+     数据源是一整串自由文本（「❌ 错句 ✅ 对句（原因）」/ 纯提示句 混排），进页面时已在 JS 里解析成结构化片段。
+     对错标记的演进：系统 emoji ❌✅（v1.1.67）→ 字符 ✗/✓（v1.1.68）→ **自绘 SVG**（v1.1.70）。
+     字符方案的问题：✗(U+2717) 与 ✓(U+2713) 在真机字体里由不同字形族兜底，粗细、大小、边距各不相同，
+     看起来像两套图标（用户真机反馈「在可视化里看到两个版本」）。改 SVG 后两者笔画宽度/圆头/网格同一套。
+     对齐：与全站口径一致 —— .fix__ico 放零宽空格 strut、.fix__mk inline-block + vertical-align:middle
+     由真机字体现算 x-height 中心；行容器 align-items:baseline。 -->
+<view class="card" wx:if="{{notes.length}}">
+  <view class="section-label">易错点</view>
+  <block wx:for="{{notes}}" wx:key="k" wx:for-item="N">
+    <view class="fix" wx:if="{{N.kind === 'fix'}}">
+      <view class="fix__head" wx:if="{{N.head}}">{{N.head}}</view>
+      <block wx:for="{{N.segs}}" wx:key="i" wx:for-item="S">
+        <view class="fix__row">
+          <view class="fix__ico"><view class="fix__mk fix__mk--{{S.t}}"></view></view>
+          <!-- 排版 v1.1.89（方案A，用户定）：英文句一行带喇叭，中文说明独立成行小字浅色（与下方（原因）行同构）。
+               原问题：句+尾连排且喇叭钉行尾，折行后正好落在尾巴词组中间。
+               卡拉OK（v1.1.83）只点亮 say（英文部分）；tail 不参与点亮、移出行外单独渲染。
+               say 不是 v 前缀（归一化差异）的条目 kara=false → 整段按原文渲染（S.v），与旧行为一致。 -->
+          <view class="fix__tx"><block wx:if="{{S.kara && playingText === S.say}}"><text class="kara-lit">{{karaLit}}</text>{{karaRest}}</block><block wx:elif="{{S.say && S.kara}}">{{S.say}}</block><block wx:else>{{S.v}}</block></view>
+          <view class="fix__spk" wx:if="{{S.t === 'good' && S.say}}"
+                data-text="{{S.say}}" hover-class="speak-hover" hover-stay-time="0"
+                bindtap="onSpeakEx"><view class="spk-ico {{playingText === S.say ? 'spk-ico--on' : ''}}"></view></view>
+        </view>
+        <view class="fix__tail" wx:if="{{S.tail}}">{{S.tail}}</view>
+      </block>
+      <view class="fix__why" wx:if="{{N.why}}">{{N.why}}</view>
+    </view>
+    <view class="li li--note" wx:else>
+      <text class="li__dot"></text><text class="li__tx">{{N.v}}</text>
+    </view>
+  </block>
+</view>
+
+<!-- 例句：点整行朗读。
+     喇叭按钮（v1.1.69 收口）改回全站同款 .ex-speak —— 56×56 热区 + 36rpx 图标 + 零宽空格 strut，
+     容器改 align-items:baseline 让喇叭贴英文首行基线。
+      v1.1.80（治「频繁点按整块闪动」）：卡拉OK 逐帧 setData + 播放时替换整行文本节点，
+     再叠加 hover 的 scale(.85)，就是"滑到底部闪上半屏 / 滑到顶部闪下半屏"的来源。
+     v1.1.83（卡拉OK 回归 · 换渲染结构）：只有被点的那一行渲染 karaLit/karaRest，其余行是
+     纯文本节点、不引用进度字段，故进度帧不波及其他行；两段拼起来等于原文、断行点不变。
+     v1.1.84（用户真机定）：连播放态的 class 也一并去掉 —— 例句行**不铺任何底色**，
+     播放反馈只由「卡拉OK 已读段染绿 + 喇叭变深绿」承担（`.ex--on` 规则已删除）。 -->
+<view class="card" wx:if="{{t.ex.length}}">
+  <view class="section-label">例句 · 点整句听朗读</view>
+  <view class="ex" wx:for="{{t.ex}}" wx:key="en"
+        data-text="{{item.en}}" hover-class="none" hover-stay-time="60" bindtap="onSpeakEx">
+    <view class="ex__main">
+      <view class="ex__en"><block wx:if="{{playingText === item.en}}"><text class="kara-lit">{{karaLit}}</text>{{karaRest}}</block><block wx:else>{{item.en}}</block></view>
+      <view class="ex__cn">{{item.cn}}</view>
+    </view>
+    <view class="ex-speak" hover-class="speak-hover" hover-stay-time="0"><view class="spk-ico {{playingText === item.en ? 'spk-ico--on' : ''}}"></view></view>
+  </view>
+</view>
+
+<!-- 课程里哪几天讲过 -->
+<view class="card" wx:if="{{days.length}}">
+  <view class="section-label">课程对应</view>
+  <view class="day-chips">
+    <view class="day-chip" wx:for="{{days}}" wx:key="d" data-d="{{item.d}}"
+          hover-class="day-chip--press" hover-stay-time="60" bindtap="goDay">第 {{item.d}} 天</view>
+  </view>
+  <view class="note">这些天的「例句精读」讲的就是这个语法点，点一下跳到当天原文。<block wx:if="{{dayMore}}">另有 {{dayMore}} 天也涉及它，未一一列出。</block></view>
+</view>
+
+<view class="toast" wx:if="{{toast}}">{{toast}}</view>
+</view>

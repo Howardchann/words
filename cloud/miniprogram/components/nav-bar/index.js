@@ -39,7 +39,13 @@ Component({
   options: { multipleSlots: false },
   properties: {
     title: { type: String, value: '' },
-    extClass: { type: String, value: '' }
+    extClass: { type: String, value: '' },
+    // v1.1.46：back 只给非 tab 页（搜索页）用 —— tab 页无返回概念，保持默认 false 即零变化
+    back: { type: Boolean, value: false }
   },
-  data: { statusBarHeight, navBarHeight, innerPaddingRight, leftWidth }
+  data: { statusBarHeight, navBarHeight, innerPaddingRight, leftWidth },
+  methods: {
+    // 事件上抛，由页面决定 navigateBack 还是别的动作（组件不假设自己的宿主是谁）
+    onBack() { this.triggerEvent('back'); }
+  }
 });

@@ -1,0 +1,196 @@
+/* 工具页（v1.1.67 · 原词表/计划页改造）
+   四块：学习记录 / 查单词 / 音标 / 语法速查。
+   词行、喇叭、歌词高亮、卡片等一律复用全局 app.wxss，这里只写本页特有的部分。 */
+
+/* ① 学习记录 */
+.rec-card { padding: 30rpx 28rpx 22rpx; }
+.rec-row { display: flex; align-items: center; }
+.rec-item { flex: 1; text-align: center; }
+.rec-div { width: 1rpx; height: 68rpx; background: var(--line); }
+/* 三格数字统一绿色（与「设置」页 .stat-num 同一口径）；单位跟着数字走，不再另起一色 */
+.rec-num { font-size: 56rpx; line-height: 1.1; font-weight: 800; color: var(--green); font-variant-numeric: tabular-nums; }
+.rec-unit { font-size: 24rpx; font-weight: 600; margin-left: 6rpx; }
+.rec-label { margin-top: 6rpx; font-size: 24rpx; color: var(--muted); }
+
+/* 学习记录卡的两个入口格（v1.1.95，由设置页「学习进度」卡迁入）
+   视觉沿用设置页 .stat-* 那一套：40rpx 绿色数字 + 12rpx chevron 箭头 + 22rpx 灰标签，
+   与上方三格的 56rpx 大数字形成层级 —— 进度是主角、入口是导航。
+   ⚠️ 按压用 data.statPress 手动控制，不用原生 hover-class：设置页→复习页是切 tab，
+   微信对 hover 残影的清理不可靠（v1.1.27 结论），故沿用「touchstart 亮 / touchmove 灭 /
+   touchend 不灭灯 / tap 未派发 350ms 兜底 / onShow·onHide 双兜底」这套。 */
+.rec-entry { display: flex; justify-content: space-around; margin-top: 28rpx; padding-top: 28rpx;
+  border-top: 1rpx solid var(--line); }
+.rec-stat { padding: 6rpx 16rpx; border-radius: 12rpx; text-align: center; }
+.rec-stat--press { background: var(--press-green); }
+.rec-stat__num { font-size: 40rpx; font-weight: 800; color: var(--green);
+  font-variant-numeric: tabular-nums; }
+/* 箭头几何与设置页 .stat-arrow 逐值一致：12rpx 盒 + 3rpx 描边 + 8rpx 基线偏移
+   （使箭头中心落在 40rpx 数字的字面中心上），颜色 --muted3 由 currentColor 描边，深浅通吃 */
+.rec-stat__go { display: inline-block; width: 12rpx; height: 12rpx; margin-left: 8rpx;
+  vertical-align: 8rpx; color: var(--muted3);
+  border-right: 3rpx solid currentColor; border-bottom: 3rpx solid currentColor;
+  transform: rotate(-45deg); }
+.rec-stat__label { margin-top: 4rpx; font-size: 22rpx; color: var(--muted); }
+/* 入口格量词（v1.1.102）：数值与第一行 .rec-unit 完全一致（24rpx / 600 / 6rpx），
+   颜色继承 .rec-stat__num 的 --green，无底色。 */
+.rec-stat__unit { font-size: 24rpx; font-weight: 600; margin-left: 6rpx; }
+
+/* ② 查单词 */
+.search-card { padding: 24rpx 28rpx; }
+.tk-bar { display: flex; align-items: center; padding: 0 22rpx; height: 76rpx;
+  background: var(--soft); border-radius: 38rpx; }
+.tk-bar__ico { flex-shrink: 0; width: 32rpx; height: 32rpx; margin-right: 14rpx; }
+.tk-bar__input { flex: 1; min-width: 0; height: 76rpx; font-size: 28rpx; color: var(--ink); }
+.tk-bar__ph { color: var(--muted); font-size: 28rpx; }
+.tk-bar__clear { flex-shrink: 0; width: 48rpx; height: 48rpx; line-height: 46rpx; text-align: center;
+  font-size: 38rpx; color: var(--muted); border-radius: 50%; }
+.tk-hint { margin-top: 16rpx; font-size: 25rpx; color: var(--muted3); line-height: 1.7; }
+.tk-hint__n { color: var(--green); font-weight: 700; }
+.tk-meta { margin-top: 16rpx; font-size: 25rpx; color: var(--muted3); }
+.tk-meta__n { color: var(--green); font-weight: 700; }
+.tk-row { border-radius: 14rpx; }
+/* 按压反馈（v1.1.75 统一口径）：无底色行改「变淡」，不再整行铺 --soft 背景 */
+.tk-row--press { opacity: .55; }
+.tk-day { font-size: 22rpx; color: var(--green); margin-top: 10rpx; }
+
+/* 词形归一提示 + 不规则形式标注（v1.1.73）
+   via = 「taken」是它的过去分词（查词归一到原形时的说明）；
+   wf  = 词条本身的 irregular 形式小字（过去式 took · 过去分词 taken），每个标签可点读。
+   读音走 kind:'g'（g/ 桶预生成，Azure Ava 与全站同音色），不引第二音色。
+   排版：自然折行、行高不变——最短 go 一行放下，最长 understand 自动折两行，不破版。 */
+.wf-via { margin-top: 6rpx; font-size: 22rpx; color: var(--muted3); line-height: 1.6; }
+.wf-note { margin-top: 8rpx; }
+.wf-note__t {
+  display: inline-block;
+  margin: 0 18rpx 6rpx 0;
+  font-size: 22rpx;
+  color: var(--green);
+  border-bottom: 2rpx dotted var(--green);
+  padding-bottom: 2rpx;
+}
+.tk-day__go { color: var(--muted); }
+/* 词形标签播放态（v1.1.78）：朗读中加深底色作即时反馈；误亮结果卡已由 wfText 态隔离修复 */
+.wf-note__t--on { color: var(--green-press); background: var(--press-green); border-bottom-color: var(--green-press); border-radius: 6rpx; }
+.tk-empty { text-align: center; padding: 40rpx 24rpx 24rpx; }
+.tk-empty__sub { margin-top: 14rpx; font-size: 24rpx; color: var(--muted); line-height: 1.7; }
+.tk-note { margin-top: 16rpx; font-size: 23rpx; color: var(--muted2); line-height: 1.7; }
+
+/* ④ 语法速查（分类卡） */
+.cat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14rpx; }
+.cat-cell { background: var(--soft); border-radius: 16rpx; padding: 20rpx 22rpx;
+  display: flex; align-items: center; justify-content: space-between; }
+.cat-cell--press { background: var(--press-green); }
+.cat-name { flex: 1; min-width: 0; font-size: 27rpx; font-weight: 700; color: var(--ink); }
+/* 可点击指引（v1.1.77）：分类格右侧加箭头 —— 首层此前只有文字+数字，用户第一眼不知可点。
+   v1.1.79 修正：箭头原先写成第一个子元素（渲染在名称左侧），与语法速查页/设置页「箭头在行尾」不一致
+   → 挪到数量之后（行尾）。
+   v1.1.80：字符「›」换成设置页同款 CSS 边框 chevron（与语法页 .cat__arrow/.tp__go 完全同款同尺寸），
+   颜色统一 --muted3、由 currentColor 描边（深浅主题自动跟随）。 */
+.cat-cell__go { flex-shrink: 0; width: 16rpx; height: 16rpx; margin-left: 12rpx; color: var(--muted3);
+  border-right: 3rpx solid currentColor; border-bottom: 3rpx solid currentColor; transform: rotate(-45deg); }
+.cat-count { flex-shrink: 0; font-size: 24rpx; color: var(--green); }
+
+/* ③ 音标（大类 + 子类两级筛选 → 音标网格 → 常驻详情面板） */
+.ph-hint { margin: 8rpx 0 14rpx; font-size: 23rpx; color: var(--muted2); line-height: 1.7; }
+
+/* 大类切换（元音 / 辅音）：两个等宽段控 */
+.ph-class { display: flex; gap: 14rpx; }
+.ph-cls { flex: 1; text-align: center; height: 68rpx; line-height: 68rpx; border-radius: 14rpx;
+  background: var(--soft); font-size: 28rpx; font-weight: 700; color: var(--muted3); }
+/* 选中态：浅绿底 + 深绿字（v1.1.76 由实心绿白字浅色化，与 .ph-subchip.on 同风格；按压不掉色） */
+.ph-cls.on { background: var(--press-green); color: var(--green-press); }
+.ph-cls--press { opacity: .85; }
+/* 数量与标签完全一致（v1.1.97）：v1.1.79 提到 24rpx/600 后用户仍觉"两个大小"——实际差在**字重**
+   （数字 600 / 标签 700）。现统一为 28rpx/700，与「元音/辅音」「词性缩写/语法术语」同号同重，
+   数字不再看起来比文字小一号。 */
+.ph-cls__n { font-size: 28rpx; font-weight: 700; margin-left: 8rpx; }
+
+/* 子类筛选（全部 / 短元音 …）：胶囊 chips，自动换行 */
+.ph-sub { display: flex; flex-wrap: wrap; gap: 12rpx; margin-top: 14rpx; }
+.ph-subchip { padding: 8rpx 20rpx; border-radius: 24rpx; font-size: 24rpx;
+  background: var(--soft); color: var(--muted3); }
+.ph-subchip.on { background: var(--soft2); color: var(--green); font-weight: 700; }
+.ph-subchip--press { opacity: .8; }
+
+.ph-grid { display: flex; flex-wrap: wrap; gap: 12rpx; margin-top: 16rpx; }
+.ph-chip { min-width: 96rpx; padding: 12rpx 16rpx; box-sizing: border-box; text-align: center;
+  background: var(--soft); border-radius: 14rpx; font-size: 28rpx; font-weight: 700; color: var(--green);
+  font-family: 'Times New Roman', Georgia, serif; }
+.ph-chip--press { background: var(--press-green); }
+/* 选中态：浅绿底 + 深绿字（v1.1.76 浅色化；两个类选择器优先级高于单类 --press，按压不掉色） */
+.ph-chip.on { background: var(--press-green); color: var(--green-press); }
+.ph-chip.on.ph-chip--press { opacity: .88; }
+
+/* 常驻详情面板：紧跟网格下方（不再排到 2 屏之外），位置随筛选结果自动上移 */
+.ph-panel { margin-top: 24rpx; padding: 22rpx 26rpx 18rpx; border-radius: 16rpx;
+  background: var(--soft); border: 1rpx solid var(--line); }
+.ph-head { display: flex; align-items: baseline; }
+.ph-big { font-size: 56rpx; font-weight: 800; color: var(--green); line-height: 1.15;
+  font-family: 'Times New Roman', Georgia, serif; }
+.ph-tag { margin-left: 16rpx; font-size: 23rpx; color: var(--muted); }
+.ph-block { margin-top: 20rpx; }
+.ph-block__t { font-size: 24rpx; font-weight: 700; color: var(--green); margin-bottom: 8rpx; letter-spacing: 1rpx; }
+.ph-block__b { font-size: 27rpx; color: var(--ink4); line-height: 1.75; }
+
+/* 例词行（v1.1.69 方案A「左列喇叭」）：喇叭在行首成一列，文字左对齐、自然宽度。
+   —— 原方案是「文字 flex:1 撑满 + 喇叭钉最右」，但例词很短（sit·i·坐），撑满后中间空出
+      行宽 49%~72% 的空白（用户真机反馈）。喇叭前移后，右侧不再有元素把空白"框"出来，
+      末尾留白变成看不见的自然行尾空白，三行文字与三枚喇叭各成一条竖线，长短词都不跳版。
+   ⚠️ 垂直对齐仍走全站铁律：.ex-speak 的零宽空格 strut + .spk-ico vertical-align:middle
+      （x-height 锚定），对 .ph-ex 的 align-items:baseline 生效；绝不自建 flex 居中盒。 */
+.ph-ex { display: flex; align-items: baseline; padding: 16rpx 14rpx; border-bottom: 1rpx solid var(--line); }
+.ph-ex:last-child { border-bottom: none; }
+/* 按压反馈（v1.1.71）：整行变色 → 喇叭缩放变淡，与今日页 .ex-speak.speak-hover 完全同款
+   （app.wxss：scale(.85) + opacity:.6）。行本体不再有视觉变化——朗读行的"点"是发音，
+   反馈落在喇叭上；行变底色是"选中跳转"的语言（查单词结果行才是），两种语义不混用。 */
+.ph-ex--press .spk-ico { transform: scale(.85); opacity: .6; }
+/* 行首喇叭：取消 margin-left，盒宽收到 44rpx（图标仍是 36rpx 定值不变，只少一点左侧缩进） */
+.ex-speak--lead { margin-left: 0; margin-right: 14rpx; width: 44rpx; height: 44rpx; }
+.ph-ex__txt { flex: 1; min-width: 0; }
+/* 例词行三尺度收口（v1.1.79）：单词 29rpx / 中文 24rpx 差 5rpx，一行里像三个来源 → 统一 27rpx。
+   基线本来就是对齐的（父级 align-items:baseline），问题只是字号差导致视觉重心散。 */
+.ph-ex__w { font-size: 27rpx; font-weight: 700; color: var(--ink); }
+/* 目标字母就地染色（v1.1.70）：取代原来的独立蓝色小标签（`sit i 坐`）。
+   直接让「发这个音的那几个字母」在单词内部变色，一眼就能对上「哪个字母发哪个音」。
+   ⚠️ 光靠颜色不够：--green(#176B5B) 对正文深灰(#24332F) 的对比度实测只有约 2:1，
+   29rpx 小字下肉眼几乎分不出（无头浏览器同字号 4 档对比验证过）→ 补一条 3rpx 同色底线
+   （border-bottom + currentColor，线随字色），不引新色值、深浅主题自动跟随（--green 两态都可用）。
+   不用 text-decoration-thickness/offset：iOS WKWebView 对这两个属性支持不全，border-bottom 全兼容。 */
+.ph-ex__seg--hit { color: var(--green); border-bottom: 3rpx solid currentColor; padding-bottom: 2rpx; }
+.ph-ex__cn { font-size: 27rpx; color: var(--muted3); margin-left: 14rpx; }
+
+/* ⑤ 语法术语速查（v1.1.94）
+   交互与排版整体复用音标卡的 .ph-*（分类段控 → 胶囊网格 → 常驻面板），这里只补中文标签的差异：
+   音标 chip 是拉丁字符、走 Times 衬线且给足 min-width；术语是 2~4 个汉字，衬线不适用、
+   也不该被 96rpx 最小宽度撑开 —— 收窄内边距、字体继承全站正文。 */
+.gl-chip { min-width: 0; padding: 12rpx 22rpx; font-size: 26rpx; font-family: inherit; }
+.gl-big { font-family: inherit; font-size: 40rpx; }
+.gl-eg { font-size: 26rpx; color: var(--ink4); line-height: 1.75; }
+
+/* iPad / 宽屏覆盖（纯追加，手机端不受影响），尺寸 = rpx × 0.5 */
+@media (min-width:700px) {
+  .gl-chip { padding: 6px 11px; font-size: 13px; }
+  .gl-big { font-size: 20px; }
+  .gl-eg { font-size: 13px; }
+  .rec-card { padding: 15px 14px 11px; }
+  .rec-num { font-size: 28px; }
+  .rec-div { height: 34px; }
+  .rec-entry { margin-top: 14px; padding-top: 14px; }
+  .rec-stat { padding: 3px 8px; border-radius: 6px; }
+  .rec-stat__num { font-size: 20px; }
+  .rec-stat__go { width: 6px; height: 6px; border-width: 1.5px; margin-left: 4px; vertical-align: 4px; }
+  .rec-stat__label { font-size: 11px; margin-top: 2px; }
+  .tk-bar { height: 38px; border-radius: 19px; padding: 0 11px; }
+  .tk-bar__input { height: 38px; }
+  .cat-grid { gap: 7px; }
+  .cat-cell { padding: 10px 11px; border-radius: 8px; }
+  .cat-cell__go { width: 8px; height: 8px; border-width: 1.5px; margin-left: 6px; }
+  .ph-chip { min-width: 48px; padding: 6px 8px; font-size: 14px; }
+  .ph-cls { height: 34px; line-height: 34px; border-radius: 7px; font-size: 14px; }
+  .ph-cls__n { font-size: 14px; }
+  .ph-subchip { padding: 4px 10px; border-radius: 12px; font-size: 12px; }
+  .ph-panel { margin-top: 12px; padding: 11px 13px 9px; border-radius: 8px; }
+  .ph-big { font-size: 28px; }
+  /* 行首喇叭（v1.1.69）：尺寸 = rpx × 0.5，必须显式 px 化，否则 44rpx 在 700px+ 窗口被放大 3 倍 */
+  .ex-speak--lead { margin-left: 0; margin-right: 7px; width: 22px; height: 22px; }
+}

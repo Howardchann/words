@@ -12,7 +12,7 @@ App({
       try { wx.cloud.init({ env: cloudCfg.ENV, traceUser: true }); } catch (e) { console.warn('cloud init failed', e); }
     }
     store.init();
-    // 纯深色实例：主题定死，无跟随系统链路（darkmode/theme.json/onThemeChange 均已移除）
+    // 纯浅色实例：主题定死，无跟随系统链路（darkmode/theme.json/onThemeChange 均已移除）
   },
 
   // 切回前台：与云端对齐一次（store 内部按 RESUME_GAP 节流，不会每次切页面都请求）

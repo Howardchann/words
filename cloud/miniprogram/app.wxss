@@ -9,16 +9,22 @@ page {
   --disabled-bg: #EDF3F0; --disabled-ink: #A6B2AD; --star-off: #C7D0CC; --dis2: #D5DDD9;
   --red: #C0392B; --red-press: #A93226; --red-soft: #FDECEA;
   --line: #E9F0EC; --cur-line: #9ED8C5; --cur-bg: #F8FCF9; --field: #FBFDFC;
-  /* 自定义导航栏（v1.1.33 components/nav-bar）：与原生栏 theme.json 同色（浅 #176B5B/白字） */
-  --nav-bg: #176B5B; --nav-fg: #FFFFFF;
+  --card-line: #DCE7DF; /* 卡片描边（v1.1.42 学习提示卡方案B 用） */
+  /* 双音标模块（v1.1.51 方案A）：美音绿系 / 英音蓝系，两套语义色互不干扰 */
+  --us-bg: #EAF6F0; --us-line: #CBE7DA; --us-ink: #176B5B;
+  --uk-bg: #EAF1F9; --uk-line: #CBDDEF; --uk-ink: #2A5C8A;
+  /* 自定义导航栏（v1.1.40 方案A浅顶）：nav-bg=窗口底色 #F3F8EF，冷启动首帧与终态零色差，
+     首点 tab「顶部闪 1~2 帧」的感知随之消除；品牌绿退守内容区（按钮/选中态/tab 栏）。
+     回退绿顶：改回 --nav-bg:#176B5B; --nav-fg:#FFFFFF; 即可（仅此一处）。 */
+  --nav-bg: #F3F8EF; --nav-fg: #24332F;
   --ico-gap: 10rpx; /* 图标-文字统一间距：所有 .ico / 图标在后的按钮一律引用此 token */
   background:var(--bg);
   color:var(--ink);
   font-size:28rpx;
   line-height:1.6;
   font-family:-apple-system, BlinkMacSystemFont, 'PingFang SC', 'Helvetica Neue', sans-serif;
-  /* 自定义 tabBar 高度约 112rpx：预留底部空间，避免最后一张卡片被导航栏遮住 */
-  padding-bottom:calc(132rpx + env(safe-area-inset-bottom));
+  /* 浮窗 dock（v1.1.73）：tabBar 抬离底边，页面底部预留随之加大 */
+  padding-bottom:calc(168rpx + env(safe-area-inset-bottom));
 }
 /* 页面根 view：铺 --bg 到整屏（page 本底在深色下仍是浅色，由根 view 覆盖；
    导航栏/窗口背景由 theme.js 运行时覆盖） */
@@ -33,6 +39,9 @@ page {
   --disabled-bg: #1A2729; --disabled-ink: #5E7370; --star-off: #556964; --dis2: #445854;
   --red: #E8795F; --red-press: #F19485; --red-soft: #34211C;
   --line: #223430; --cur-line: #2E5B4F; --cur-bg: #14211F; --field: #101B1D;
+  --card-line: #223430;
+  --us-bg: #16281F; --us-line: #2C4A3C; --us-ink: #7CD6B4;
+  --uk-bg: #16222E; --uk-line: #2B4054; --uk-ink: #7FB3E8;
   --nav-bg: #0E1618; --nav-fg: #FFFFFF;
 }
 /* 深色下的特殊覆盖（data-URI 图标 / 语义色点 / 状态块，走不了变量） */
@@ -59,12 +68,18 @@ page {
 .ico-down{background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='%23176B5B'%20stroke-width='1.8'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpath%20d='M12%204v11M8%2011l4%204%204-4'/%3E%3Cpath%20d='M5%2019h14'/%3E%3C/svg%3E")}
 .ico-sync{background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='%23176B5B'%20stroke-width='1.8'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpath%20d='M20%2012a8%208%200%201%201-2.4-5.7'/%3E%3Cpath%20d='M18%203v4h-4'/%3E%3C/svg%3E")}
 .ico-spk{background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Cpath%20d='M3%209v6h4l5%205V4L7%209H3z%20M16.5%2012c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73%202.5-2.25%202.5-4.02z'%20fill='%23176B5B'/%3E%3C/svg%3E")}
+.ico-search{background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='%23176B5B'%20stroke-width='2'%20stroke-linecap='round'%3E%3Ccircle%20cx='10.8'%20cy='10.8'%20r='6.6'/%3E%3Cpath%20d='M15.8%2015.8l4.7%204.7'/%3E%3C/svg%3E")}
 .ico-copy{background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='%23176B5B'%20stroke-width='1.8'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Crect%20x='9'%20y='9'%20width='11'%20height='11'%20rx='2'/%3E%3Cpath%20d='M5%2015V5h10'/%3E%3C/svg%3E")}
 .ico-merge{background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='%23176B5B'%20stroke-width='1.8'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpath%20d='M6%2015V6h12'/%3E%3Cpath%20d='M4%2018h6a4%204%200%200%200%204-4V9'/%3E%3Cpath%20d='M11%2012l3-3%203%203'/%3E%3C/svg%3E")}
 .ico-cover{background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='%23176B5B'%20stroke-width='1.8'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpath%20d='M4%206h12v12H4z'/%3E%3Cpath%20d='M9%2018h11V7'/%3E%3C/svg%3E")}
 .ico-uparrow{background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='%23176B5B'%20stroke-width='1.8'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpath%20d='M6%2014l6-6%206%206'/%3E%3C/svg%3E")}
 /* 提示强调块统一为「淡绿底 + 圆角、无左边框」（与语法讲解块同语言）；学习提示卡不再双层accent */
 .tip-box { background:var(--soft); border-radius:14rpx; padding:20rpx 24rpx; margin-top:20rpx; }
+/* 学习提示卡（v1.1.42 · 方案B「区分改走线条」）：浅绿底与窗口底色 Δ≈3 本就不闪，
+   再加 1rpx 细描边 + 左侧 8rpx 绿竖条强化识别；竖条/描边是细长元素，自身几乎不产生
+   冷启动首绘帧的闪现感知。只作用于「学习提示」卡（.card.tip-box），
+   页面顶部/等级页的纯提示条（.tip-box 单独使用）不在此列。 */
+.card.tip-box { border:1rpx solid var(--card-line); border-left:8rpx solid var(--green); padding-left:20rpx; }
 .tip-text { color:var(--ink3); font-size:26rpx; }
 /* 行内小图标（文案里指代真实控件，替代"小喇叭/♡"文字）：em 跟随容器字号
    （v1.1.33 收口：26rpx→1em、-4rpx→-.125em，与 FontAwesome -0.125em 同值；
@@ -93,19 +108,43 @@ page {
 .word-row:last-child { border-bottom:none; }
 /* 播放喇叭去圆形底：裸图标直接跟在文字旁，播放态由 spk-ico--on 变深绿 + 卡拉OK进度变色承担 */
 .word-speak { flex-shrink:0; width:56rpx; height:56rpx; font-size:32rpx; text-align:center; margin-right:16rpx; }
-.word-speak::before, .ex-speak::before, .word-star::before { content:'\200B'; }
+.word-speak::before, .ex-speak::before, .ex-eye::before, .word-star::before { content:'\200B'; }
 /* 按下即时反馈：无底色后改「缩放+变淡」（小程序里 view 的 :active 不可靠，统一用 hover-class="speak-hover"） */
 .word-speak.speak-hover, .ex-speak.speak-hover { transform:scale(.85); opacity:.6; }
-.word-main { flex:1; min-width:0; }
+/* 词区右移（v1.1.57 用户反馈「太靠左」）：v1.1.51 移除左侧喇叭后词区整体左移了
+   约 72rpx（喇叭56+间距16），补 16rpx 找回平衡；today/review/search 三页同步 */
+.word-main { flex:1; min-width:0; padding-left:16rpx; }
 .word-head { display:flex; align-items:baseline; flex-wrap:wrap; }
 .word-en { font-size:32rpx; font-weight:700; color:var(--ink); }
-/* 音标（v1.1.44）：纯文本，无底色无描边——朗读入口统一走左侧喇叭，音标只作书面依据，
-   不再自带「可点」暗示（点喇叭读的就是该词本身）。等双音标(US/UK)上线时再让它变成点读目标。
-   v1.1.45：字号 22rpx→24rpx。依据 = 最宽词头 characterization 在真机（含开发者工具的 iPhone 5
-   最小档 320px）实测不折行且与右侧收藏键仍有间距，说明余量充足；rpx 全等比故与分辨率无关。 */
+/* 音标（v1.1.44 纯文本 → v1.1.51 方案A 双音标模块）：
+   朗读入口不再用左侧大喇叭，改为「美音 / 英音」两个胶囊模块各自带小喇叭，
+   点模块即按该口音朗读。移除左侧喇叭后词区整体左移（word-main 510→582rpx），
+   双音标单行容纳率 88.5%→99.3%（仅 58 个超长词靠 flex-wrap 折到第二行）。
+   字号沿用 v1.1.45 定的 24rpx；rpx 全等比，折行点与分辨率无关。 */
 .word-ipa { font-size:24rpx; color:var(--ink3); margin-left:12rpx; }
 .word-pos { font-size:22rpx; color:var(--green); font-style:italic; margin-left:10rpx; }
+/* 音标模块行：flex-wrap 兜底——超长词自动折到第二行，永不挤到右侧收藏键 */
+.ipa-row { display:flex; flex-wrap:wrap; align-items:center; margin-top:2rpx; }
+.ipa-mod { display:inline-flex; align-items:center; height:56rpx; padding:0 14rpx; margin:6rpx 10rpx 0 0;
+  border-radius:14rpx; border:1rpx solid var(--us-line); background:var(--us-bg); }
+.ipa-mod--uk { border-color:var(--uk-line); background:var(--uk-bg); }
+.ipa-mod .spk-ico { width:30rpx; height:30rpx; flex-shrink:0; margin-right:6rpx; }
+.ipa-txt { font-size:24rpx; line-height:1; color:var(--us-ink); }
+.ipa-mod--uk .ipa-txt { color:var(--uk-ink); }
+.ipa-mod.speak-hover { transform:scale(.96); opacity:.75; }
+.ipa-mod.on { border-color:var(--us-ink); }
+.ipa-mod--uk.on { border-color:var(--uk-ink); }
+/* 英音模块的喇叭换蓝系（美音沿用全局 .spk-ico 绿） */
+.ipa-mod--uk .spk-ico{background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Cpath%20d='M3%209v6h4l5%205V4L7%209H3z%20M16.5%2012c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73%202.5-2.25%202.5-4.02z%20M14%203.23v2.06c2.89.86%205%203.54%205%206.71s-2.11%205.85-5%206.71v2.06c4.01-.91%207-4.49%207-8.77s-2.99-7.86-7-8.77z'%20fill='%232A5C8A'/%3E%3C/svg%3E");}
+.ipa-mod--uk .spk-ico--on{background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Cpath%20d='M3%209v6h4l5%205V4L7%209H3z%20M16.5%2012c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73%202.5-2.25%202.5-4.02z%20M14%203.23v2.06c2.89.86%205%203.54%205%206.71s-2.11%205.85-5%206.71v2.06c4.01-.91%207-4.49%207-8.77s-2.99-7.86-7-8.77z'%20fill='%231E4468'/%3E%3C/svg%3E");}
+.theme-dark .ipa-mod--uk .spk-ico{background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Cpath%20d='M3%209v6h4l5%205V4L7%209H3z%20M16.5%2012c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73%202.5-2.25%202.5-4.02z%20M14%203.23v2.06c2.89.86%205%203.54%205%206.71s-2.11%205.85-5%206.71v2.06c4.01-.91%207-4.49%207-8.77s-2.99-7.86-7-8.77z'%20fill='%237FB3E8'/%3E%3C/svg%3E");}
 .word-zh { font-size:26rpx; color:var(--ink2); margin-top:4rpx; }
+/* 词头行 v1.1.57（用户拍板方案B）：单词+词性+释义+双音标 全部并入一个可折行的横排流。
+   「边线 + 超长自动换行」不用写条件判断 —— .word-head 本来就是 flex-wrap:wrap，
+   放进来的内容碰到右边线就整体折到下一行（实测 hello/cat 挤进 1 行，
+   government/international 的音标自动折到第 2 行）。 */
+.word-head .word-zh { margin-top:0; margin-left:12rpx; }
+.word-head .ipa-row { margin-top:0; margin-left:8rpx; }
 .word-example { font-size:25rpx; color:var(--muted2); margin-top:6rpx; padding-left:4rpx; }
 /* 例句行：文本占满 + 右侧播放按钮（与语法区 ex-speak 同款，让人一眼看出可以播） */
 .word-example-row { display:flex; align-items:baseline; }
@@ -120,7 +159,31 @@ page {
 .grammar-ex:last-child { border-bottom:none; }
 .grammar-ex-text { flex:1; min-width:0; font-size:27rpx; line-height:1.75; color:var(--ink4); white-space:normal; word-break:break-word; overflow-wrap:break-word; }
 .ex-no { flex-shrink:0; width:36rpx; color:var(--green); font-weight:700; font-size:26rpx; line-height:1.75; text-align:center; margin:0 14rpx 0 0; }
-.ex-speak { flex-shrink:0; width:46rpx; height:46rpx; font-size:26rpx; text-align:center; margin-left:12rpx; }
+/* 例句喇叭热区 46→56rpx（v1.1.51，用户反映「播放按钮偏小不好点」）：只放大盒与热区，图标随之略增 */
+.ex-speak { flex-shrink:0; width:56rpx; height:56rpx; font-size:28rpx; text-align:center; margin-left:12rpx; }
+/* ── 例句中文「眼睛」开关（v1.1.53 / 图标改版 v1.1.54）──────────
+   闭上（默认）= 不显示例句中文；睁开 = 显示。眼睛只在词条有 cn（中文例句）时渲染，
+   没有中文的例句不出现眼睛（首批 1169/8000 已有，随每日翻译补齐）。
+   图形：闭上 = 上眼皮合拢的弧线 + 3 根睫毛（不是斜杠划掉）；睁开 = 睁开的眼形 + 实心瞳孔。
+   ⚠️ 下面两个图标类必须保持「只含 background-image 一条声明」——tools/darkicons.js
+   的正则才能扫到并自动生成 .theme-dark 变体（见文件末尾 auto 块）。
+   ⚠️ .ex-eye .eye-ico 绝不能用 background 简写 —— 简写会把上一个规则的 background-image
+   重置为 none（app.wxss 里 .ico-inline 踩过同样的坑）。 */
+.eye-ico{background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='%23176B5B'%20stroke-width='1.8'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpath%20d='M2%2012C4%2012%206%206%2012%206C18%206%2020%2012%2022%2012'/%3E%3Cpath%20d='M2%2012C4%2012%206%2018%2012%2018C18%2018%2020%2012%2022%2012'/%3E%3Cpath%20d='M12%2018.4v3.2'/%3E%3Cpath%20d='M7%2016.4l-1.2%202.6'/%3E%3Cpath%20d='M17%2016.4l1.2%202.6'/%3E%3C/svg%3E")}
+.eye-ico--on{background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='%23176B5B'%20stroke-width='1.8'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpath%20d='M2%2012s3.5-6%2010-6%2010%206%2010%206-3.5%206-10%206-10-6-10-6z'/%3E%3Ccircle%20cx='12'%20cy='12'%20r='2.4'%20fill='%23176B5B'%20stroke='none'/%3E%3C/svg%3E")}
+/* 眼睛按钮热区与 .ex-speak 同规格 56rpx，图标略小不抢喇叭。
+   对齐机制（v1.1.55，无头浏览器实测三种方案后定）：必须与 .ex-speak 完全同构——
+   普通块 + 零宽空格 strut + 图标 vertical-align:middle（x-height 锚定）。
+   ⚠️ 不能用 display:flex 居中：flex 容器在 align-items:baseline 的行里没有真实基线，
+   浏览器会拿子元素底边当基线 → 眼睛整只被抬到基线上方，与喇叭错位 10rpx（实测 Δ=-5px）。 */
+.ex-eye{flex-shrink:0;width:56rpx;height:56rpx;font-size:28rpx;text-align:center;margin-left:2rpx}
+.ex-eye .eye-ico{display:inline-block;vertical-align:middle;width:34rpx;height:34rpx;background-position:center;background-size:contain;background-repeat:no-repeat}
+.ex-eye.speak-hover{transform:scale(.85);opacity:.6}
+/* 例句中文：比英文例句小一号、弱一档；默认不渲染（wx:if），展开后出现在例句行下方 */
+/* 2026-10-10 配色修订（用户真机定稿）：--muted2 #82908B 白底仅 3.33:1，12px 小字偏浅难读；
+   改用 --muted3 #66736E（白底 4.95:1 / 深色 6.37:1，两主题均达 WCAG AA），
+   与英文例句 --ink3（6.58:1）仍保留一档主次层次。 */
+.ex-cn{font-size:24rpx;color:var(--muted3);line-height:1.6;margin-top:2rpx;padding-left:4rpx}
 .checkin-btn { margin:24rpx 0; }
 .done-state { display:flex; align-items:center; justify-content:center; color:var(--green); font-size:28rpx; font-weight:700; padding:16rpx 0; }
 
@@ -138,11 +201,25 @@ page {
 .hover-dim{opacity:.55;transform:scale(.96)}
 /* 磁贴/卡片类按压：背景变色（重绘属性）。⚠️ v1.1.19 起该类由 weeks 页手动按压态驱动
    （data.pressed + touchstart/end/cancel/move + onShow 兜底清零），不再走原生 hover-class——
-   原生 hover 会沿节点链激活（点日格连父级周卡一起亮），且 switchTab 跳转时清理不可靠、
+   原生 hover 会沿节点链激活（点日格连父级一起亮），且 switchTab 跳转时清理不可靠、
    返回后按压底色残留（实机翻车）。给其他页面接按压态时照 weeks.js 的 onTileDown/onTileUp 模式。 */
 .hover-tint{background:var(--soft)}
 .btn-press{transform:scale(.96)}
-.btn-primary.btn-press{background:var(--press-green);color:var(--green-press)}
+/* 动作按钮按压（v1.1.80 强化）：此前只把底色 soft→press-green，两个都是极浅绿、色差≈0，
+   真机上"看不出按了没"（用户反馈）。加一档内阴影 + 字色加深，按下有明确的"陷下去"感。
+   ⚠️ 只作用于有底的 .btn-primary/.btn-c；无底文字按钮（.btn-ghost）不加阴影。 */
+.btn-primary.btn-press{background:var(--press-green);color:var(--green-press);box-shadow:inset 0 2rpx 8rpx rgba(15,74,62,.22)}
+.btn-c.btn-press{box-shadow:inset 0 2rpx 8rpx rgba(15,74,62,.12)}
+
+/* ── 统一右向箭头（v1.1.80）──────────────────────────────
+   全站原本三套写法：① 语法/工具页用「›」字符（32rpx 文本，字形瘦、随字体漂移）
+   ② 设置页用 CSS 边框 chevron（border-right + border-bottom + rotate(-45deg)）。
+   现统一为 ② 这一种，并把设置页同款复刻到语法页 / 工具页：
+   · border-color 用 currentColor → 颜色随所在行的 token 自动适配深浅主题，**不需要 darkicons 生成变体**；
+   · 尺寸/线宽统一，旋转后视觉约 22rpx，比之前的『›』更清晰、也不再受字形影响；
+   · 展开态的 rotate(90deg) 动画照旧由使用方（.cat__arrow.on）接管。 */
+.chev{display:inline-block;width:16rpx;height:16rpx;flex-shrink:0;
+  border-right:3rpx solid currentColor;border-bottom:3rpx solid currentColor;transform:rotate(-45deg)}
 /* 方案A（次级文字按钮）：按压字加深；方案C（重要按钮）加 btn-c：按压浮出淡绿底 #F0F7F3（比 #E6F4EE 更淡），
    危险类（取消打卡/清除学习记录）由页内规则按压浮淡红底。两者都配合 .btn-press 的缩放 */
 .btn-ghost.btn-press{color:var(--green-press)}
@@ -162,7 +239,18 @@ page {
    由真机字体现算 x-height 中心；尺寸用显式 rpx（不再随 em，避免随父字号漂移） */
 .spk-ico{display:inline-block;vertical-align:middle;width:.9em;height:.9em;background:center/contain no-repeat;background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Cpath%20d='M3%209v6h4l5%205V4L7%209H3z%20M16.5%2012c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73%202.5-2.25%202.5-4.02z%20M14%203.23v2.06c2.89.86%205%203.54%205%206.71s-2.11%205.85-5%206.71v2.06c4.01-.91%207-4.49%207-8.77s-2.99-7.86-7-8.77z'%20fill='%23176B5B'/%3E%3C/svg%3E");}
 .spk-ico--on{background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Cpath%20d='M3%209v6h4l5%205V4L7%209H3z%20M16.5%2012c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73%202.5-2.25%202.5-4.02z%20M14%203.23v2.06c2.89.86%205%203.54%205%206.71s-2.11%205.85-5%206.71v2.06c4.01-.91%207-4.49%207-8.77s-2.99-7.86-7-8.77z'%20fill='%230E4C41'/%3E%3C/svg%3E");}
-.ex-speak .spk-ico{width:.85em;height:.85em;}
+/* 例句喇叭图标 0.85em(≈23.8rpx)→36rpx（v1.1.55 用户反馈「播放按钮没放大」）：
+   显式 rpx 定值不再随 em 漂移，略大于眼睛 34rpx（播放是主行为，眼睛只作显示开关） */
+.ex-speak .spk-ico{width:36rpx;height:36rpx;}
+/* 绿色喇叭的深色变体（v1.1.56）：.spk-ico 源规则含尺寸声明，tools/darkicons.js 的正则
+   只认「只含 background-image 一条声明」的规则 → 扫不到 → 深色下 #176B5B 压 #162324 卡片
+   对比度仅约 2.5:1，偏暗。手工补两条：浅色 #176B5B / 播放态 #0E4C41 → 深色 #7CD6B4 / #8FE0C0
+   （= --green / --green-press，与主题 token 一致）。
+   ⚠️ 这两条故意把 background-repeat 写在 background-image 之前，避免被 darkicons.js 的正则
+   二次匹配后重复写进文件末尾的 auto 块。
+   英音蓝喇叭另有 .theme-dark .ipa-mod--uk .spk-ico（3 类，特异性更高）覆盖，不受影响。 */
+.theme-dark .spk-ico{background-repeat:no-repeat;background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Cpath%20d='M3%209v6h4l5%205V4L7%209H3z%20M16.5%2012c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73%202.5-2.25%202.5-4.02z%20M14%203.23v2.06c2.89.86%205%203.54%205%206.71s-2.11%205.85-5%206.71v2.06c4.01-.91%207-4.49%207-8.77s-2.99-7.86-7-8.77z'%20fill='%237CD6B4'/%3E%3C/svg%3E");}
+.theme-dark .spk-ico--on{background-repeat:no-repeat;background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Cpath%20d='M3%209v6h4l5%205V4L7%209H3z%20M16.5%2012c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73%202.5-2.25%202.5-4.02z%20M14%203.23v2.06c2.89.86%205%203.54%205%206.71s-2.11%205.85-5%206.71v2.06c4.01-.91%207-4.49%207-8.77s-2.99-7.86-7-8.77z'%20fill='%238FE0C0'/%3E%3C/svg%3E");}
 
 /* 歌词式朗读进度：已读部分品牌绿，未读保持原色（kara-lit 放在词首 text 上） */
 .kara-lit{color:var(--green)}
@@ -178,7 +266,7 @@ page {
    rpx 按「窗口宽度/750」换算，iPad Pro 窗口宽 1000px+ 时所有尺寸被放大约 3 倍。
    ≥700px 时改用固定 px 并把内容限宽居中，字号取手机端 ×0.5rpx 值。 */
 @media (min-width:700px) {
-  page { font-size:15px; padding-bottom:calc(66px + env(safe-area-inset-bottom)); }
+  page { font-size:15px; padding-bottom:calc(84px + env(safe-area-inset-bottom)); }
   .card { max-width:640px; margin:12px auto; border-radius:12px; padding:14px; box-sizing:border-box; }
   .section-label { font-size:14px; margin-bottom:7px; }
   .btn-primary { border-radius:22px; font-size:15px; }
@@ -199,15 +287,28 @@ page {
   .word-en { font-size:16px; }
   .word-ipa { font-size:12px; margin-left:6px; }
   .word-pos { font-size:11px; margin-left:5px; }
-  .word-zh { font-size:13px; margin-top:2px; }
+  .ipa-mod { height:28px; padding:0 7px; margin:3px 5px 0 0; border-radius:7px; }
+  .ipa-mod .spk-ico { width:15px; height:15px; margin-right:3px; }
+  .ipa-txt { font-size:12px; }
+  .word-zh { font-size:13px; margin-top:0; }
+  /* 词头行方案B（v1.1.57）：宽屏块 rpx 会放大 3 倍，边距必须显式 px（6px=12rpx@1x） */
+  .word-head .word-zh { margin-left:6px; }
+  .word-head .ipa-row { margin-left:4px; }
+  .word-main { padding-left:8px; }
   .word-example { font-size:13px; margin-top:3px; padding-left:2px; }
   .word-star { width:32px; height:32px; font-size:16px; }
   .grammar-ex { padding:7px 0; }
   .grammar-ex-text { font-size:14px; }
   .ex-no { width:18px; font-size:13px; line-height:1.75; margin:0 7px 0 0; }
-  .ex-speak { width:23px; height:23px; font-size:13px; margin-left:6px; }
+  .ex-speak { width:28px; height:28px; font-size:14px; margin-left:6px; }
   .spk-ico { width:.9em; height:.9em; }
-  .ex-speak .spk-ico { width:.85em; height:.85em; }
+  .ex-speak .spk-ico { width:18px; height:18px; }
+  /* 例句中文眼睛（v1.1.53）宽屏；字号 = rpx × 0.5。font-size 必须显式 px 化，
+     否则 28rpx 在 700px+ 窗口被放大 3 倍 → x-height 锚定点漂移，眼睛与喇叭错位 */
+  .ex-eye { width:28px; height:28px; font-size:14px; text-align:center; margin-left:1px; }
+  .ex-eye .eye-ico { display:inline-block; vertical-align:middle; width:17px; height:17px; }
+  .ex-cn { font-size:12px; margin-top:1px; padding-left:2px; }
+  .random-card .ex-cn { margin-top:4px; }
   .checkin-btn { margin:12px 0; }
   .done-state { font-size:14px; padding:8px 0; }
   .icon-button { width:32px; height:32px; border-radius:9px; font-size:15px; }
@@ -218,6 +319,8 @@ page {
 
 /* ==== darkicons:auto-start（由 tools/darkicons.js 生成，勿手改） ==== */
 .theme-dark .ico-play{background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Cpath%20d='M7%205v14l11-7z'%20fill='%237CD6B4'/%3E%3C/svg%3E")}
+.theme-dark .ico-stop{background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Crect%20x='6.5'%20y='6.5'%20width='11'%20height='11'%20rx='2.5'%20fill='%237CD6B4'/%3E%3C/svg%3E")}
+.theme-dark .ico-check{background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Cpath%20d='M4.5%2012.8l5%205L19.5%207'%20fill='none'%20stroke='%237CD6B4'%20stroke-width='2.4'%20stroke-linecap='round'%20stroke-linejoin='round'/%3E%3C/svg%3E")}
 .theme-dark .ico-eye{background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='%237CD6B4'%20stroke-width='1.8'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpath%20d='M2%2012s3.5-6%2010-6%2010%206%2010%206-3.5%206-10%206-10-6-10-6z'/%3E%3Ccircle%20cx='12'%20cy='12'%20r='2.6'/%3E%3C/svg%3E")}
 .theme-dark .ico-ask{background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='%237CD6B4'%20stroke-width='1.8'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Ccircle%20cx='12'%20cy='12'%20r='9'/%3E%3Cpath%20d='M9.6%209.3a2.5%202.5%200%201%201%203.3%202.4c-.7.3-.9.8-.9%201.5'/%3E%3Cpath%20d='M12%2016.6h.01'/%3E%3C/svg%3E")}
 .theme-dark .ico-undo{background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='%23E8795F'%20stroke-width='1.8'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpath%20d='M9%2014%204%209l5-5'/%3E%3Cpath%20d='M4%209h9.5a6%206%200%200%201%200%2012H10'/%3E%3C/svg%3E")}
@@ -226,10 +329,11 @@ page {
 .theme-dark .ico-down{background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='%237CD6B4'%20stroke-width='1.8'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpath%20d='M12%204v11M8%2011l4%204%204-4'/%3E%3Cpath%20d='M5%2019h14'/%3E%3C/svg%3E")}
 .theme-dark .ico-sync{background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='%237CD6B4'%20stroke-width='1.8'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpath%20d='M20%2012a8%208%200%201%201-2.4-5.7'/%3E%3Cpath%20d='M18%203v4h-4'/%3E%3C/svg%3E")}
 .theme-dark .ico-spk{background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Cpath%20d='M3%209v6h4l5%205V4L7%209H3z%20M16.5%2012c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73%202.5-2.25%202.5-4.02z'%20fill='%237CD6B4'/%3E%3C/svg%3E")}
+.theme-dark .ico-search{background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='%237CD6B4'%20stroke-width='2'%20stroke-linecap='round'%3E%3Ccircle%20cx='10.8'%20cy='10.8'%20r='6.6'/%3E%3Cpath%20d='M15.8%2015.8l4.7%204.7'/%3E%3C/svg%3E")}
 .theme-dark .ico-copy{background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='%237CD6B4'%20stroke-width='1.8'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Crect%20x='9'%20y='9'%20width='11'%20height='11'%20rx='2'/%3E%3Cpath%20d='M5%2015V5h10'/%3E%3C/svg%3E")}
 .theme-dark .ico-merge{background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='%237CD6B4'%20stroke-width='1.8'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpath%20d='M6%2015V6h12'/%3E%3Cpath%20d='M4%2018h6a4%204%200%200%200%204-4V9'/%3E%3Cpath%20d='M11%2012l3-3%203%203'/%3E%3C/svg%3E")}
 .theme-dark .ico-cover{background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='%237CD6B4'%20stroke-width='1.8'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpath%20d='M4%206h12v12H4z'/%3E%3Cpath%20d='M9%2018h11V7'/%3E%3C/svg%3E")}
 .theme-dark .ico-uparrow{background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='%237CD6B4'%20stroke-width='1.8'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpath%20d='M6%2014l6-6%206%206'/%3E%3C/svg%3E")}
-.theme-dark .ico-stop{background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Crect%20x='6.5'%20y='6.5'%20width='11'%20height='11'%20rx='2.5'%20fill='%237CD6B4'/%3E%3C/svg%3E")}
-.theme-dark .ico-check{background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Cpath%20d='M4.5%2012.8l5%205L19.5%207'%20fill='none'%20stroke='%237CD6B4'%20stroke-width='2.4'%20stroke-linecap='round'%20stroke-linejoin='round'/%3E%3C/svg%3E")}
+.theme-dark .eye-ico{background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='%237CD6B4'%20stroke-width='1.8'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpath%20d='M2%2012C4%2012%206%206%2012%206C18%206%2020%2012%2022%2012'/%3E%3Cpath%20d='M2%2012C4%2012%206%2018%2012%2018C18%2018%2020%2012%2022%2012'/%3E%3Cpath%20d='M12%2018.4v3.2'/%3E%3Cpath%20d='M7%2016.4l-1.2%202.6'/%3E%3Cpath%20d='M17%2016.4l1.2%202.6'/%3E%3C/svg%3E")}
+.theme-dark .eye-ico--on{background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='%237CD6B4'%20stroke-width='1.8'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpath%20d='M2%2012s3.5-6%2010-6%2010%206%2010%206-3.5%206-10%206-10-6-10-6z'/%3E%3Ccircle%20cx='12'%20cy='12'%20r='2.4'%20fill='%237CD6B4'%20stroke='none'/%3E%3C/svg%3E")}
 /* ==== darkicons:auto-end ==== */

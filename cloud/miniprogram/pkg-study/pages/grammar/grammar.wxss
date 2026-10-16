@@ -1,0 +1,82 @@
+/* 语法速查 · 体系目录（分包页） */
+/* 本页是普通页面（非 tab）：撤掉 app.wxss 给 tabBar 预留的 132rpx 底部内边距。
+   v1.1.80 修：原来只留 env(safe-area-inset-bottom)，多数安卓机型该值为 0
+   → 最后一张卡（如「特殊句式」）贴底、被手势条压住（用户真机反馈）。补 44rpx（≈22px）呼吸位。 */
+page { padding-bottom: calc(44rpx + env(safe-area-inset-bottom)); }
+
+.sb { display: flex; align-items: center; margin: 18rpx 24rpx 4rpx; padding: 0 22rpx; height: 76rpx;
+  background: var(--card); border-radius: 38rpx; border: 1rpx solid var(--card-line); }
+.sb__ico { flex-shrink: 0; width: 30rpx; height: 30rpx; margin-right: 14rpx;
+  background: center/contain no-repeat;
+  background-image: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='%23176B5B'%20stroke-width='2'%20stroke-linecap='round'%3E%3Ccircle%20cx='10.8'%20cy='10.8'%20r='6.6'/%3E%3Cpath%20d='M15.8%2015.8l4.7%204.7'/%3E%3C/svg%3E"); }
+.sb__input { flex: 1; min-width: 0; height: 76rpx; font-size: 28rpx; color: var(--ink); }
+.sb__ph { color: var(--muted); font-size: 26rpx; }
+.sb__clear { flex-shrink: 0; width: 48rpx; height: 48rpx; line-height: 46rpx; text-align: center;
+  font-size: 38rpx; color: var(--muted); border-radius: 50%; }
+
+.meta { margin: 20rpx 32rpx 0; font-size: 25rpx; color: var(--muted3); }
+.intro { margin: 22rpx 32rpx 0; font-size: 24rpx; color: var(--muted3); line-height: 1.8; }
+.empty { text-align: center; padding: 80rpx 48rpx; font-size: 27rpx; color: var(--muted); }
+
+/* 场景筛选条（v1.1.68）：8 个场景 + 全部；胶囊 chips 自动换行 */
+.tagbar { display: flex; flex-wrap: wrap; gap: 12rpx; margin: 16rpx 24rpx 0; }
+.tagchip { padding: 10rpx 22rpx; border-radius: 26rpx; font-size: 25rpx;
+  background: var(--soft); color: var(--muted3); }
+.tagchip.on { background: var(--press-green); color: var(--green-press); font-weight: 700; }
+.tagchip--press { opacity: .8; }
+
+/* 分类卡（手风琴） */
+.cat { padding: 6rpx 28rpx; }
+/* 行尾顺序（v1.1.79 核实）：名称/简介 → 数量 → 箭头。三处都统一「箭头在行尾」，
+   与工具页语法目录（原先箭头写在名称左侧，已一并修正）、设置页一致。 */
+.cat__head { display: flex; align-items: center; padding: 22rpx 0; }
+/* 按压反馈（v1.1.75 统一口径）：无底色行改「变淡」，与今日页/工具页一致，不再整行铺背景 */
+/* 按压反馈（v1.1.77 收窄）：不再整头行变淡（数字跟着闪，用户点名不要）——
+   箭头旋转 + 展开本身已表达交互，按压只让箭头（可点击指引本体）变淡。 */
+.cat__head--press .cat__arrow { opacity: .45; }
+.cat__l { flex: 1; min-width: 0; }
+.cat__name { font-size: 30rpx; font-weight: 700; color: var(--ink); }
+.cat__intro { margin-top: 6rpx; font-size: 23rpx; color: var(--muted3); line-height: 1.6; }
+/* 数量列（v1.1.79 收口）：去掉 96rpx 定宽 —— 标题已经是 flex:1，数量贴着行尾即可；
+   定宽会把「6 个」这类短数字推到离箭头很远的地方。字号与工具页 .cat-count 统一为 24rpx。 */
+.cat__n { flex-shrink: 0; font-size: 24rpx; color: var(--green); margin-left: 12rpx; }
+/* 箭头（v1.1.80）：由「›」字符换成设置页同款的 CSS 边框 chevron（全站统一，见 app.wxss .chev 注释）。
+   字符方案的问题：› 字形瘦、占位小于同号文字，用户反馈"还是偏小"；换成边框 chevron 后可精确控尺寸/线宽。
+   颜色 currentColor + color:var(--muted3) —— 原来首层 muted2 / 三层 muted3 两个灰，现统一到 --muted3 一档。
+   旋转：底形尖端朝东南，-45° 得「指向右」；展开态需指向下 → 再转 90°，即 rotate(45deg)（不是 90deg！）。 */
+.cat__arrow { flex-shrink: 0; width: 16rpx; height: 16rpx; margin-left: 14rpx; color: var(--muted3);
+  border-right: 3rpx solid currentColor; border-bottom: 3rpx solid currentColor;
+  transform: rotate(-45deg); transition: transform .18s; }
+.cat__arrow.on { transform: rotate(45deg); }
+
+/* 语法点行 */
+.tp { padding: 20rpx 0; border-top: 1rpx solid var(--line); }
+.tp--press { opacity: .55; }
+.tp__head { display: flex; align-items: baseline; }
+.tp__t { flex: 1; min-width: 0; font-size: 28rpx; font-weight: 700; color: var(--ink); }
+/* 分类小字（v1.1.78）：原为英音蓝胶囊（--uk-ink/--uk-bg），与全站浅色绿语言不合群（用户真机指出）
+   → 改中性纯文字小字，信息保留、视觉减重 */
+.tp__cat { flex-shrink: 0; margin-left: 14rpx; font-size: 21rpx; color: var(--muted3); }
+/* 可点指引（v1.1.78 加，v1.1.80 换 chevron）：第二层展开行加箭头 —— 展开列表此前无任何可点暗示。
+   与 .cat__arrow 同款同尺寸，容器是 baseline 行 → 元素底边落在文字基线上（x-height 区域内），
+   与「›」原来坐在基线上的视觉位置一致；align-self 不额外调整。 */
+.tp__go { flex-shrink: 0; width: 16rpx; height: 16rpx; margin-left: 16rpx; color: var(--muted3);
+  border-right: 3rpx solid currentColor; border-bottom: 3rpx solid currentColor; transform: rotate(-45deg); }
+.tp__def { margin-top: 6rpx; font-size: 24rpx; color: var(--muted3); line-height: 1.6; }
+
+/* 自绘轻提示（不引组件，分包零依赖） */
+.toast { position: fixed; left: 50%; bottom: 180rpx; transform: translateX(-50%); z-index: 9999;
+  background: var(--card); color: var(--ink); font-size: 26rpx; padding: 18rpx 34rpx; border-radius: 40rpx;
+  box-shadow: 0 8rpx 30rpx rgba(0,0,0,.14); }
+
+@media (min-width:700px) {
+  .sb { height: 38px; border-radius: 19px; margin: 9px 12px 2px; padding: 0 11px; }
+  .sb__input { height: 38px; font-size: 14px; }
+  .tagchip { padding: 5px 11px; border-radius: 13px; font-size: 12.5px; }
+  .cat__name { font-size: 15px; }
+  .tp__t { font-size: 14px; }
+  .cat__n { font-size: 12px; }
+  /* 宽屏（≥700px）rpx 会 1:1 变 px，箭头按半值给 px（16rpx→8px） */
+  .cat__arrow { width: 8px; height: 8px; border-width: 1.5px; margin-left: 7px; }
+  .tp__go { width: 8px; height: 8px; border-width: 1.5px; margin-left: 8px; }
+}

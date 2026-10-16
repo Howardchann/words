@@ -1,5 +1,23 @@
 /* 开溜 · 复习页 */
-.tab-row{display:flex;background:var(--card);margin:20rpx 24rpx;border-radius:44rpx;padding:8rpx}.tab{flex:1;text-align:center;font-size:28rpx;color:var(--muted);padding:14rpx 0;border-radius:40rpx}.tab--on{background:var(--soft);color:var(--green);font-weight:700}.pool-info{padding:18rpx 28rpx}.random-card{text-align:center;padding:50rpx 30rpx}.random-head{display:flex;align-items:baseline;justify-content:center;gap:16rpx}/* 大词行：喇叭盒 font-size 与大词一致，x-height 锚定机制才成立（见 app.wxss .word-speak 注释）；09-26 选 B：系数独立 1.1em、盒（兼热区）56→64rpx */.random-head .word-speak{font-size:56rpx;width:64rpx;height:64rpx}.random-head .spk-ico{width:1.1em;height:1.1em}.random-zh-ex{display:flex;align-items:baseline;justify-content:center;gap:14rpx;margin-top:16rpx;font-size:26rpx;color:var(--muted2)}.random-word{font-size:56rpx;font-weight:800;color:var(--ink);line-height:1.3}.random-word--playing{color:var(--green)}.random-pos{font-size:24rpx;color:var(--green);font-style:italic;margin-top:6rpx}.random-zh{margin-top:30rpx}.random-zh-main{font-size:36rpx;color:var(--ink4)}.random-zh-ex{font-size:26rpx;color:var(--muted2);margin-top:16rpx;display:flex;align-items:baseline;justify-content:center;gap:14rpx}.random-actions{display:flex;align-items:center;justify-content:space-between;margin-top:40rpx}.star-big{display:flex;align-items:center;gap:10rpx;font-size:28rpx;color:var(--ink2);padding:10rpx;transition:color .2s ease}
+.tab-row{display:flex;background:var(--card);margin:20rpx 24rpx;border-radius:44rpx;padding:8rpx}.tab{flex:1;text-align:center;font-size:28rpx;color:var(--muted);padding:14rpx 0;border-radius:40rpx}.tab--on{background:var(--soft);color:var(--green);font-weight:700}.pool-info{padding:18rpx 28rpx}.random-card{text-align:center;padding:50rpx 30rpx}.random-head{display:flex;align-items:baseline;justify-content:center;gap:16rpx}/* 大词行：喇叭盒 font-size 与大词一致，x-height 锚定机制才成立（见 app.wxss .word-speak 注释）；09-26 选 B：系数独立 1.1em、盒（兼热区）56→64rpx */.random-head .word-speak{font-size:56rpx;width:64rpx;height:64rpx}.random-head .spk-ico{width:1.1em;height:1.1em}.random-zh-ex{display:flex;align-items:baseline;justify-content:center;gap:14rpx;margin-top:16rpx;font-size:26rpx;color:var(--muted2)}.random-word{font-size:56rpx;font-weight:800;color:var(--ink);line-height:1.3}.random-word--playing{color:var(--green)}.random-pos{font-size:24rpx;color:var(--green);font-style:italic}.random-zh{margin-top:30rpx}.random-zh-main{font-size:36rpx;color:var(--ink4);margin-top:26rpx}.random-zh-ex{font-size:26rpx;color:var(--muted2);margin-top:16rpx;display:flex;align-items:baseline;justify-content:center;gap:14rpx}.random-card .ipa-row{justify-content:center;margin-top:16rpx}
+.random-ex{position:relative;display:flex;align-items:center;justify-content:center;min-height:56rpx;margin-top:26rpx;font-size:27rpx;color:var(--ink3);text-align:center;padding:0 96rpx}
+/* 例句行「真居中」（2026-10-10 用户真机定稿）：喇叭按钮脱离文档流、绝对定位到行右端，
+   文本不再被它挤偏 → 单行/多行都是真正的水平居中。用 top:50% + 负 margin 做垂直居中，
+   不用 transform（避免与按压态 .speak-hover 的 transform:scale 互相覆盖）。
+   宽度账（右侧，距卡片内容右边界）：留白 padding 96rpx ≥ 喇叭 56rpx + 喇叭右间隙 30rpx + 文本右间隙 10rpx；
+   左侧同取 96rpx，保证居中是对称的。喇叭用 right:30rpx 不贴边。超长例句折行时文本被限制在
+   padding 内（右边界距喇叭左沿 10rpx），最后一行的宽度也算进了喇叭位、不会压到喇叭。 */
+.random-card .random-ex .ex-speak{position:absolute;right:30rpx;top:50%;margin-top:-28rpx;margin-left:0}
+/* 折行保险：文本是 flex 子项，min-width:0 + break-word 保证极端长词也只在 padding 内折行，
+   不会横向溢出压到喇叭（与语法区 .grammar-ex-text 同款机制） */
+.random-ex-text{min-width:0;word-break:break-word;overflow-wrap:break-word}
+.random-card .ex-cn{text-align:center;padding-left:0;margin-top:6rpx}
+/* 释义/例句中文的显隐开关（2026-10-10 用户定稿）：复用今日页那套眼睛图标（闭上=藏起来、睁开=已显示），
+   位置仍在英文例句下方；点击在「显示/隐藏」之间切换，不再有文字与胶囊底。
+   ⚠️ 图标类必须保持「只含 background-image 一条声明」— tools/darkicons.js 的正则依赖它生成暗色变体 */
+.zh-toggle{display:flex;align-items:center;justify-content:center;width:64rpx;height:64rpx;margin:24rpx auto 0}
+.zh-toggle .eye-ico{display:inline-block;width:38rpx;height:38rpx;background-position:center;background-size:contain;background-repeat:no-repeat}
+/* 例句行与中文翻译居中（2026-10-10 用户真机定稿）：卡片内词/词性/释义均居中，左对齐成组反而突兀 */.random-actions{display:flex;align-items:center;justify-content:space-between;margin-top:40rpx}.star-big{display:flex;align-items:center;gap:10rpx;font-size:28rpx;color:var(--ink2);padding:10rpx;transition:color .2s ease}
 .star-big.on{color:#FF8A78;animation:star-pop .35s ease}
 @keyframes star-pop{0%{transform:scale(1)}40%{transform:scale(1.2)}100%{transform:scale(1)}}.empty-text{font-size:26rpx;color:var(--muted);line-height:1.8;margin-bottom:24rpx}/* 删除叉：浅灰圆底按钮形态（配合 wxml 里 hover-dim 按压反馈），不再是裸文字 */
 /* 删除图标（裸一定稿 + 09-26 选 B 放大）：珊瑚线条 ✕ SVG（与爱心 off 描边同语言），30rpx 图标 / 64rpx 热区按磁贴中线居中；
@@ -18,10 +36,14 @@
   .pool-info { padding:9px 14px; }
   .random-card { padding:25px 15px; }
   .random-word { font-size:28px; }
-  .random-pos { font-size:12px; margin-top:3px; }
+  .random-pos { font-size:12px; }
   .random-zh { margin-top:15px; }
   .random-zh-main { font-size:18px; }
   .random-zh-ex { font-size:13px; margin-top:8px; }
+  .random-ex { padding:0 48px; min-height:28px; margin-top:13px; font-size:13.5px; }
+  .random-card .random-ex .ex-speak { margin-top:-14px; right:15px; }
+  .zh-toggle { width:32px; height:32px; margin-top:12px; }
+  .zh-toggle .eye-ico { width:19px; height:19px; }
   .random-actions { margin-top:20px; }
   .star-big { font-size:14px; padding:5px; }
   .empty-text { font-size:13px; margin-bottom:12px; }
@@ -47,3 +69,68 @@
 /* deep-link 盖罩（v1.1.31）：设置页跨栈预切换期间罩住整页，保证切换瞬间的任何合成帧
    都只是纯页面底色而非旧 tab 内容；review.onShow 第一行撤罩。跟随主题变量明暗自适应 */
 .page-veil{position:fixed;left:0;top:0;right:0;bottom:0;background:var(--bg);z-index:999}
+
+/* ── SM-2 四档按钮（v1.1.52）：忘记 / 困难 / 一般 / 简单，副标题是各自的下次间隔 ── */
+.review-result-row--4{display:flex;gap:12rpx;margin-top:30rpx}
+.grade-btn{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;height:96rpx;border-radius:18rpx;border:1rpx solid var(--line);background:var(--soft)}
+/* 按压反馈（v1.1.80）：此前是 hover-class="none" —— 完全没反馈，用户真机"按了不知道按到没"。
+   改回按压，但遵守全站约定「有底色元素只用状态色」：底色加深一档 + 边框转绿，不叠缩放/变淡。 */
+.grade-press{background:var(--press-green);border-color:var(--green)}
+.grade-name{font-size:28rpx;font-weight:700;color:var(--green);line-height:1.25}
+.grade-hint{font-size:20rpx;color:var(--muted2);line-height:1.25}
+.grade-btn--again .grade-name{color:var(--red)}
+.grade-btn--hard .grade-name{color:#B4713A}
+.grade-btn--easy .grade-name{color:var(--green-mid)}
+
+
+/* 其他词形标签（v1.1.80，D）：口径与今日页 .wf-line__t / 工具页 .wf-note__t 一致（绿字 + 点状下划线）。
+   随机/到期卡是居中布局 → 整行居中；磁贴内左对齐（与词条同列）。 */
+.rv-wf { display: flex; flex-wrap: wrap; justify-content: center; margin-top: 12rpx; }
+.rv-wf--tile { justify-content: flex-start; margin-top: 8rpx; }
+.rv-wf__t {
+  display: inline-block;
+  margin: 0 14rpx 6rpx 0;
+  font-size: 22rpx;
+  color: var(--green);
+  border-bottom: 2rpx dotted var(--green);
+  padding-bottom: 2rpx;
+}
+/* 播放态：与今日页 .wf-line__t--on / 工具页 .wf-note__t--on 同款（wfText 独立态防误亮卡片） */
+.rv-wf__t--on { color: var(--green-press); background: var(--press-green); border-bottom-color: var(--green-press); border-radius: 6rpx; }
+
+/* 填空答对后的英文原句 + 喇叭（v1.1.80，C6）。
+   喇叭跟着句子走（不钉到行尾）—— 原句通常很短，钉右会留下大片空白（v1.1.69 音标例词行的教训）。 */
+.cloze-en-row { display: flex; align-items: baseline; justify-content: center; margin-top: 30rpx; }
+.cloze-en-row .cloze-en { margin-top: 0; }
+
+/* ── 中文例句挖空（v1.1.52）── */
+.cloze-card{padding:44rpx 30rpx;text-align:center}
+.cloze-zh{font-size:34rpx;line-height:1.75;color:var(--ink);font-weight:700}
+.cloze-opts{display:flex;flex-wrap:wrap;gap:16rpx;margin-top:36rpx}
+.cloze-opt{flex:1 1 44%;min-width:0;height:88rpx;display:flex;align-items:center;justify-content:center;border-radius:16rpx;border:1rpx solid var(--card-line);background:var(--field);font-size:30rpx;color:var(--ink2)}
+.cloze-opt--ok,.cloze-opt--reveal{border-color:var(--green);background:var(--soft2);color:var(--green);font-weight:700}
+.cloze-opt--bad{border-color:var(--red);background:var(--red-soft);color:var(--red)}
+.cloze-blank{margin-top:16rpx;font-size:30rpx;line-height:1.6;color:var(--muted2)}
+.cloze-en{margin-top:30rpx;font-size:26rpx;color:var(--muted2);line-height:1.6}
+.cloze-foot{margin-top:30rpx}
+.cloze-verdict{font-size:28rpx;margin-bottom:20rpx}
+.cloze-verdict--ok{color:var(--green)}
+.cloze-verdict--bad{color:var(--red)}
+
+@media (min-width:700px){
+  .review-result-row--4{gap:6px;margin-top:15px}
+  .grade-btn{height:48px;border-radius:9px}
+  .grade-name{font-size:14px}
+  .grade-hint{font-size:10px}
+  .cloze-card{padding:22px 15px}
+  .cloze-zh{font-size:17px}
+  .cloze-blank{font-size:15px;margin-top:8px}
+  .cloze-opts{gap:8px;margin-top:18px}
+  .cloze-opt{height:44px;border-radius:8px;font-size:15px}
+  .cloze-en{font-size:13px;margin-top:15px}
+  .cloze-verdict{font-size:14px;margin-bottom:10px}
+  .rv-wf { margin-top:6px; }
+  .rv-wf--tile { margin-top:4px; }
+  .rv-wf__t { font-size:11px; margin:0 7px 3px 0; }
+  .cloze-en-row { margin-top:15px; }
+}
