@@ -4,6 +4,8 @@ const splitSenses = require('../miniprogram/utils/split-senses.js');
 const wordforms = require('../miniprogram/utils/wordforms.js');
 const plan = require('../miniprogram/utils/data.js');
 const phoneticFixes = require('../miniprogram/utils/phonetic-corrections.js');
+const corrections = require('../miniprogram/utils/learning-corrections.js');
+const pendingAudio = require('./audio-pipeline/data/pending-sentence-audio.json');
 const EXPECTED_WORDS = 8115;
 const fail = [];
 function check(ok, message) { if (!ok) fail.push(message); }
@@ -86,6 +88,25 @@ Object.keys(expected).forEach(w => {
 });
 ['abuse','addict','moderate','read','recount','use'].forEach(w =>
   check(!!(runtimeWords.get(w) && runtimeWords.get(w).subSense), w + ' 的副读音未进入共享数据'));
+
+// 每条待重生成任务必须与运行时修正文本/音频编号一致；不得把待处理误标为已完成。
+check(pendingAudio.length === 14, '待重生成例句资产应为 14 条，实际 ' + pendingAudio.length);
+pendingAudio.forEach(task => {
+  const main = runtimeWords.get(task.word);
+  const sub = splitSenses.subFor(task.word);
+  const isSub = !!(sub && sub.e === task.text);
+  const expectedText = isSub ? sub.e : (corrections[task.word] && corrections[task.word].e) || (main && main.e);
+  const expectedAi = isSub ? sub.ai : (main && main.ai);
+  check(!!main, '音频任务词条不存在：' + task.word);
+  check(task.text === expectedText, task.word + ' 音频任务文本与实际学习数据不一致');
+  check(task.ai === expectedAi, task.word + ' 音频任务编号与卡片不一致');
+  const n = String(task.ai).padStart(4, '0');
+  check(task.normal_key === 's/' + Math.floor(task.ai / 1000) + '/' + n + '.mp3', task.word + ' 正常速 key 不正确');
+  check(task.slow_key === 's/' + Math.floor(task.ai / 1000) + '/' + n + 's.mp3', task.word + ' 慢速 key 不正确');
+  check(task.status && task.status.code_routed === true, task.word + ' 代码路由状态未确认');
+  check(task.status && task.status.asset_generated === false && task.status.asset_uploaded === false && task.status.listened_verified === false,
+    task.word + ' 待处理音频状态被错误标记为已完成');
+});
 
 const NO_EXAMPLE_OK = new Set([
   '6-1','12-1','12-5','18-1','18-2','18-4','18-5','24-4','27-1','27-5','30-3','30-5',
