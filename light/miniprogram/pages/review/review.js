@@ -117,9 +117,20 @@ Page({
     // 收藏列表同值守卫（新数组实例同值也会触发重渲染）；ipa/uk/cn 渲染时反查补全（v1.1.50）
     // wf（其他词形，v1.1.80）是派生字段、快照里没有 → 每次渲染都算
     const raw = store.get('starredWords') || [];
-    const starred = raw.map(v => Object.assign({}, v, {
-      ipa: v.ipa || ipaOf(v.w), uk: v.uk || ukOf(v.w), cn: v.cn || cnOf(v.w), wf: wordforms.wfNotes(v.w), subSense: splitSenses.subFor(v.w),
-    }));
+    // 收藏快照可能早于本轮词条修正；展示时始终以词库规范数据为准，保留收藏时间等用户状态字段。
+    if (!this._wordMap) {
+      this._wordMap = {};
+      plan.allWords().forEach(x => { this._wordMap[x.w] = x; });
+    }
+    const starred = raw.map(v => {
+      const canonical = this._wordMap[v.w] || v;
+      return Object.assign({}, v, {
+        p: canonical.p || v.p, m: canonical.m || v.m, e: canonical.e || v.e,
+        ai: canonical.ai || v.ai, ipa: canonical.ipa || ipaOf(v.w), uk: canonical.uk || ukOf(v.w),
+        cn: canonical.cn || cnOf(v.w), wf: wordforms.wfNotes(v.w),
+        subSense: canonical.subSense || splitSenses.subFor(v.w),
+      });
+    });
     const sj = JSON.stringify(starred);
     if (sj !== this._starredJson) { this._starredJson = sj; this.setData({ starred }); }
   },
