@@ -351,15 +351,23 @@ Page({
     if (!c) return;
     if (this.data.wfText) this.setData({ wfText: '', wfKey: '' });   // 词形→词条切换：先收词形态
     const ds = e && e.currentTarget ? e.currentTarget.dataset : {};
-    const target = ds.sense === 'sub' && c.subSense ? c.subSense : c;
+    const isSub = ds.sense === 'sub' && !!c.subSense;
+    const target = isSub ? c.subSense : c;
+    const senseKey = isSub ? 'sub' : 'main';
     const accent = ds.accent || '';
-    if (this.data.playingWord === c.w && (this.data.playingAccent || '') === accent && target === c) {
+    if (this.data.playingWord === c.w &&
+        (this.data.playingAccent || '') === accent &&
+        (this.data.playingSense || 'main') === senseKey) {
       const r = speech.togglePause();
-      this.setData({ playingWord: r === 'paused' ? '' : c.w, playingAccent: r === 'paused' ? '' : accent });
+      this.setData({
+        playingWord: r === 'paused' ? '' : c.w,
+        playingAccent: r === 'paused' ? '' : accent,
+        playingSense: r === 'paused' ? '' : senseKey,
+      });
       return;
     }
     speech.speak(c.w, { ai: target.ai || c.ai, kind: 'w', accent: accent });
-    this.setData({ playingWord: c.w });
+    this.setData({ playingWord: c.w, playingAccent: accent, playingSense: senseKey });
   },
 
   onSpeakExample(e) {
