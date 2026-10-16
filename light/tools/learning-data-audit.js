@@ -56,6 +56,7 @@ grammarTopics.forEach(topic => {
 const runtimeWords = new Map(plan.allWords().map(w => [w.w, w]));
 const expected = {
   isle:['The small isle is home to many birds.','小岛'],
+  aisle:['Please leave the aisle clear.','过道；通道'],
   catching:['Laughter is catching.','有感染力的；容易传染的'],
   reinforced:['The reinforced bridge can carry heavier trucks.','加固的；增强的'],
   bitumen:['Workers used bitumen to seal the roof.','沥青'],
@@ -76,7 +77,11 @@ if (aisle) {
 Object.keys(expected).forEach(w => {
   const actual = runtimeWords.get(w), e = expected[w];
   check(!!actual, '运行时缺少词条 ' + w);
-  if (actual) { check(actual.e === e[0], w + ' 例句修正未生效'); check(actual.m === e[1], w + ' 主卡释义修正未生效：' + actual.m); }
+  if (actual) {
+    check(actual.e === e[0], w + ' 例句修正未生效');
+    check(actual.m === e[1], w + ' 主卡释义修正未生效：' + actual.m);
+    if (w === 'isle' || w === 'aisle') check(actual.ipa === '/aɪl/' && actual.uk === '/aɪl/', w + ' 英美音标应统一为 /aɪl/');
+  }
 });
 ['abuse','addict','moderate','read','recount','use'].forEach(w =>
   check(!!(runtimeWords.get(w) && runtimeWords.get(w).subSense), w + ' 的副读音未进入共享数据'));
