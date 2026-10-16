@@ -25,13 +25,13 @@
     <view class="random-zh-main" wx:if="{{showZh}}">{{currentRandom.m}}</view>
     <view class="sense-sub" wx:if="{{currentRandom.subSense}}">
       <view class="sense-sub__head">另一读音 · <text class="random-pos">{{currentRandom.subSense.p}}</text></view>
-      <view class="random-zh-main">{{currentRandom.subSense.m}}</view>
+      <view class="random-zh-main" wx:if="{{showZh}}">{{currentRandom.subSense.m}}</view>
       <view class="ipa-row">
         <view class="ipa-mod" hover-class="speak-hover" data-sense="sub" data-accent="us" bindtap="onSpeakCurrent"><view class="spk-ico"></view><text class="ipa-txt">{{currentRandom.subSense.ipa}}</text></view>
         <view class="ipa-mod ipa-mod--uk" hover-class="speak-hover" data-sense="sub" data-accent="uk" bindtap="onSpeakCurrent"><view class="spk-ico"></view><text class="ipa-txt">{{currentRandom.subSense.uk}}</text></view>
       </view>
       <view class="random-ex"><text class="random-ex-text">{{currentRandom.subSense.e}}</text><view class="ex-speak" data-sense="sub" hover-class="speak-hover" bindtap="onSpeakExample"><view class="spk-ico"></view></view></view>
-      <view class="ex-cn">{{currentRandom.subSense.cn}}</view>
+      <view class="ex-cn" wx:if="{{showZh}}">{{currentRandom.subSense.cn}}</view>
     </view>
     <view class="random-ex"><text class="random-ex-text"><text wx:if="{{playingWord === currentRandom.e}}" class="kara-lit">{{karaLit}}</text>{{playingWord === currentRandom.e ? karaRest : currentRandom.e}}</text><view class="ex-speak {{playingWord === currentRandom.e ? 'playing' : ''}}" hover-class="speak-hover" hover-stay-time="0" bindtap="onSpeakExample"><view class="spk-ico {{playingWord === currentRandom.e ? 'spk-ico--on' : ''}}"></view></view></view>
     <view class="ex-cn" wx:if="{{showZh && currentRandom.cn}}">{{currentRandom.cn}}</view>
@@ -56,13 +56,13 @@
     <view class="random-zh-main" wx:if="{{showZh}}">{{currentDue.m}}</view>
     <view class="sense-sub" wx:if="{{currentDue.subSense}}">
       <view class="sense-sub__head">另一读音 · <text class="random-pos">{{currentDue.subSense.p}}</text></view>
-      <view class="random-zh-main">{{currentDue.subSense.m}}</view>
+      <view class="random-zh-main" wx:if="{{showZh}}">{{currentDue.subSense.m}}</view>
       <view class="ipa-row">
         <view class="ipa-mod" hover-class="speak-hover" data-sense="sub" data-accent="us" bindtap="onSpeakCurrent"><view class="spk-ico"></view><text class="ipa-txt">{{currentDue.subSense.ipa}}</text></view>
         <view class="ipa-mod ipa-mod--uk" hover-class="speak-hover" data-sense="sub" data-accent="uk" bindtap="onSpeakCurrent"><view class="spk-ico"></view><text class="ipa-txt">{{currentDue.subSense.uk}}</text></view>
       </view>
       <view class="random-ex"><text class="random-ex-text">{{currentDue.subSense.e}}</text><view class="ex-speak" data-sense="sub" hover-class="speak-hover" bindtap="onSpeakExample"><view class="spk-ico"></view></view></view>
-      <view class="ex-cn">{{currentDue.subSense.cn}}</view>
+      <view class="ex-cn" wx:if="{{showZh}}">{{currentDue.subSense.cn}}</view>
     </view>
     <view class="random-ex"><text class="random-ex-text"><text wx:if="{{playingWord === currentDue.e}}" class="kara-lit">{{karaLit}}</text>{{playingWord === currentDue.e ? karaRest : currentDue.e}}</text><view class="ex-speak {{playingWord === currentDue.e ? 'playing' : ''}}" hover-class="speak-hover" hover-stay-time="0" bindtap="onSpeakExample"><view class="spk-ico {{playingWord === currentDue.e ? 'spk-ico--on' : ''}}"></view></view></view>
     <view class="ex-cn" wx:if="{{showZh && currentDue.cn}}">{{currentDue.cn}}</view>
