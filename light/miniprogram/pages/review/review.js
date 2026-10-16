@@ -191,7 +191,7 @@ Page({
       const item = pool[Math.floor(Math.random() * pool.length)];
       const next = Object.assign({}, item, {
         ipa: item.ipa || ipaOf(item.w), uk: item.uk || ukOf(item.w), cn: item.cn || cnOf(item.w),
-        starred: store.isStarred(item.w), wf: wordforms.wfNotes(item.w),
+        starred: store.isStarred(item.w), wf: wordforms.wfNotes(item.w), subSense: item.subSense || splitSenses.subFor(item.w),
       });
       this.setData({ currentDue: next, showZh: false, dueHint: this._hints(next.w), wfText: '', wfKey: '' }); // v1.1.38：下一词同样不自动朗读
       this._prefetchCard(next);
