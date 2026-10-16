@@ -22,12 +22,10 @@
 - 本轮只更新代码文本与路由，不生成、不上传、不声称已听核音频。`asset-generated` / `asset-uploaded` / `listened-verified` 均待负责音频的 AI 完成并提供证据。
 - `utils/words.js` 的历史生成源与 `utils/phonetic.js` 的历史生成源未包含在仓库中：词条正文由 `utils/learning-corrections.js` 运行时覆盖层修正，音标例词由 `utils/phonetic-corrections.js` 覆盖；恢复源脚本后必须回填修正。`words.js` 首行注释仍遗留「8000 词表」，但运行时数据与审计均为 8115 条；本次未整文件重写 1.17MB 生成文件。
 
-### 验证
+### 验证状态（需在本地工作区复跑）
 
-- `node tools/verify-structure.js`：全部通过（31/31 JS 语法、页面/组件/WXML/WXSS 结构）。
-- `node tools/cloudsync-test/run_tests.js`：75/75 通过。
-- `node tools/audio-pipeline/selftest.js`：全部通过，6 份输入数据、7 个内核文件与云端 manifest 可见。
-- `node tools/learning-data-audit.js`：全部通过；词表 8115 条、副卡 46 个唯一 ID、语法 12 类 / 71 点、策略/复盘空例句 31 天。
+- **本轮候选分支的自动化脚本尚未在此执行环境实际运行**：GitHub 连接器可以读写仓库文件，但不能直接在远程分支启动 Node.js 或微信开发者工具。因此，不把既有分支/历史版本曾有的测试结果冒充为本轮通过。
+- 待在本地检出 `audit/light-learning-data-2026-10-17` 后运行：`node tools/verify-structure.js`、`node tools/cloudsync-test/run_tests.js`、`node tools/audio-pipeline/selftest.js`、`node tools/learning-data-audit.js`。逐项记录真实退出码与输出，再决定是否合并。
 - 尚未执行微信开发者工具真机/预览验收；正式预览/上传前必须在真实 Git 工作区运行 `node tools/stamp-build.js` 重新生成 `utils/build-info.js`。
 
 ## 2026-10-16 · B 档例句修复 + addict 副卡换官方音频 + 缓存 au6（v1.1.103，未上传）
