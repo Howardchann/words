@@ -15,7 +15,7 @@
 
 具体任务见 [\`data/pending-sentence-audio.json\`](./data/pending-sentence-audio.json)。每条只需重生成美音例句桶 \`s/{ai//1000}/{ai:04d}.mp3\` 与慢速 \`.../{ai:04d}s.mp3\`；词卡单词读音文件无需因例句改文而重生成。
 
-- 当前 13 条任务：\`code-routed\` 已完成（文本与 \`ai\` 号已记录）；\`asset-generated\` / \`asset-uploaded\` / \`listened-verified\` **待负责音频的 AI 执行**。
+- 当前 14 条任务：\`code-routed\` 已完成（文本与 \`ai\` 号已记录）；\`asset-generated\` / \`asset-uploaded\` / \`listened-verified\` **待负责音频的 AI 执行**。
 - 不要在没有听核的情况下把状态标为 \`listened-verified\`。
 - 若后续需补齐单词的英音/美音，另建单词音频任务；不要把例句桶 \`s/\` 当成单词桶 \`w/\` 或 \`wuk/\`。
 
