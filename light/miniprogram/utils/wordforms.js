@@ -30,7 +30,7 @@ var IRREG_V = {
   understand: ['understood'], wake: ['woke/waked', 'woken'], wear: ['wore', 'worn'],
   win: ['won'], write: ['wrote', 'written'],
   // 情态动词（词形表关系；语义独立的词条由功能词包补入）
-  can: ['could'], will: ['would'], shall: ['should'], may: ['might'], must: ['must']
+  can: ['could'], will: ['would'], shall: ['should'], may: ['might']
 };
 
 // 不规则名词复数：复数 -> 原形（存反方向，词条标注时取原形反查）
@@ -142,7 +142,12 @@ function noteFor(base) {
   var tags = FORMS[base] || [];
   var out = [];
   tags.forEach(function (t) {
-    t.form.split('/').forEach(function (f) { out.push({ label: t.label, form: f }); });
+    t.form.split('/').forEach(function (f) {
+      // 相同拼写的词形不作为可点读的变体重复展示：read 的过去式拼写相同但读音不同，
+      // 单独播放字符串 read 会合成常见原形读音，可能误教；must 不属于普通过去式映射。
+      if (f === base) return;
+      out.push({ label: t.label, form: f });
+    });
   });
   return out;
 }
@@ -165,7 +170,9 @@ function wfNotes(w) {
   var out = noteFor(w);
   if (out.length) return out;
   var hit = VARIANTS[w];
-  return hit ? [{ label: '原形', form: hit.base }] : [];
+  // read/cut/cost 等原形与变化形式拼写相同；不把它们显示成重复标签。
+  // read 的过去式虽同拼写但读音不同，需等到有可靠的读音专用呈现方式后再单独展示。
+  return hit && hit.base !== w ? [{ label: '原形', form: hit.base }] : [];
 }
 
 module.exports = { lemma: lemma, noteFor: noteFor, wfNotes: wfNotes, allForms: allForms, LBL: LBL };
