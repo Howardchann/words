@@ -67,6 +67,12 @@ const expected = {
   recount:['She recounted what happened during the trip.','详述；叙述'],
   some:['Some of the best players in the world train here.','一些；一部分']
 };
+const aisle = runtimeWords.get('aisle');
+check(!!aisle, '运行时缺少 aisle 词条');
+if (aisle) {
+  check(aisle.e === 'I entered the aisle and saw her.', 'aisle 例句意外变化');
+  check(aisle.m === '走廊；侧廊', 'aisle 释义意外变化：' + aisle.m);
+}
 Object.keys(expected).forEach(w => {
   const actual = runtimeWords.get(w), e = expected[w];
   check(!!actual, '运行时缺少词条 ' + w);
