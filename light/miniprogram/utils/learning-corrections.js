@@ -5,7 +5,17 @@ module.exports = {
     "p": "n.",
     "m": "小岛",
     "e": "The small isle is home to many birds.",
+    "ipa": "/aɪl/",
+    "uk": "/aɪl/",
     "cn": "这座小岛是许多鸟类的栖息地。"
+  },
+  "aisle": {
+    "p": "n.",
+    "m": "过道；通道",
+    "e": "Please leave the aisle clear.",
+    "ipa": "/aɪl/",
+    "uk": "/aɪl/",
+    "cn": "请保持过道畅通。"
   },
   "catching": {
     "m": "有感染力的；容易传染的",
@@ -53,7 +63,7 @@ module.exports = {
     "uk": "/rɪˈkaʊnt/"
   },
   "tear": {
-    "m": "泪水；眼泪；撕裂",
+    "m": "泪水；眼泪",
     "cn": "这件事最后肯定会以眼泪收场。"
   },
   "use": {
