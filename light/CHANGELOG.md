@@ -2,6 +2,38 @@
 
 > 本实例由 cloud 实例 v1.1.38（仓库提交 `dbe76dc` 的 cloud/ 树）派生，**共享全部产品与机制历史**——完整变更史见 `../cloud/CHANGELOG.md`，此处只记录本实例自身的差异与后续变更。
 
+## 2026-10-16 · B 档例句修复 + addict 副卡换官方音频 + 缓存 au6（v1.1.103，未上传）
+
+> **触发**：10 月需求盘点 B 组三项用户拍板——B 档 7 词例句修复；take/taken 变体核对（结论：机制已存在，无需改）；addict 副卡告别 TTS 例外。
+
+### ① B 档 7 词例句修复（`words.js`，只改字段内容，8115 条不变）
+
+| 词 | ai | 原句（不地道） | 新句 |
+|---|---|---|---|
+| child | 39 | The children are in need of you. | Every child needs love and care. |
+| seem | 72 | It just seems like that to you. | You seem very happy today. |
+| case | 86 | Is it the case for you? | Is that really the case? |
+| far | 137 | This is far the best of all. | This is by far the best of all. |
+| face | 196 | You have a face of a child. | You have the face of a child. |
+| second | 236 | The second is the unit of time. | Please wait a second. |
+| eagle | 7940 | The eagle is the king of the air. | The eagle flew high above the mountains. |
+
+- 中文例句同步更新 7 条（face 中例本就通顺，不动）。
+- ⚠️ `second` 的新句带 ai 锚点替换：原句「The second is the unit of time.」在表内出现 **2 次**（`unit`(719) 复用同一句——对 unit 语义成立，保留未动）。
+- 例句音频重生成 14 个（Ava +0%/-30%，44100Hz/96kbps）并上传：`s/0/0039|0072|0086|0137|0196|0236(mp3/s)` + `s/7/7940(mp3/s)`，云端 key 逐字节核对一致。
+
+### ② addict 副卡（8201）换权威音频
+
+- **复查推翻旧结论**：「全网无 /əˈdɪkt/ 公开音频」有误——**Merriam-Webster 有官方真人动词音频**（addict01.mp3，0.55s）。剑桥确认只有名词块（2026-10-16 抓原始 HTML 复核）；朗文/柯林斯反爬拦截。
+- 美音 `w/8/8201(mp3/s)`：MW 官方音频（慢速 = atempo 0.78，同剑桥口径）。
+- 英音 `wuk/8/8201(mp3/s)`：MW 无英音 → Sonia 载体短语 "to addict" + WordBoundary 裁词（v1.1.99 新口径，前置余量 ≤10ms；原 v1.1.98 旧口径版会吃进 "to" 尾音）。
+- **裁词/逼音手法的例外清单就此清零**：全表 8245 个编号不再有 TTS 裁词残留（addict 英音是唯一保留的 Sonia 裁词卡，因官方源客观不存在）。
+
+### ③ 缓存版本化
+
+- `speech.js` CACHE_ROOT **au5 → au6**（旧链 au5/au4/au3 启动即清）：同路径同名替换了 14 例句 + 4 单词音频，不换根老设备会继续播旧缓存。
+- 踩坑记录：`tcb storage upload` 把 synth 的 raw 中间文件（`*.mp3.raw.mp3`）一并铺上云 → 已删 16 个（s/0 ×12、s/7 ×2、wuk/8 ×2）。后续上传前先清 raw 或改输出目录隔离。
+
 ## 2026-10-15 · 剑桥音频选块修正 + 量词 + 抓取截断修复（v1.1.102，已上传体验版）
 
 > **触发**：v1.1.101 验收反馈「abuse 名词/动词音还是不对，美音反倒用重音区分」。「abuse 音标维度本来就对」的旧结论让我回头审 v1.1.101 的**选块脚本**——查出**系统性 bug**：v1.1.101 上传的 104 卡里有 **11 张拿到了错误词性的录音**（abuse 名词卡播的是动词音）。
