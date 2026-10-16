@@ -28,7 +28,7 @@
 ### 验证状态（需在本地工作区复跑）
 
 - **本轮候选分支的自动化脚本尚未在此执行环境实际运行**：GitHub 连接器可以读写仓库文件，但不能直接在远程分支启动 Node.js 或微信开发者工具。因此，不把既有分支/历史版本曾有的测试结果冒充为本轮通过。
-- 待在本地检出 `audit/light-learning-data-2026-10-17` 后运行：`node tools/verify-structure.js`、`node tools/cloudsync-test/run_tests.js`、`node tools/audio-pipeline/selftest.js`、`node tools/learning-data-audit.js`。逐项记录真实退出码与输出，再决定是否合并。
+- 待在本地检出 `audit/light-learning-data-2026-10-17` 后，先进入 `light/` 目录，再运行：`node tools/verify-structure.js`、`node tools/cloudsync-test/run_tests.js`、`node tools/audio-pipeline/selftest.js`、`node tools/learning-data-audit.js`。逐项记录真实退出码与输出，再决定是否合并。
 - 尚未执行微信开发者工具真机/预览验收；正式预览/上传前必须在真实 Git 工作区运行 `node tools/stamp-build.js` 重新生成 `utils/build-info.js`。
 
 ## 2026-10-16 · B 档例句修复 + addict 副卡换官方音频 + 缓存 au6（v1.1.103，未上传）
