@@ -74,6 +74,12 @@ node tools/audio-pipeline/mk-manifest.js
 
 ---
 
+## 音频核验（2026-10-17 起）
+
+- 核验状态、流程和本轮待重生成例句清单：[`AUDIO-AUDIT.md`](./AUDIO-AUDIT.md)。
+- 机器可读任务：[`data/pending-sentence-audio.json`](./data/pending-sentence-audio.json)。
+- 例句改文后必须重生成对应 `s/` 正常速与慢速文件；本仓库不代替真实听核，生成、上传和听核状态须分别记录。
+
 ## 3. 脚本清单
 
 | 文件 | 作用 | 用法 |
