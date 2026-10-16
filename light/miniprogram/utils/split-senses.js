@@ -329,10 +329,10 @@ module.exports.expand = expand;
 
 // 供搜索与复习页读取同一份副卡数据，避免只有今日页知道多义词的另一读音。
 module.exports.subFor = function (word) {
-  const item = MAP[String(word || '').toLowerCase()];
+  const item = module.exports[String(word || '').toLowerCase()];
   return item && item.sub ? item.sub : null;
 };
 module.exports.mainFor = function (word) {
-  const item = MAP[String(word || '').toLowerCase()];
+  const item = module.exports[String(word || '').toLowerCase()];
   return item ? { p: item.p1 || '', m: item.m1 || '' } : null;
 };
