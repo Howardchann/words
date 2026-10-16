@@ -52,6 +52,16 @@
 - 文档同步：本实例 `README.md` 目录树 + 存储键说明、`tools/backup-test/备份导入导出测试清单.md`（3 处）；`tools/cloudsync-test/run_tests.js` 的 `app:'ielts-365'` **故意保留**作为兼容分支回归用例。
 - 验证：本实例 `store.js` / `tools.js` 与 light 改动后**逐字节相同**；`verify-structure.js` 六项全过；`cloudsync-test/run_tests.js` **75/75**；键名迁移专项 12 项全过。
 
+### 同日追加 ③ · 音频生成管线入库（仅存在于 light，本实例不复制）
+
+**决策依据（用户 2026-10-16）**：所有文件都放 GitHub，换机 clone 后可直接调试。音频生成管线原先活在开发机**仓库外**（`D:\idea\_ipa_build`），换机即失传。
+
+- 管线已入库 **`../light/tools/audio-pipeline/`**：13 脚本 + 公共模块 `_env` + 6 份输入数据 + 云端清单 + README，全部路径改为脚本相对定位，**零硬编码**。
+- **本实例（与 cloud）不复制该目录**：管线产物是三实例共用的云端音频桶，脚本只需一份；复制反而在同步时产生无意义差异。
+- 云端清单 `cloud-manifest.json`（`../light/tools/audio-pipeline/`）记录本实例音频所依赖的桶现状：`w` 16322 / `wuk` 16322 / `s` 16322 / `g` 2768 = **51734 个 / 1032.9MB**，词卡 8161 × 6 维度零缺口。
+- `.gitignore` 本实例追加 `tools/audio-pipeline/_work/`（与 light/dark 保持一致；本实例暂无该目录，规则空转无害）。
+- 提交 `cd5d5e6`；详见 `../light/CHANGELOG.md` 2026-10-16 ⑦ 节。
+
 ## 2026-09-27 · 首点闪白定性更新（light 录屏结论同步，文档修订）
 
 - light 实例 v1.1.39 真机录屏逐帧定性「首点 4 tab 闪白」：**与色系无关**，冷启动（后台无小程序）后首访各 tab 即闪，1~2 帧容器底色帧（webview 冷创建首绘帧）；首页不闪；

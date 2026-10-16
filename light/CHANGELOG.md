@@ -76,6 +76,23 @@ light v1.1.103 功能内核已整树同步到 cloud/dark（63 版差距一次性
 - `original/` 不动（历史快照，本就含旧键名，保持原貌）。
 - **验证**：三实例 `store.js` / `tools.js` 改动后仍**逐字节相同**；`verify-structure.js` 三实例六项全过；`cloudsync-test/run_tests.js` 三实例 **75/75**；另跑键名迁移专项 12 项（旧键读→迁移写新键→旧键保留→旧 tag 导入→新 tag 导入→无关 tag 拒绝→导出带新 tag）三实例全过。
 
+### ⑦ 音频生成管线入库（同日三轮追加，未上传）
+
+> **决策依据（用户 2026-10-16）**：「所有文件都放 GitHub，换台新电脑 clone 下来就能像旧电脑一样调试」。管线原先只活在开发机 `D:\idea\_ipa_build`（**仓库外**）——换机后拿得到小程序、拿不到「怎么造音频」，这正是该诉求真正断掉的地方。
+
+- **新建 `tools/audio-pipeline/`**（本实例独有，cloud/dark 不复制 —— 管线产物是三实例共用的云端桶）：
+  - `_env.js` / `_env.py`：**路径解析唯一出口**（`HERE` / `WORK` / `MP` / `FFMPEG`），全部脚本从这里取路径。
+  - **13 个脚本零硬编码**：原 `D:/idea/_ipa_build/**`、`D:/idea/words/light/miniprogram/**`、`D:/idea/ielts-365/light/...`（旧仓库名残留，一并根治）、`C:/.../ffmpeg.exe`、edge-tts site-packages 路径全部改写；支持 `AUDIO_WORK` / `FFMPEG` / `TCB_ENV` / `TCB_CLI` 覆盖。
+  - Cambridge 线：`cam-fetch` / `cam-pick` / `cam-rebuild` / `cam-ipa-audit`；TTS 线：`gen-g-audio` / `gen-fw-audio` / `gen-uk` / `gen-uk-slow` / `regen-us` / `gen-new-audio` / `gen-special-fix`（单点修正模板）/ `patch-edge-tts-403`。
+  - 工具：`selftest.js`（依赖与路径自检）、`mk-manifest.js`（拉云端清单 + 缺口分析）。
+  - `data/`：剑桥抓取存档 141KB · 英音词表 203KB · 功能词表 · 任务源等 **6 份输入数据**。
+  - `README.md`：桶结构 / 音源口径 / 脚本清单 / 换机三步 / **已知坑 11 条**。
+- **云端清单入库** `cloud-manifest.json`（1.05MB / 51734 个 key）：`*.mp3` 本体约 1.03GB 永远不进 git，改用这份纯文本清单让「云端有什么」离线可查。
+- **云端现状（本次核验）**：`w` 16322 个 / 249MB · `wuk` 16322 / 144.6MB · `s` 16322 / 540MB · `g` 2768 / 99.3MB = **51734 个 / 1032.9MB**；词卡 **8161 个 ai 号 × 6 维度零缺口**。⚠️ 容量已占约 1.03GB，新增音频前先确认额度。
+- `.gitignore` 三实例追加 `tools/audio-pipeline/_work/`（中间产物，可随时删）。
+- **验证**：13 脚本 + `_env` 语法全过（py `ast.parse` / js `new Function`）；残留旧路径扫描为 0；`selftest.js` 全绿（data 6/6 · 内核 7/7）；`mk-manifest.js --from-dir` 复现结果与原始清单逐字节一致。
+- 提交 `cd5d5e6`（28 文件）。
+
 ## 2026-10-15 · 剑桥音频选块修正 + 量词 + 抓取截断修复（v1.1.102，已上传体验版）
 
 > **触发**：v1.1.101 验收反馈「abuse 名词/动词音还是不对，美音反倒用重音区分」。「abuse 音标维度本来就对」的旧结论让我回头审 v1.1.101 的**选块脚本**——查出**系统性 bug**：v1.1.101 上传的 104 卡里有 **11 张拿到了错误词性的录音**（abuse 名词卡播的是动词音）。

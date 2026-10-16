@@ -6,6 +6,15 @@
 
 > **本文件只描述 light 实例自身的现状与边界**。cloud 实例（三色调整完整版）的完整决策史、机制细节、实验记录见 `../cloud/AI-CONTEXT.md`——两实例共享全部底层机制，此处不重复。
 
+## 音频生成管线（`tools/audio-pipeline/`，2026-10-16 入库）
+
+云端四个音频桶（`w/` 美音单词 · `wuk/` 英音单词 · `s/` 美音例句 · `g/` 语法例句与音标例词）的生成脚本、输入数据与云端清单都在 `tools/audio-pipeline/`，**只此一份，cloud/dark 不复制**。
+
+- 上手：`node tools/audio-pipeline/selftest.js`（依赖与路径自检）→ 用法与口径见该目录 `README.md`。
+- 清单：`tools/audio-pipeline/cloud-manifest.json`（51734 个 key / 1.05MB）—— mp3 本体约 1.03GB 不进 git，此清单供离线对照与缺口审计。
+- ⚠️ 管线**必须在沙箱外运行**（联网 + edge-tts 直连）；`*.mp3` 与 `_work/` 均已被 gitignore。
+- ⚠️ 换音源覆盖同名文件时，**必须同步升 `utils/speech.js` 的 `CACHE_ROOT`**，否则老设备继续播旧缓存。
+
 ## 本实例定位（2026-09-27 用户拍板）
 
 **本实例为仓库主项与唯一上线形态**：深浅模式下的闪白/残影在保留三色调整的 cloud 实例中无法根治，故功能开发与上线以后都从本实例出，直到主题闪白问题找到根治方案。共用逻辑（store/speech/页面结构）的变更需同步回 `cloud/` 与 `dark/`。

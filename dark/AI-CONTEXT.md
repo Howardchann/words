@@ -4,6 +4,9 @@
 > 8115 词表 · 剑桥官方音频管线 · 工具页（学习记录/搜索/音标区/语法区）· `pkg-study` 分包 · dock 栏 · 缓存 `au6` · 4 tab 英文化 · `pages/weeks` 移除 · `audio-url` 的 `PATH_RE` 补 `wuk/`。外观层**定死深色**，与 light 的差异仅 `app.json` 与 `utils/theme.js` 两个文件。
 > 详见 [CHANGELOG.md](./CHANGELOG.md)。
 
+> **音频生成管线不在本实例**：见 `../light/tools/audio-pipeline/`（2026-10-16 入库，仅 light 一份；cloud/dark 不复制）。
+
+
 > **本文件只描述 dark 实例自身的现状与边界**。cloud 实例（三色调整完整版）的完整决策史、机制细节、实验记录见 `../cloud/AI-CONTEXT.md`——两实例共享全部底层机制，此处不重复。
 
 ## 本实例是什么
