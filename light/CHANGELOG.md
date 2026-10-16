@@ -11,6 +11,7 @@
 - 词表运行时仍为 **8115 条**，不增删行；通过 `utils/learning-corrections.js` 修正 isle/aisle 混淆、catching、reinforced、bitumen、oblong、conservatory、expedient、moderate、sow、recount、tear、use、go、make、one、think、some 等词条的例句、词性或释义。
 - isle/aisle 的例句与英美音标统一；复习页抽到主卡时会预取副卡单词及例句音频，减少副读音首次点击的等待。
 - 修正 `what/where/when/why/which` 的美音音标为常见 General American `/w/` 读法；英音字段不变。对应的功能词输入清单同步更新；仍需后续对照真实云端音频核听。
+- 在音标工具页明确「词卡显示独立读词形式、例句自然语流可能弱读」的规则，避免把 to/of/and 等句中弱读误认为音标与音频不一致。
 - `split-senses.js` 的编号说明更新为 8200–8245；修正 addict / alternate 副卡例句，并暴露同一副卡查询接口，今日、搜索、复习页复用统一的主/副义数据。
 - `wordforms.js` 不再把 read/cut/cost 等同拼写形式显示成可点读的重复标签；`must` 不应被标成普通过去式。read 的过去式与原形拼写相同但读音不同，待有读音专用呈现方式后再单独教。
 - 音标教学 `/r/` 示例换为 `right`，`/w/` 示例避免把 `qu` 整体高亮；通过 `phonetic-corrections.js` 覆盖例词，页面明确音标表以英式 RP 为参照、例词播放口音随当前设置变化。
