@@ -18,7 +18,7 @@
 
 ### 音频交接状态（尚未完成）
 
-- 新增 `tools/audio-pipeline/AUDIO-AUDIT.md` 与 `data/pending-sentence-audio.json`，列出 13 条因例句改文需要重生成的 `s/` 正常速/慢速资产。
+- 新增 `tools/audio-pipeline/AUDIO-AUDIT.md` 与 `data/pending-sentence-audio.json`，列出 14 条因例句改文需要重生成的 `s/` 正常速/慢速资产。
 - 本轮只更新代码文本与路由，不生成、不上传、不声称已听核音频。`asset-generated` / `asset-uploaded` / `listened-verified` 均待负责音频的 AI 完成并提供证据。
 - `utils/words.js` 的历史生成源与 `utils/phonetic.js` 的历史生成源未包含在仓库中：词条正文由 `utils/learning-corrections.js` 运行时覆盖层修正，音标例词由 `utils/phonetic-corrections.js` 覆盖；恢复源脚本后必须回填修正。`words.js` 首行注释仍遗留「8000 词表」，但运行时数据与审计均为 8115 条；本次未整文件重写 1.17MB 生成文件。
 
