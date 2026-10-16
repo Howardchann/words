@@ -4,6 +4,7 @@ const store = require('../../utils/store.js');
 const theme = require('../../utils/theme.js');
 const speech = require('../../utils/speech.js');
 const wordforms = require('../../utils/wordforms.js');
+const splitSenses = require('../../utils/split-senses.js');
 
 // 收藏词在 store 里是快照（v1.1.44 之前的存量没有 ipa 字段）→ 渲染前按词反查词表补全。
 let _ipaMap = null;
@@ -117,7 +118,7 @@ Page({
     // wf（其他词形，v1.1.80）是派生字段、快照里没有 → 每次渲染都算
     const raw = store.get('starredWords') || [];
     const starred = raw.map(v => Object.assign({}, v, {
-      ipa: v.ipa || ipaOf(v.w), uk: v.uk || ukOf(v.w), cn: v.cn || cnOf(v.w), wf: wordforms.wfNotes(v.w),
+      ipa: v.ipa || ipaOf(v.w), uk: v.uk || ukOf(v.w), cn: v.cn || cnOf(v.w), wf: wordforms.wfNotes(v.w), subSense: splitSenses.subFor(v.w),
     }));
     const sj = JSON.stringify(starred);
     if (sj !== this._starredJson) { this._starredJson = sj; this.setData({ starred }); }
@@ -169,7 +170,7 @@ Page({
     // 此前不反查，导致美音胶囊无字、英音胶囊整块不渲染（真机反馈 were 只有一个读音）。此处与收藏列表同口径补齐。
     const c = Object.assign({}, item, {
       ipa: item.ipa || ipaOf(item.w), uk: item.uk || ukOf(item.w), cn: item.cn || cnOf(item.w),
-      starred: store.isStarred(item.w), wf: wordforms.wfNotes(item.w),
+      starred: store.isStarred(item.w), wf: wordforms.wfNotes(item.w), subSense: item.subSense || splitSenses.subFor(item.w),
     });
     this.setData({ currentDue: c, showZh: false, dueHint: this._hints(item.w), wfText: '', wfKey: '' });
     this._prefetchCard(c);   // v1.1.80：抽到词就把音频备好，第一次点即出声
@@ -342,21 +343,25 @@ Page({
     const c = this._cur();
     if (!c) return;
     if (this.data.wfText) this.setData({ wfText: '', wfKey: '' });   // 词形→词条切换：先收词形态
-    const accent = (e && e.currentTarget && e.currentTarget.dataset.accent) || '';
-    if (this.data.playingWord === c.w && (this.data.playingAccent || '') === accent) {
+    const ds = e && e.currentTarget ? e.currentTarget.dataset : {};
+    const target = ds.sense === 'sub' && c.subSense ? c.subSense : c;
+    const accent = ds.accent || '';
+    if (this.data.playingWord === c.w && (this.data.playingAccent || '') === accent && target === c) {
       const r = speech.togglePause();
       this.setData({ playingWord: r === 'paused' ? '' : c.w, playingAccent: r === 'paused' ? '' : accent });
       return;
     }
-    speech.speak(c.w, { ai: c.ai, kind: 'w', accent: accent });
+    speech.speak(c.w, { ai: target.ai || c.ai, kind: 'w', accent: accent });
     this.setData({ playingWord: c.w });
   },
 
-  onSpeakExample() {
+  onSpeakExample(e) {
     const c = this._cur();
-    if (!c || !c.e) return;
+    const ds = e && e.currentTarget ? e.currentTarget.dataset : {};
+    const target = ds.sense === 'sub' && c && c.subSense ? c.subSense : c;
+    if (!target || !target.e) return;
     if (this.data.wfText) this.setData({ wfText: '', wfKey: '' });
-    speech.speak(c.e, { ai: c.ai, kind: 's' });
+    speech.speak(target.e, { ai: target.ai || c.ai, kind: 's' });
   },
 
   onStarCurrent() {
@@ -397,7 +402,6 @@ Page({
     speech.speak(w, { ai: this._aiOf(it), kind: 'w', accent: accent });
     this.setData({ playingWord: w });
   },
-
   // 重点词例句朗读（v1.1.40）：对齐今日页——点例句或右侧喇叭都可播，kind:'s' 命中例句预生成音频
   onSpeakStarredEx(e) {
     const w = e.currentTarget.dataset.word;
