@@ -86,6 +86,16 @@
                 hover-class="speak-hover" hover-stay-time="120" hover-stop-propagation="{{true}}"
                 data-text="{{item.e}}" data-ai="{{item.ai}}" data-kind="s" catchtap="onSpeak"><view class="spk-ico {{playingText === item.e ? 'spk-ico--on' : ''}}"></view></view>
         </view>
+        <view class="sense-sub" wx:if="{{item.subSense}}">
+          <view class="sense-sub__head">另一读音 · <text class="word-pos">{{item.subSense.p}}</text></view>
+          <view class="word-zh">{{item.subSense.m}}</view>
+          <view class="ipa-row">
+            <view class="ipa-mod" hover-class="speak-hover" data-text="{{item.w}}" data-ai="{{item.subSense.ai}}" data-kind="w" data-accent="us" catchtap="onSpeak"><view class="spk-ico"></view><text class="ipa-txt">{{item.subSense.ipa}}</text></view>
+            <view class="ipa-mod ipa-mod--uk" hover-class="speak-hover" data-text="{{item.w}}" data-ai="{{item.subSense.ai}}" data-kind="w" data-accent="uk" catchtap="onSpeak"><view class="spk-ico"></view><text class="ipa-txt">{{item.subSense.uk}}</text></view>
+          </view>
+          <view class="word-example-row"><view class="word-example">{{item.subSense.e}}</view><view class="ex-speak" data-text="{{item.subSense.e}}" data-ai="{{item.subSense.ai}}" data-kind="s" catchtap="onSpeak"><view class="spk-ico"></view></view></view>
+          <view class="ex-cn">{{item.subSense.cn}}</view>
+        </view>
         <view class="tk-day">第 {{item.day}} 天<text class="tk-day__go">{{jumpingW === item.w ? ' 跳转中…' : ' ›'}}</text></view>
       </view>
     </view>
@@ -103,6 +113,7 @@
      说明文字也移到最前，不再吊在最底。 -->
 <view class="card">
   <view class="section-label">音标</view>
+  <view class="ph-note">本表以英式 RP 音标体系为参照；例词播放口音跟随当前英美音设置。英美差异明显的音，请切换英音核对符号与发音。</view>
 
   <!-- 大类：元音 / 辅音 -->
   <view class="ph-class">
