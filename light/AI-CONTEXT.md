@@ -16,7 +16,7 @@
 - ⚠️ 管线**必须在沙箱外运行**（联网 + edge-tts 直连）；`*.mp3` 与 `_work/` 均已被 gitignore。
 - ⚠️ 换音源覆盖同名文件时，**必须同步升 `utils/speech.js` 的 `CACHE_ROOT`**，否则老设备继续播旧缓存。
 - 本轮学习数据审查：词表 **8115 条**；多义词副卡编号 **8200–8245（46 个）**。机器审计入口：`node tools/learning-data-audit.js`；策略/复盘日的空例句有显式豁免名单。
-- 音频核验状态与待重生成任务见 `tools/audio-pipeline/AUDIO-AUDIT.md` 与 `data/pending-sentence-audio.json`。本轮**没有生成、上传或听核音频**；13 条例句资产需由负责音频的 AI 重生成并上传。
+- 音频核验状态与待重生成任务见 `tools/audio-pipeline/AUDIO-AUDIT.md` 与 `data/pending-sentence-audio.json`。本轮**没有生成、上传或听核音频**；14 条例句资产需由负责音频的 AI 重生成并上传。
 - `utils/words.js` 的历史生成源 `_wordbank/generate_course_files78.py` 与 `utils/phonetic.js` 的历史生成源 `_ipa_build/build_study_data.js` 未包含在当前仓库中。词条正文通过 `utils/learning-corrections.js` 运行时覆盖层修正，音标例词通过 `utils/phonetic-corrections.js` 覆盖；若恢复生成源，必须把修正回填源文件。`words.js` 首行历史注释仍写「8000 词表」，但运行时/审计实际为 8115 条；本次不直接重写 1.17MB 生成文件，避免整文件覆盖风险。
 
 ## 本实例定位（2026-09-27 用户拍板）
