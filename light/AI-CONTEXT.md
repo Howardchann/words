@@ -3,6 +3,7 @@
 > **当前版本：v1.1.103**（2026-10-16，内容提交 `8f1e67a` + 盖章 `0687555`；同日另有两轮追加：仓库卫生整理、**存储键名统一**——**尚未上传体验版**）
 > B 档 7 词例句修复（face / far / seem / case / child / second / eagle）· addict 副卡换 Merriam-Webster 官方音频 · 缓存根 `au5 → au6` · 存储键名 `ielts-365` → `words`（`store.js` 的 `KEY`/`BACKUP_TAG`、`tools.js` 搜索关键词键；**旧键只读兼容、旧备份仍可导入**）· 功能内核已整树同步至 `../cloud/` 与 `../dark/`（提交 `476310e`）。
 > 逐版本流水见 [CHANGELOG.md](./CHANGELOG.md)；换行符 / 缓存 / overlay 等跨版本规则见仓库根 `README.md`；**三实例同步的权威操作手册 = 仓库根 `SYNC-CHECKLIST.md`**。
+> **审查工作分支（2026-10-17）**：候选修订基于 `cloud-sync` HEAD `ae2755c03984a5c4ae3a42444a9ef9e32bbcb67e`，独立分支 `audit/light-learning-data-2026-10-17`；尚未合并/上传。最近正式记录版本仍为 v1.1.103。预览/上传前必须在真实 Git 工作区执行 `node tools/stamp-build.js` 重新盖章 `miniprogram/utils/build-info.js`；不要手改自动生成文件。
 
 > **本文件只描述 light 实例自身的现状与边界**。cloud 实例（三色调整完整版）的完整决策史、机制细节、实验记录见 `../cloud/AI-CONTEXT.md`——两实例共享全部底层机制，此处不重复。
 
@@ -14,6 +15,9 @@
 - 清单：`tools/audio-pipeline/cloud-manifest.json`（51734 个 key / 1.05MB）—— mp3 本体约 1.03GB 不进 git，此清单供离线对照与缺口审计。
 - ⚠️ 管线**必须在沙箱外运行**（联网 + edge-tts 直连）；`*.mp3` 与 `_work/` 均已被 gitignore。
 - ⚠️ 换音源覆盖同名文件时，**必须同步升 `utils/speech.js` 的 `CACHE_ROOT`**，否则老设备继续播旧缓存。
+- 本轮学习数据审查：词表 **8115 条**；多义词副卡编号 **8200–8245（46 个）**。机器审计入口：`node tools/learning-data-audit.js`；策略/复盘日的空例句有显式豁免名单。
+- 音频核验状态与待重生成任务见 `tools/audio-pipeline/AUDIO-AUDIT.md` 与 `data/pending-sentence-audio.json`。本轮**没有生成、上传或听核音频**；13 条例句资产需由负责音频的 AI 重生成并上传。
+- `utils/words.js` 的历史生成源 `_wordbank/generate_course_files78.py` 与 `utils/phonetic.js` 的历史生成源 `_ipa_build/build_study_data.js` 未包含在当前仓库中。词条正文通过 `utils/learning-corrections.js` 运行时覆盖层修正，音标例词通过 `utils/phonetic-corrections.js` 覆盖；若恢复生成源，必须把修正回填源文件。`words.js` 首行历史注释仍写「8000 词表」，但运行时/审计实际为 8115 条；本次不直接重写 1.17MB 生成文件，避免整文件覆盖风险。
 
 ## 本实例定位（2026-09-27 用户拍板）
 
@@ -109,7 +113,7 @@
 
 **入口**：今日页自定义导航栏**左区插槽**里的放大镜（`.nav-search`，热区 30px / 图标 22px）→ `navigateTo` 搜索页。左区本身宽 ≈94px（与右侧胶囊区对称，用来保证标题居中），`nav-bar` 组件为此从「纯占位」升级为「可选容器」（`box-sizing:border-box` + 内部 `padding-left`，**宽度不变所以标题不偏**）；同时新增 `back` 属性给非 tab 页（搜索页）用，tab 页不传即零变化。返回键用字符 `‹` 而非 SVG —— 颜色直接继承 `--nav-fg`，深浅主题零成本适配。
 
-**搜索**：纯前端内存过滤 `utils/data.js#searchWords()`，8000 词单次遍历 <5ms，不发请求、离线可用。排序 **完全匹配 > 英文前缀 > 英文包含 > 中文释义包含**（组内按词表序 = 由易到难 = Day 升序）；**完全匹配必须置顶**，否则搜 good 会被 goods/goodbye 顶到后面，用户会以为搜错了。默认最多返回 60 条，`total` 始终是真实命中数（超出时页头提示「仅显示前 N 个」）。
+**搜索**：纯前端内存过滤 `utils/data.js#searchWords()`，8115 词单次遍历 <5ms，不发请求、离线可用。排序 **完全匹配 > 英文前缀 > 英文包含 > 中文释义包含**（组内按词表序 = 由易到难 = Day 升序）；**完全匹配必须置顶**，否则搜 good 会被 goods/goodbye 顶到后面，用户会以为搜错了。默认最多返回 60 条，`total` 始终是真实命中数（超出时页头提示「仅显示前 N 个」）。
 
 **结果行**与今日页词行同构（v1.1.51 后 = 单词 + 词性同行 / 美音·英音双音标模块 / 词义 / 例句+喇叭），额外挂一行 `Day N · 第X周 周X ›`。
 
