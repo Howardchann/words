@@ -19,7 +19,12 @@ const plan = require('../../utils/data.js');
 const store = require('../../utils/store.js');
 const theme = require('../../utils/theme.js');
 const speech = require('../../utils/speech.js');
-const PHONETIC = require('../../utils/phonetic.js');
+const PHONETIC_BASE = require('../../utils/phonetic.js');
+const PHONETIC_FIXES = require('../../utils/phonetic-corrections.js');
+const PHONETIC = PHONETIC_BASE.map(function (item) {
+  const examples = PHONETIC_FIXES[item.s];
+  return examples ? Object.assign({}, item, { ex: examples }) : item;
+});
 const STUDY_CATS = require('../../utils/study-cats.js');
 const GLOSSARY = require('../../utils/glossary.js');
 
@@ -77,7 +82,6 @@ function listOf(cls, grp) {
   const base = cls === 'consonant' ? PH_CONS : PH_VOWEL;
   return base.filter(p => !grp || p.grp === grp);
 }
-
 Page({
   data: {
     // 主题 data 初始化（与 tabBar 同款）：首帧即正确深浅，见 today.js 注释
@@ -437,6 +441,5 @@ Page({
     if (!it) return;
     this.setData({ gl: it });
   },
-
   fb() { return this.selectComponent('#fb'); },
 });
