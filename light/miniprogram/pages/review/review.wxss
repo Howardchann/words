@@ -134,3 +134,8 @@
   .rv-wf__t { font-size:11px; margin:0 7px 3px 0; }
   .cloze-en-row { margin-top:15px; }
 }
+
+/* 统一多义词副卡：搜索与复习页复用同一份 split-senses 数据。 */
+.sense-sub { margin-top: 18rpx; padding: 16rpx; border-radius: 12rpx; background: var(--bg-content, rgba(120,140,120,.08)); border: 1rpx solid var(--line, rgba(120,140,120,.18)); }
+.sense-sub__head { font-size: 23rpx; color: var(--muted); margin-bottom: 6rpx; }
+.sense-sub__tile { margin-top: 5rpx; font-size: 22rpx; line-height: 1.45; color: var(--muted); }
