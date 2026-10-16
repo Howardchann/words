@@ -27,6 +27,7 @@
 - **页面**：工具页（学习记录 / 搜索 / 音标区 / 语法区）· `pkg-study` 分包（grammar / topic）· dock 栏 · 4 tab 英文化 · `pages/weeks` 移除
 - **新增 utils**：`glossary.js` · `phonetic.js` · `split-senses.js` · `study-cats.js` · `wordforms.js`
 - **云函数**：`audio-url` 的 `PATH_RE` 纳入 `wuk/`（英音单词桶）；`sync` 函数保持原样
+- **存储键名统一**：`ielts-365-store` → `words-store`、`BACKUP_TAG` `ielts-365` → `words`、搜索关键词键 → `words-search-kw`（三实例逐字节相同）；旧键**只读兼容**（读到即迁移写新键、旧键保留），旧 tag 备份**仍可导入**
 - **同步方式**：`_ipa_build/_sync_1103.js`（整树 `cp` + 按实例回填外观层）→ 随后跑 `node tools/verify-structure.js` 六项自检
 
 **同步后自检**：`verify-structure.js` 六项全过（JS 语法 29/29、app.json、WXML 配对、WXSS 花括号、usingComponents、旧页面残留）；三实例 `app.wxss` 逐字节相同（深色 token 组在 light 内本就维护完整，深色适配零工作量）。
@@ -96,7 +97,7 @@
 | 语音方案 | **预生成高清音频为主**：edge-tts（微软神经语音）离线生成 → 微信云存储托管 → 云函数签名分发 → 本地缓存 |
 | 在线 TTS | 仅作**兜底**（有道整句 → 百度整句），不再是主通道 |
 | 云端依赖 | **两处**：① 云存储音频（`audio-url` 云函数签名分发）② 云数据库进度同步（`sync` 云函数，2026-09-23 按用户决策恢复，见 §2.5） |
-| 进度存储 | **本地优先 + 云端同步**：`wx.setStorageSync('ielts-365-store')` 仍是第一现场，随后与云数据库集合 `progress` 合并；另有「进度备份」导出 / 导入 JSON 兜底 |
+| 进度存储 | **本地优先 + 云端同步**：`wx.setStorageSync('words-store')` 仍是第一现场，随后与云数据库集合 `progress` 合并；另有「进度备份」导出 / 导入 JSON 兜底 |
 | 复习算法 | 已内置间隔重复 1/2/4/7/14/30/60/120 天（`store.js`），复习页有 随机 / 到期 / 重点词 三个页签 |
 | 数据是否完成 | 是。78 周无缺项；**33530 条音频云端全量核对缺失 0、多余 0** |
 
@@ -276,7 +277,7 @@ H5 版（SpeechSynthesis，各设备可用声音乱七八糟、无法选发音�
 
 ### 2.6 进度存储与备份
 
-- **纯本地**：`wx.setStorageSync('ielts-365-store')`。换机 / 卸载微信 / 清缓存 → 全部丢失。所以备份**必须存在**。
+- **纯本地**：`wx.setStorageSync('words-store')`。换机 / 卸载微信 / 清缓存 → 全部丢失。所以备份**必须存在**。
 - **备份**（设置页「进度备份」）：导出 JSON **文本**（自动复制到剪贴板，可粘贴到「文件传输助手」/备忘录），**合并导入**（推荐，取并集，可用于人工跨机同步）/ **覆盖导入**（换机恢复）。
 - **`sanitize()` 把外部数据全当不可信**：`checkedDays` key 须匹配 `/^w\d{1,2}d[1-7]$/`（防 `__proto__` 原型污染）、`starredWords` 缺 `w` 即丢弃、字符串截断（词 60 / 释义 80 / 词性 20 / 例句 300）、`rate` 限 0.5~2、`accent` 限 us/uk、`startDate` 须 `YYYY-MM-DD`。解析失败/App 标识不符/空输入均抛**中文**错误。
 - **间隔重复**：`reviewWord(word, remembered)`——答对 `level+1`、间隔取 `[1,2,4,7,14,30,60,120]`；答错 `level=0`、`nextReviewAt=now`（立即可复习）。`reviewStats` 随本地数据保存并进入备份。
@@ -485,7 +486,7 @@ H5 版（SpeechSynthesis，各设备可用声音乱七八糟、无法选发音�
 ## 5. 文件职责
 
 ```
-ielts-365/
+words/
 ├── project.config.json          appid、编译配置（含 cloudfunctionRoot）
 ├── cloudbaserc.json             云开发环境 ID + functionRoot（部署云函数用）
 ├── cloudfunctions/

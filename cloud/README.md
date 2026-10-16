@@ -28,7 +28,7 @@
 ## 一、项目结构
 
 ```
-ielts-365/
+words/
 ├── project.config.json          # 工具配置（已含真实 AppID，含 cloudfunctionRoot）
 ├── cloudbaserc.json             # 云开发环境 ID + 云函数根目录
 ├── cloudfunctions/
@@ -147,7 +147,7 @@ tcb storage upload <本地目录>/w D:/ielts-audio/w -e <环境ID>
 
 | 层 | 位置 | 作用 |
 |---|---|---|
-| ① 本地存储 | `wx.setStorageSync('ielts-365-store')` | **第一现场**。写入立刻落本地，断网 / 云端故障都不影响学习 |
+| ① 本地存储 | `wx.setStorageSync('words-store')` | **第一现场**。写入立刻落本地，断网 / 云端故障都不影响学习 |
 | ② 云端同步 | 云数据库集合 `progress`（唯一出入口是云函数 `sync`） | 多台设备共用同一份进度。换手机登录同一个微信即自动恢复 |
 | ③ 备份导出 | 设置页「进度备份」 | 最后一道保险：云端出事、换微信号、误操作时仍能救回进度 |
 

@@ -13,14 +13,19 @@
 //
 // 同步失败不影响学习：本地永远是完整的，界面用 cloudStatus() 展示状态，可在设置页手动重试。
 
-const KEY = 'ielts-365-store';
+const KEY = 'words-store';
+// v1.1.103 键名统一（ielts-365 → words）：LEGACY_KEY 只读不写 —— 老设备首次启动即自动迁移到新键，
+// 进度不丢；旧键不清除，回滚到旧版本时仍能读到数据。
+const LEGACY_KEY = 'ielts-365-store';
 const SYNC_FN = 'sync';
 const plan = require('./data.js');
 // 旧的固定阶梯 [1,2,4,7,14,30,60,120]：v1.1.52 起 SRS 改为 SM-2 自适应，
 // 本表只用于「老数据迁移」与 level 字段兼容，不再参与计算。
 const DEFAULT_INTERVALS = [1, 2, 4, 7, 14, 30, 60, 120];
 const DAY_KEY = /^w\d{1,2}d[1-7]$/;
-const BACKUP_TAG = 'ielts-365';
+const BACKUP_TAG = 'words';
+// 导入校验同时放行旧 tag：2026-10-16 之前导出的备份（app: 'ielts-365'）仍然可以导入。
+const LEGACY_BACKUP_TAGS = ['ielts-365'];
 const BACKUP_VERSION = 3;
 const PUSH_DELAY = 2500;        // 本地写入后多久推云（防抖，避免连点打卡触发多次请求）
 const DRAIN_DELAY = 300;        // 上送量超过单次上限时，补推下一批的间隔（要快，别让积压慢慢爬）
@@ -59,7 +64,17 @@ let lastFailAt = 0;
 // ---------------- 本地读写 ----------------
 
 function loadLocal() {
-  try { const saved = wx.getStorageSync(KEY); if (saved && typeof saved === 'object') data = Object.assign(defaults(), saved); } catch (e) {}
+  let saved = null, fromLegacy = false;
+  try { saved = wx.getStorageSync(KEY); } catch (e) {}
+  if (!saved) {
+    // 旧键兜底：只读不写；读到了就在末尾写回新键（一次性迁移，旧键保留）
+    try {
+      const legacy = wx.getStorageSync(LEGACY_KEY);
+      if (legacy && typeof legacy === 'object') { saved = legacy; fromLegacy = true; }
+    } catch (e) {}
+  }
+  if (saved && typeof saved === 'object') data = Object.assign(defaults(), saved);
+  if (fromLegacy) saveLocal();
 }
 function saveLocal() { try { wx.setStorageSync(KEY, data); } catch (e) {} }
 function emit() { listeners.slice().forEach(fn => { try { fn(data); } catch (e) {} }); }
@@ -571,7 +586,7 @@ function sanitizeReviewStats(raw) {
 
 function sanitize(raw) {
   if (!raw || typeof raw !== 'object') throw new Error('不是有效的备份数据');
-  if (raw.app && raw.app !== BACKUP_TAG) throw new Error('这不是「开溜」的备份');
+  if (raw.app && raw.app !== BACKUP_TAG && LEGACY_BACKUP_TAGS.indexOf(raw.app) < 0) throw new Error('这不是「开溜」的备份');
   const d = (raw.data && typeof raw.data === 'object') ? raw.data : raw;
   const out = {
     checkedDays: {}, uncheckedDays: {}, starredWords: [], unstarredWords: {},

@@ -182,7 +182,7 @@ Page({
     });
     // 恢复上次的搜索关键词（tab 页通常不会销毁，这里是「被系统回收后再进来」的兜底）
     let last = '';
-    try { last = wx.getStorageSync('ielts-365-search-kw') || ''; } catch (e) { last = ''; }
+    try { last = wx.getStorageSync('words-search-kw') || wx.getStorageSync('ielts-365-search-kw') || ''; } catch (e) { last = ''; }
     if (last) { this._kw = last; this.setData({ kw: last }); this._run(last); }
     this.refreshRecord();
   },
@@ -282,14 +282,14 @@ Page({
   onClear() {
     if (this._deb) { clearTimeout(this._deb); this._deb = null; }
     this._kw = '';
-    try { wx.setStorageSync('ielts-365-search-kw', ''); } catch (err) {}
+    try { wx.setStorageSync('words-search-kw', ''); } catch (err) {}
     speech.stop();
     // 刻意不写 focus：配合 hold-keyboard，点 × 不会让输入框失焦，键盘原地保持、无「收起又弹出」闪动
     this.setData({ kw: '', total: 0, more: false, list: [] });
   },
   _run(kw) {
     speech.stop();
-    try { wx.setStorageSync('ielts-365-search-kw', kw); } catch (err) {}
+    try { wx.setStorageSync('words-search-kw', kw); } catch (err) {}
     const r = plan.searchWords(kw);
     this.setData({ total: r.total, list: r.list, more: r.total > r.list.length });
   },

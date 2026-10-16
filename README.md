@@ -1,4 +1,4 @@
-# ielts-365 · 四实例仓库
+# words · 四实例仓库
 
 > 本仓库自 2026-09-27 起按**同仓 4 目录**划分实例（不再是分支划分）。四个实例同仓同 HEAD，产品功能一致，差异在主题能力：
 
@@ -18,4 +18,4 @@
 1. **功能开发只改 `light/`**——上线、上传体验版也只从 light 出（深浅模式闪白/残影根治前，cloud 不再作为发布形态）；
 2. 变更若涉及主题无关的共用逻辑（store/speech/页面结构），需要同步回 `cloud/` 与 `dark/` 并更新其文档，保持四实例功能一致；
 3. 上传体验版前在对应实例目录跑 `node tools/stamp-build.js`；
-4. CLI 上传：`cli.bat upload --project "D:\idea\ielts-365\light" -v x.y.z -d "..."`。
+4. CLI 上传：`cli.bat upload --project "D:\idea\words\light" -v x.y.z -d "..."`。

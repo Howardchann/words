@@ -248,6 +248,7 @@ function dump(id) { const c = DB.progress; return c ? c.get(id) : undefined; }
   use(d2);
   const beforeImp = d2.store.getReviewStats('hello').lastReviewedAt;
   const fakeBackup = JSON.stringify({
+    // 这里**故意**用旧 tag 'ielts-365'：顺带覆盖「旧备份仍可导入」的兼容分支（v1.1.103 键名统一）
     app: 'ielts-365', v: 3, data: {
       checkedDays: { w2d1: Date.now() }, starredWords: [{ w: 'hello', m: '你好', p: 'int.', e: 'Hello!' }],
       reviewStats: { hello: { correct: 5, wrong: 0, level: 5, nextReviewAt: Date.now() + 86400000, lastReviewedAt: Date.now() } },

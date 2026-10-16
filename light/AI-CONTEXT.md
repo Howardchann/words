@@ -1,8 +1,8 @@
 # AI-CONTEXT —— light 实例（纯浅色版 · **主项 / 上线版**）
 
-> **当前版本：v1.1.103**（2026-10-16，本地内容提交 `8f1e67a` + 盖章 `0687555`，**尚未上传体验版**）
-> B 档 7 词例句修复（face / far / seem / case / child / second / eagle）· addict 副卡换 Merriam-Webster 官方音频 · 缓存根 `au5 → au6` · 功能内核已整树同步至 `../cloud/` 与 `../dark/`（提交 `476310e`）。
-> 逐版本流水见 [CHANGELOG.md](./CHANGELOG.md)；换行符 / 缓存 / overlay 等跨版本规则见仓库根 `README.md`。
+> **当前版本：v1.1.103**（2026-10-16，内容提交 `8f1e67a` + 盖章 `0687555`；同日另有两轮追加：仓库卫生整理、**存储键名统一**——**尚未上传体验版**）
+> B 档 7 词例句修复（face / far / seem / case / child / second / eagle）· addict 副卡换 Merriam-Webster 官方音频 · 缓存根 `au5 → au6` · 存储键名 `ielts-365` → `words`（`store.js` 的 `KEY`/`BACKUP_TAG`、`tools.js` 搜索关键词键；**旧键只读兼容、旧备份仍可导入**）· 功能内核已整树同步至 `../cloud/` 与 `../dark/`（提交 `476310e`）。
+> 逐版本流水见 [CHANGELOG.md](./CHANGELOG.md)；换行符 / 缓存 / overlay 等跨版本规则见仓库根 `README.md`；**三实例同步的权威操作手册 = 仓库根 `SYNC-CHECKLIST.md`**。
 
 > **本文件只描述 light 实例自身的现状与边界**。cloud 实例（三色调整完整版）的完整决策史、机制细节、实验记录见 `../cloud/AI-CONTEXT.md`——两实例共享全部底层机制，此处不重复。
 
@@ -10,24 +10,21 @@
 
 **本实例为仓库主项与唯一上线形态**：深浅模式下的闪白/残影在保留三色调整的 cloud 实例中无法根治，故功能开发与上线以后都从本实例出，直到主题闪白问题找到根治方案。共用逻辑（store/speech/页面结构）的变更需同步回 `cloud/` 与 `dark/`。
 
-### 同步边界（2026-09-29 用户拍板：**只同步功能内核**）
+### 同步边界（2026-10-16 换代：**整树铺 + 外观层回填**）
 
-本实例前进后往 `cloud/` 与 `dark/` 同步时**按类别拆开，不要整目录搬运**：
+> ⚠️ 本节旧的「按类别拆开、逐处字符串替换」口径（v1.1.45 时代，实际只覆盖约 7 处差异）**自 v1.1.103 起作废**。
+> **权威操作手册 = 仓库根 [`../SYNC-CHECKLIST.md`](../SYNC-CHECKLIST.md)**（口径 / 步骤 / 自检 / 踩坑表 / 发布节奏），本节只留结论。
 
-| 类别 | 例子 | 同步？ |
+**一句话口径**：把 `light/miniprogram` **整树 `cp -r`** 过去 → 再按实例**回填外观层** → 跑 `node tools/verify-structure.js` 六项自检。
+
+| 目标 | 回填的外观层文件 | 同步后允许的剩余差异 |
 |---|---|---|
-| **功能内核** | 音标（数据 + 渲染）、复习页例句朗读 `onSpeakStarredEx`、音色兜底 `_aiOf`、收藏补存 `ai`、朗读链路与交互修复 | ✅ 同步 |
-| **外观 / 配色** | `--nav-bg/--nav-fg` 浅灰顶、`navigationBarTextStyle` 状态栏字色、`--card-line` + `.card.tip-box` 描边、窗口底色 | ❌ 不同步 |
-| **本实例独有机制** | 由三态换肤删简而来的静态主题链路 | ❌ 不反向并入 |
+| `../cloud/`（三色调整） | `app.js` · `app.json` · `pages/settings/settings.js` · `pages/settings/settings.wxml` · `theme.json` · `utils/theme.js` | 恰好这 **6 个文件** |
+| `../dark/`（定死深色） | `app.json` · `utils/theme.js` | 恰好这 **2 个文件** |
 
-`original/` 落后多代、且不发布，**不参与任何同步**（留档冻结）。
-
-**两条硬规则**：
-
-1. `app.wxss` 是**混装文件**（配色 token 与功能规则写在同一个文件里）→ 同步**必须逐处字符串替换，禁止整文件覆盖**，否则本实例的浅顶值会冲掉 cloud 的换肤 token 与 dark 的深色 token。
-2. 纯数据文件（`utils/words.js`）可整文件覆盖，但覆盖前须先用 `git diff --no-index` 证明目标实例在该文件上**无独有内容**。
-
-**手法与验收**：脚本 `D:/idea/_ipa_build/sync_core_to_cloud_dark.py`（带唯一性断言——任一处匹配数 ≠ 1 即中止且不写入；按目标文件实际换行符自适应）。验收判据 = `git diff --no-index --stat light/miniprogram <实例>/miniprogram` 的剩余差异**只剩外观 / 主题 / 版本号**，功能类文件（`data.js` / `store.js` / `words.js` / `today.wxml` / `review.js` / `review.wxml` / `review.wxss`）必须从差异列表消失。
+- 成立前提：本实例 `app.wxss` 已持续维护完整的 `.theme-dark` token 组 → 深色适配**零工作量**（三实例 `app.wxss` 逐字节相同，md5 一致）。
+- ⚠️ **最致命坑**：整树 `cp` 会把本实例**定死浅色**的 `utils/theme.js` 一并带过去 → 必须立刻回填，否则 cloud/dark 主题直接坏掉；`verify-structure.js` **查不出来**（只查结构），只能靠上表的差异清单发现。
+- `original/` 已冻结为 2026-09-25 历史快照，**不参与任何同步**。
 
 ## 本实例是什么
 
@@ -119,7 +116,7 @@
 
 **两个刻意的取舍**：
 
-1. **关键词只存本地 storage**（`ielts-365-search-kw`），**不进 `store`** —— `store.set()` 会 `schedulePush()` 触发云同步，纯 UI 现场不该混进要上云的业务数据；
+1. **关键词只存本地 storage**（`words-search-kw`），**不进 `store`** —— `store.set()` 会 `schedulePush()` 触发云同步，纯 UI 现场不该混进要上云的业务数据；
 2. 从结果跳走时 `switchTab` 会**销毁搜索页**（小程序规则：关闭所有非 tab 页）→ 回到搜索页时按存下的关键词**自动恢复关键词与结果**，做到跟没离开一样；只有无历史关键词时才自动聚焦弹键盘。
 
 **未做**：结果行不带收藏按钮（会把行挤窄，刚调好的音标一行排版有再次被压的风险），收藏仍走今日页星标。

@@ -43,6 +43,15 @@
 - **`tools/cloudsync-test/README.md`** 的旧路径 `D:/idea/ielts-365/...` 改为正确绝对路径（三实例同步）。
 - 根 `SYNC-CHECKLIST.md` 重写为「**整树铺 + 外观层回填**」口径（旧 A~H 逐处替换口径作废）；本实例 `AI-CONTEXT.md` 的「当前进度快照」同步更新至 v1.1.103。
 
+### 同日追加 ② · 存储键名统一 ielts-365 → words
+
+**决策依据（用户 2026-10-16）**：尚未上线发布，测试用户只有本人 → 不存在「改动导致用户丢数据」的顾虑；同日追加 ① 里未提及，本实例此前文档中的「键名永久保留」口径**据此作废**。
+
+- `store.js`：`KEY` `'ielts-365-store'` → `'words-store'`；`BACKUP_TAG` `'ielts-365'` → `'words'`。`tools.js` 搜索关键词键 → `'words-search-kw'`（3 处）。
+- **零风险迁移**：新增 `LEGACY_KEY`（只读不写）—— 启动先读新键、读不到再读旧键，读到即写回新键（一次性迁移）；**旧键不清除**，回滚旧版本仍能读到。新增 `LEGACY_BACKUP_TAGS=['ielts-365']` —— 导入校验放行旧 tag，**改动前导出的备份仍可导入**；导出统一写新 tag。
+- 文档同步：本实例 `README.md` 目录树 + 存储键说明、`tools/backup-test/备份导入导出测试清单.md`（3 处）；`tools/cloudsync-test/run_tests.js` 的 `app:'ielts-365'` **故意保留**作为兼容分支回归用例。
+- 验证：本实例 `store.js` / `tools.js` 与 light 改动后**逐字节相同**；`verify-structure.js` 六项全过；`cloudsync-test/run_tests.js` **75/75**；键名迁移专项 12 项全过。
+
 ## 2026-09-27 · 首点闪白定性更新（light 录屏结论同步，文档修订）
 
 - light 实例 v1.1.39 真机录屏逐帧定性「首点 4 tab 闪白」：**与色系无关**，冷启动（后台无小程序）后首访各 tab 即闪，1~2 帧容器底色帧（webview 冷创建首绘帧）；首页不闪；

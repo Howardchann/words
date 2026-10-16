@@ -63,9 +63,18 @@ light v1.1.103 功能内核已整树同步到 cloud/dark（63 版差距一次性
 - `light` / `dark` 的 `AI-CONTEXT.md` 头部各补「当前版本」指向。
 - `original/`（历史快照，不发布）：README / AI-CONTEXT / CHANGELOG 三份**头部统一加「⚠️ 历史快照 · 不再维护」声明**并指向 light / cloud / dark；**技术内容一字不改**，保持快照原貌。
 
-**明确不处理**
+### ⑥ 存储键名统一 ielts-365 → words（同日二轮追加，未上传）
 
-- 运行时存储键名 `ielts-365-store`（`store.js` 的 `KEY` / `BACKUP_TAG`）与 `ielts-365-search-kw`（`tools.js`）：**永久保留旧名**。改动会让全部用户学习进度/打卡/收藏归零，且旧备份 JSON（校验 `app === 'ielts-365'`）将无法导入——收益为零、代价是用户数据。
+> **决策依据（用户 2026-10-16）**：尚未上线发布，测试用户只有本人 → 不存在「改动导致用户丢数据」的顾虑。⑤ 里「运行时键名永久保留旧名」的结论**据此作废**。
+
+- `store.js`：`KEY` `'ielts-365-store'` → `'words-store'`；`BACKUP_TAG` `'ielts-365'` → `'words'`。
+- `tools.js`：搜索关键词键 `'ielts-365-search-kw'` → `'words-search-kw'`（读 / 清 / 写共 3 处）。
+- **零风险迁移**（顾虑消失也不裸改）：
+  - `LEGACY_KEY` **只读不写** —— 启动时先读新键，读不到再读旧键，读到即写回新键（一次性迁移）；**旧键不清除**，回滚到旧版本时仍能读到数据。
+  - `LEGACY_BACKUP_TAGS = ['ielts-365']` —— 导入校验**放行旧 tag**，2026-10-16 之前导出的备份**仍然可以导入**；非本应用的 tag 依旧被拒（校验没被放宽成「什么都收」）。导出统一写新 tag。
+- 文档同步：三份 README 的目录树与存储键说明、`cloud/AI-CONTEXT.md`（存储键 2 处 + 目录树 1 处）、`light/AI-CONTEXT.md`（1 处）、三份 `tools/backup-test/备份导入导出测试清单.md`（各 3 处）；`tools/cloudsync-test/run_tests.js` 里的 `app:'ielts-365'` **故意保留**，作为「旧备份仍可导入」的常驻回归用例。
+- `original/` 不动（历史快照，本就含旧键名，保持原貌）。
+- **验证**：三实例 `store.js` / `tools.js` 改动后仍**逐字节相同**；`verify-structure.js` 三实例六项全过；`cloudsync-test/run_tests.js` 三实例 **75/75**；另跑键名迁移专项 12 项（旧键读→迁移写新键→旧键保留→旧 tag 导入→新 tag 导入→无关 tag 拒绝→导出带新 tag）三实例全过。
 
 ## 2026-10-15 · 剑桥音频选块修正 + 量词 + 抓取截断修复（v1.1.102，已上传体验版）
 
