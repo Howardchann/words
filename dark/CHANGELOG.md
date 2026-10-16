@@ -34,6 +34,15 @@
 - 设置页**无**外观选择卡（定死深色实例不需要）；app.js 无 onThemeChange
 - 深色 token 适配：light 的 app.wxss 本就持续维护 .theme-dark token 组（含 v1.1.42 --card-line、v1.1.51 双音标 us-*/uk-* 的深色值），随树直接生效；深色图标 darkicons auto 块同样随树同步
 
+### 同日追加 · 仓库卫生与文档整理（承接分类全量扫描）
+
+- **app.wxss 同步清理**：删 13 个死样式类共 29 行（品牌头 `.brand-head/.brand-logo/.brand-copy/.brand-name/.brand-sub`、被取代的 `.ico-eye`/`.ico-ask`/`.icon-button`/`.icon-star`/`.icon-star--on`/`.icon-remove`/`.icon-speaker`、`.hover-tint`），340 → 311 行；清理后三实例 `app.wxss` 仍**逐字节相同**。
+- **删死资源** `miniprogram/images/logo.svg`（「开溜」品牌图，全项目零引用）。
+- **`.gitignore` 放开** `project.private.config.json` 并纳入版本管理（换机 clone 后开发者工具的本地设置与旧机一致）。
+- **移出** `tools/_rec3_all` / `_rec3_zoom` / `_rec3_frames` / `_rec4_frames` 逐帧目录（各 199 文件 / 约 23 MB，结论已归档）；**保留** `_rec*.mp4`、拼图与证据 png、4 个分析脚本（闪白 / deep-link 残影仍标「待解决」，属原始证据）。
+- **`tools/cloudsync-test/README.md`** 的旧路径 `D:/idea/ielts-365/...` 改为正确绝对路径（三实例同步）。
+- 根 `SYNC-CHECKLIST.md` 重写为「**整树铺 + 外观层回填**」口径（旧 A~H 逐处替换口径作废）；本实例 `AI-CONTEXT.md` 的「当前进度快照」同步更新至 v1.1.103。
+
 ## 2026-09-27 · 首点闪白定性更新（light 录屏结论同步，文档修订）
 
 - light 实例 v1.1.39 真机录屏逐帧定性「首点 4 tab 闪白」：**与色系无关**，冷启动（后台无小程序）后首访各 tab 即闪，1~2 帧容器底色帧（webview 冷创建首绘帧）；首页不闪；

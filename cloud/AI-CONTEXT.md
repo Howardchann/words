@@ -8,11 +8,32 @@
 >
 > 它记录了本项目中几个「看起来奇怪但刻意如此」的设计。这些决定都踩过坑，如果你不理解背景就"顺手优化"，很可能把修好的 bug 改回去。完整变更历史见 [CHANGELOG.md](./CHANGELOG.md)。
 >
-> **最后更新：2026-10-16**：功能内核一次性同步至 light v1.1.103（详见 CHANGELOG 2026-10-16 节）；三态外观模块保留，闪白家族遗留问题原样（这正是 light 成为主项的原因）。：复习页三修（去自动朗读/到期保词/串卡根治）；遗留问题（deep-link 残影、色调闪白家族、跟随系统跨主题翻转首点闪白）经用户重新定性**全部改为「待解决」**；仓库拆 4 实例。
+> **最后更新：2026-10-16**：功能内核一次性同步至 light v1.1.103（详见 CHANGELOG 2026-10-16 节）；三态外观模块保留，闪白家族遗留问题原样（这正是 light 成为主项的原因）。
+>
+> **历史节点（2026-09-26/27）**：复习页三修（去自动朗读 / 到期保词 / 串卡根治）；遗留问题（deep-link 残影、色调闪白家族、跟随系统跨主题翻转首点闪白）经用户重新定性**全部改为「待解决」**；仓库拆 4 实例。
 
 ---
 
-## ⚡ 当前进度快照（2026-09-26 22:15，v1.1.37 已上传验收）
+## ⚡ 当前进度快照（2026-10-16 · 功能内核 = light v1.1.103）
+
+**本实例现状**：功能内核于 2026-10-16 由 light **整树同步**（提交 `476310e`，63 版差距一次性收口）；外观层仍为**三色调整**（auto / 浅色 / 深色 + 手动切换）——这是本实例与 light、dark 的**唯一区别**。
+
+**与 light 的差异 = 6 个文件**：`miniprogram/app.js`、`miniprogram/app.json`、`pages/settings/settings.js`、`pages/settings/settings.wxml`、`miniprogram/theme.json`、`utils/theme.js`。
+
+**同步进来的功能内核**：
+
+- **数据**：8115 词表（功能词 115 条在最前，ai 8001~8115）· 拆卡 overlay `split-senses.js` · `data-p1~p6`
+- **音频**：Cambridge 官方音频管线（v1.1.101/102）· addict 副卡改 Merriam-Webster 官方源（v1.1.103）· 缓存根 **`au6`**
+- **页面**：工具页（学习记录 / 搜索 / 音标区 / 语法区）· `pkg-study` 分包（grammar / topic）· dock 栏 · 4 tab 英文化 · `pages/weeks` 移除
+- **新增 utils**：`glossary.js` · `phonetic.js` · `split-senses.js` · `study-cats.js` · `wordforms.js`
+- **云函数**：`audio-url` 的 `PATH_RE` 纳入 `wuk/`（英音单词桶）；`sync` 函数保持原样
+- **同步方式**：`_ipa_build/_sync_1103.js`（整树 `cp` + 按实例回填外观层）→ 随后跑 `node tools/verify-structure.js` 六项自检
+
+**同步后自检**：`verify-structure.js` 六项全过（JS 语法 29/29、app.json、WXML 配对、WXSS 花括号、usingComponents、旧页面残留）；三实例 `app.wxss` 逐字节相同（深色 token 组在 light 内本就维护完整，深色适配零工作量）。
+
+---
+
+## 📜 历史快照 · 2026-09-26/27（v1.1.37/38，仅作决策追溯）
 
 **基线**：HEAD `1a62eee`（v1.1.38，2026-09-27）推 GitHub（cloud-sync 分支）。自定义导航栏链路 = v1.1.33~34；中间的 deep-link 过渡桥实验（另一会话 15 提交）已被真机证伪并整体回退，详见 CHANGELOG「晚 16」。
 

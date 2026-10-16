@@ -31,6 +31,15 @@
 
 **遗留**：AI-CONTEXT 里的「深浅切换闪白/残影」家族问题原样保留（这正是 light 成为发布版的原因）；等有根治方案再议恢复主项。
 
+### 同日追加 · 仓库卫生与文档整理（承接分类全量扫描）
+
+- **app.wxss 同步清理**：删 13 个死样式类共 29 行（品牌头 `.brand-head/.brand-logo/.brand-copy/.brand-name/.brand-sub`、被取代的 `.ico-eye`/`.ico-ask`/`.icon-button`/`.icon-star`/`.icon-star--on`/`.icon-remove`/`.icon-speaker`、`.hover-tint`），340 → 311 行；清理后三实例 `app.wxss` 仍**逐字节相同**。
+- **删死资源** `miniprogram/images/logo.svg`（「开溜」品牌图，全项目零引用）。
+- **`.gitignore` 放开** `project.private.config.json` 并纳入版本管理（换机 clone 后开发者工具的本地设置与旧机一致）。
+- **移出** `tools/_rec3_all` / `_rec3_zoom` / `_rec3_frames` / `_rec4_frames` 逐帧目录（各 199 文件 / 约 23 MB，结论已归档）；**保留** `_rec*.mp4`、拼图与证据 png、4 个分析脚本（闪白 / deep-link 残影仍标「待解决」，属原始证据）。
+- **`tools/cloudsync-test/README.md`** 的旧路径 `D:/idea/ielts-365/...` 改为正确绝对路径（三实例同步）。
+- 根 `SYNC-CHECKLIST.md` 重写为「**整树铺 + 外观层回填**」口径（旧 A~H 逐处替换口径作废）；本实例 `AI-CONTEXT.md` 的「当前进度快照」同步更新至 v1.1.103。
+
 ## 2026-09-29 · 从 light 同步功能内核（音标 / 复习例句朗读 / 音色兜底），外观配色保持本实例语义
 
 **背景**：light 实例 09-29 推进到 v1.1.45（音标全量注入、复习页例句朗读、音色兜底、学习提示卡描边、浅灰顶等）。用户拍板**只同步功能内核**：cloud / dark 补功能、不补外观；`original/` 落后多代、不发布，不参与同步。

@@ -4,7 +4,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const MP = 'D:/idea/ielts-365/light/miniprogram';
+const MP = path.join(__dirname, '..', 'miniprogram');
 const OUT = 'D:/idea/_reviews/工具页效果图_v1.1.70.html';
 
 const PH = require(MP + '/utils/phonetic.js');

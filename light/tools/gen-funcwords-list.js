@@ -152,7 +152,7 @@ const F = [
 ];
 
 // 剔除词表已有的
-const W = require('D:/idea/ielts-365/light/miniprogram/utils/words.js');
+const W = require('../miniprogram/utils/words.js');
 const words = new Set(W.join('\n').split('\n').map(r => r.split('\t')[0].toLowerCase()));
 const list = F.filter(r => !words.has(r[0].toLowerCase()));
 const dropped = F.filter(r => words.has(r[0].toLowerCase())).map(r => r[0]);

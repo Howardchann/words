@@ -59,7 +59,7 @@ cp miniprogram/utils/store.js miniprogram/utils/store.__nofix.js
 #    `(sentWords || []).forEach(w => { delete data.reviewDirty[w]; })`
 
 # 2. 用变异版跑同一套用例
-TEST_STORE="D:/idea/ielts-365/miniprogram/utils/store.__nofix.js" node tools/cloudsync-test/run_tests.js
+TEST_STORE="D:/idea/words/light/miniprogram/utils/store.__nofix.js" node tools/cloudsync-test/run_tests.js
 #    → 期望【13】精准失败（本地被顶回旧值 / dirty 被误清 / 云端 correct 停在 1）
 
 # 3. 用完删掉，别留在仓库里

@@ -1,5 +1,9 @@
 # AI-CONTEXT —— light 实例（纯浅色版 · **主项 / 上线版**）
 
+> **当前版本：v1.1.103**（2026-10-16，本地内容提交 `8f1e67a` + 盖章 `0687555`，**尚未上传体验版**）
+> B 档 7 词例句修复（face / far / seem / case / child / second / eagle）· addict 副卡换 Merriam-Webster 官方音频 · 缓存根 `au5 → au6` · 功能内核已整树同步至 `../cloud/` 与 `../dark/`（提交 `476310e`）。
+> 逐版本流水见 [CHANGELOG.md](./CHANGELOG.md)；换行符 / 缓存 / overlay 等跨版本规则见仓库根 `README.md`。
+
 > **本文件只描述 light 实例自身的现状与边界**。cloud 实例（三色调整完整版）的完整决策史、机制细节、实验记录见 `../cloud/AI-CONTEXT.md`——两实例共享全部底层机制，此处不重复。
 
 ## 本实例定位（2026-09-27 用户拍板）

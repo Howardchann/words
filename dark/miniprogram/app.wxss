@@ -60,8 +60,6 @@ page {
 .ico-play{background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Cpath%20d='M7%205v14l11-7z'%20fill='%23176B5B'/%3E%3C/svg%3E")}
 .ico-stop{background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Crect%20x='6.5'%20y='6.5'%20width='11'%20height='11'%20rx='2.5'%20fill='%23176B5B'/%3E%3C/svg%3E")}
 .ico-check{background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Cpath%20d='M4.5%2012.8l5%205L19.5%207'%20fill='none'%20stroke='%23176B5B'%20stroke-width='2.4'%20stroke-linecap='round'%20stroke-linejoin='round'/%3E%3C/svg%3E")}
-.ico-eye{background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='%23176B5B'%20stroke-width='1.8'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpath%20d='M2%2012s3.5-6%2010-6%2010%206%2010%206-3.5%206-10%206-10-6-10-6z'/%3E%3Ccircle%20cx='12'%20cy='12'%20r='2.6'/%3E%3C/svg%3E")}
-.ico-ask{background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='%23176B5B'%20stroke-width='1.8'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Ccircle%20cx='12'%20cy='12'%20r='9'/%3E%3Cpath%20d='M9.6%209.3a2.5%202.5%200%201%201%203.3%202.4c-.7.3-.9.8-.9%201.5'/%3E%3Cpath%20d='M12%2016.6h.01'/%3E%3C/svg%3E")}
 .ico-undo{background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='%23C0392B'%20stroke-width='1.8'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpath%20d='M9%2014%204%209l5-5'/%3E%3Cpath%20d='M4%209h9.5a6%206%200%200%201%200%2012H10'/%3E%3C/svg%3E")}
 .ico-trash{background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='%23C0392B'%20stroke-width='1.8'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpath%20d='M4%207h16M9.5%207V4h5v3M6.5%207l1%2013h9l1-13'/%3E%3C/svg%3E")}
 .ico-up{background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='%23176B5B'%20stroke-width='1.8'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpath%20d='M12%2015V4M8%208l4-4%204%204'/%3E%3Cpath%20d='M5%2012v7h14v-7'/%3E%3C/svg%3E")}
@@ -90,11 +88,6 @@ page {
    深色能显示只是因为 .theme-dark .ico-spk 优先级更高。09-26 用户实测踩坑 */
 .ico-heart { background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Cpath%20d='M12%2020.1C7.7%2016.9%204%2013.7%203%2010.7%202.1%207.8%203.8%205.1%206.6%204.6%208.5%204.3%2010.5%205.2%2012%206.9%2013.5%205.2%2015.5%204.3%2017.4%204.6%2020.2%205.1%2021.9%207.8%2021%2010.7%2020%2013.7%2016.3%2016.9%2012%2020.1Z'%20fill='none'%20stroke='%23FF8A78'%20stroke-width='1.8'%20stroke-linejoin='round'/%3E%3C/svg%3E"); }
 .muted { color:var(--muted); font-size:24rpx; }
-.brand-head { display:flex; align-items:center; padding:20rpx 28rpx 4rpx; }
-.brand-logo { width:76rpx; height:76rpx; flex-shrink:0; }
-.brand-copy { margin-left:16rpx; }
-.brand-name { font-size:36rpx; line-height:1.1; font-weight:800; color:var(--green); }
-.brand-sub { font-size:22rpx; color:var(--muted4); margin-top:6rpx; }
 /* 播放喇叭对齐（机制级修复，不再手调 margin 常量）：
    1) 行容器 align-items:baseline —— 喇叭盒与文字首行共享真机字体基线；
    2) 喇叭盒内放零宽空格 strut（::before），让 flex 能取到该盒的字体基线；
@@ -187,23 +180,11 @@ page {
 .checkin-btn { margin:24rpx 0; }
 .done-state { display:flex; align-items:center; justify-content:center; color:var(--green); font-size:28rpx; font-weight:700; padding:16rpx 0; }
 
-/* 开溜 · 图标与触控视觉统一 */
-.icon-button{display:flex;align-items:center;justify-content:center;width:64rpx;height:64rpx;border-radius:18rpx;background:var(--soft2);color:var(--green);font-size:30rpx;line-height:1;}
-.icon-button:active{background:var(--press2);}
-.icon-star{font-size:34rpx;color:var(--star-off);}
-.icon-star--on{color:#F5C451;}
-.icon-remove{font-size:28rpx;color:var(--disabled-ink);}
-.icon-speaker{font-size:28rpx;}
 
 /* 全局按压反馈（hover-class 挂这些类）：
    原生按钮统一「背景变色 + 轻缩放」（不再用透明度——有的按钮看得见有的看不见）；
    文字/图标类（无背景）用变暗 + 缩放 */
 .hover-dim{opacity:.55;transform:scale(.96)}
-/* 磁贴/卡片类按压：背景变色（重绘属性）。⚠️ v1.1.19 起该类由 weeks 页手动按压态驱动
-   （data.pressed + touchstart/end/cancel/move + onShow 兜底清零），不再走原生 hover-class——
-   原生 hover 会沿节点链激活（点日格连父级一起亮），且 switchTab 跳转时清理不可靠、
-   返回后按压底色残留（实机翻车）。给其他页面接按压态时照 weeks.js 的 onTileDown/onTileUp 模式。 */
-.hover-tint{background:var(--soft)}
 .btn-press{transform:scale(.96)}
 /* 动作按钮按压（v1.1.80 强化）：此前只把底色 soft→press-green，两个都是极浅绿、色差≈0，
    真机上"看不出按了没"（用户反馈）。加一档内阴影 + 字色加深，按下有明确的"陷下去"感。
@@ -277,11 +258,6 @@ page {
   .tip-text { font-size:13px; }
   .ico-inline { width:1em; height:1em; vertical-align:-.125em; } /* 宽屏容器 13px → 1em=13px，与旧定值完全等值 */
   .muted { font-size:12px; }
-  .brand-head { max-width:640px; margin:0 auto; width:100%; box-sizing:border-box; padding:10px 14px 2px; }
-  .brand-logo { width:38px; height:38px; }
-  .brand-copy { margin-left:8px; }
-  .brand-name { font-size:18px; }
-  .brand-sub { font-size:11px; margin-top:3px; }
   .word-row { padding:7px 0; }
   .word-speak { width:28px; height:28px; font-size:16px; margin-right:8px; }
   .word-en { font-size:16px; }
@@ -311,9 +287,6 @@ page {
   .random-card .ex-cn { margin-top:4px; }
   .checkin-btn { margin:12px 0; }
   .done-state { font-size:14px; padding:8px 0; }
-  .icon-button { width:32px; height:32px; border-radius:9px; font-size:15px; }
-  .icon-star { font-size:17px; }
-  .icon-remove, .icon-speaker { font-size:14px; }
   .star-ico { width:18px; height:18px; }
 }
 
@@ -321,8 +294,6 @@ page {
 .theme-dark .ico-play{background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Cpath%20d='M7%205v14l11-7z'%20fill='%237CD6B4'/%3E%3C/svg%3E")}
 .theme-dark .ico-stop{background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Crect%20x='6.5'%20y='6.5'%20width='11'%20height='11'%20rx='2.5'%20fill='%237CD6B4'/%3E%3C/svg%3E")}
 .theme-dark .ico-check{background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Cpath%20d='M4.5%2012.8l5%205L19.5%207'%20fill='none'%20stroke='%237CD6B4'%20stroke-width='2.4'%20stroke-linecap='round'%20stroke-linejoin='round'/%3E%3C/svg%3E")}
-.theme-dark .ico-eye{background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='%237CD6B4'%20stroke-width='1.8'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpath%20d='M2%2012s3.5-6%2010-6%2010%206%2010%206-3.5%206-10%206-10-6-10-6z'/%3E%3Ccircle%20cx='12'%20cy='12'%20r='2.6'/%3E%3C/svg%3E")}
-.theme-dark .ico-ask{background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='%237CD6B4'%20stroke-width='1.8'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Ccircle%20cx='12'%20cy='12'%20r='9'/%3E%3Cpath%20d='M9.6%209.3a2.5%202.5%200%201%201%203.3%202.4c-.7.3-.9.8-.9%201.5'/%3E%3Cpath%20d='M12%2016.6h.01'/%3E%3C/svg%3E")}
 .theme-dark .ico-undo{background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='%23E8795F'%20stroke-width='1.8'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpath%20d='M9%2014%204%209l5-5'/%3E%3Cpath%20d='M4%209h9.5a6%206%200%200%201%200%2012H10'/%3E%3C/svg%3E")}
 .theme-dark .ico-trash{background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='%23E8795F'%20stroke-width='1.8'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpath%20d='M4%207h16M9.5%207V4h5v3M6.5%207l1%2013h9l1-13'/%3E%3C/svg%3E")}
 .theme-dark .ico-up{background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='%237CD6B4'%20stroke-width='1.8'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpath%20d='M12%2015V4M8%208l4-4%204%204'/%3E%3Cpath%20d='M5%2012v7h14v-7'/%3E%3C/svg%3E")}

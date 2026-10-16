@@ -2,7 +2,7 @@
 // 数据取真实文件（phonetic.js / grammar.js），喇叭 SVG 从 app.wxss 实抽 —— 效果图 = 真机外观。
 const fs = require('fs');
 
-const MP = 'D:/idea/ielts-365/light/miniprogram';
+const MP = require('path').join(__dirname, '..', 'miniprogram');
 const OUT = 'D:/idea/_reviews/音标例词行方案A效果图_v1.1.69.html';
 
 const PH = require(MP + '/utils/phonetic.js');

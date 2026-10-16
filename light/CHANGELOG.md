@@ -37,6 +37,36 @@
 ### ④ 内核同步 cloud/dark（本版本内完成）
 
 light v1.1.103 功能内核已整树同步到 cloud/dark（63 版差距一次性收口）：cloud 保留三态外观（theme.js/theme.json/darkmode/设置页外观卡/onThemeChange），dark 保留定死深色（静态色 app.json）；weeks 旧页两实例均已移除；云函数 audio-url 的 PATH_RE 补 wuk/；verify-structure 两实例全过。文档：cloud/dark 各自 CHANGELOG/README/AI-CONTEXT 已记同步。
+
+### ⑤ 仓库卫生与文档整理（同日追加，未上传）
+
+> 触发：分类全量代码扫描（报告 `D:\idea\_ipa_build\_SCAN_1103_REPORT.md`）后的逐条定性执行。
+
+**代码层**
+
+- 删除死资源 `miniprogram/images/logo.svg`——2026-09-21（`2f96be8`「更新开溜主Logo为飞机与张嘴插画风格」）定稿的「开溜 / Kailliu」品牌图，四实例同一份（md5 `a5f6a98c…`），**当前零引用**（唯一相关样式 `.brand-logo` 也无 wxml 使用）。
+- 删除 `app.wxss` 中 **13 个死样式类、29 行**（三实例同步，340 → 311 行，删后三份仍逐字节相同）：`.brand-head` / `.brand-logo` / `.brand-copy` / `.brand-name` / `.brand-sub`（品牌头整块已从 wxml 移除）、`.ico-eye` / `.ico-ask`（已被 `eye-ico` 取代，含 `.theme-dark` 变体）、`.icon-button` / `.icon-star` / `.icon-star--on` / `.icon-remove` / `.icon-speaker`（已被 `spk-ico` / `star-ico` 等取代）、`.hover-tint`（其注释所述的 weeks 页手动按压模式已随 `pages/weeks` 移除）。
+  - 判据：全项目 `js` / `wxml` / `wxss` / `json` 交叉验证「零引用」。`chev`、`word-speak` 因被页面 wxss（settings / grammar / review / topic）引用而**保留**。
+  - ⚠️ 纯样式删除、逻辑零风险，但**视觉效果需真机过一遍确认**。
+
+**仓库层**
+
+- `light|cloud|dark/.gitignore` 放开 `project.private.config.json`（改为一行注释说明），并把 3 个 `project.private.config.json` 纳入版本管理——目标：**换机 clone 后开发者工具的本地设置与旧机一致**。
+- 4 个此前未跟踪的 `tools/gen-*.js` 一并入库。
+- `tools/gen-*.js` 里硬编码的 `D:/idea/ielts-365/light/miniprogram` 全部改为 `path.join(__dirname, '..', 'miniprogram')`（7 个文件）→ **以后再改名、换机都不会坏**；`tools/cloudsync-test/README.md` 的旧路径改为正确绝对路径（三实例同步）。
+- 移出三实例 `tools/_rec3_all`、`_rec3_zoom`、`_rec3_frames`、`_rec4_frames` 逐帧目录（各 199 文件 / 约 23 MB，合计约 69 MB；结论已归档进文档）。**保留** `_rec*.mp4`、拼图/证据 png 与 4 个分析脚本——闪白 / deep-link 残影在 AI-CONTEXT 仍标「待解决」，属原始证据。
+
+**文档层**
+
+- 根 `SYNC-CHECKLIST.md` **整篇重写**：旧的「A~H 八类 · 逐处替换」口径作废（只覆盖 v1.1.45 时代约 7 处差异），改为 v1.1.103 起的「**整树铺 + 外观层回填**」，含验收标准（同步后允许剩余哪些差异文件）与踩坑表。
+- `cloud/AI-CONTEXT.md`：「当前进度快照」由 v1.1.37/38（09-26）改写为 **v1.1.103 当前态**，旧快照降格为「📜 历史快照 · 仅作追溯」；顺带修掉引言处一处拼接破损（`…成为主项的原因）。：复习页三修…`）。
+- `light` / `dark` 的 `AI-CONTEXT.md` 头部各补「当前版本」指向。
+- `original/`（历史快照，不发布）：README / AI-CONTEXT / CHANGELOG 三份**头部统一加「⚠️ 历史快照 · 不再维护」声明**并指向 light / cloud / dark；**技术内容一字不改**，保持快照原貌。
+
+**明确不处理**
+
+- 运行时存储键名 `ielts-365-store`（`store.js` 的 `KEY` / `BACKUP_TAG`）与 `ielts-365-search-kw`（`tools.js`）：**永久保留旧名**。改动会让全部用户学习进度/打卡/收藏归零，且旧备份 JSON（校验 `app === 'ielts-365'`）将无法导入——收益为零、代价是用户数据。
+
 ## 2026-10-15 · 剑桥音频选块修正 + 量词 + 抓取截断修复（v1.1.102，已上传体验版）
 
 > **触发**：v1.1.101 验收反馈「abuse 名词/动词音还是不对，美音反倒用重音区分」。「abuse 音标维度本来就对」的旧结论让我回头审 v1.1.101 的**选块脚本**——查出**系统性 bug**：v1.1.101 上传的 104 卡里有 **11 张拿到了错误词性的录音**（abuse 名词卡播的是动词音）。

@@ -5,7 +5,7 @@ node_modules/
 .DS_Store
 *.log
 miniprogram_npm/
-project.private.config.json
+# project.private.config.json 故意不忽略：纳入版本管理，保证换机 clone 后可直接调试（2026-10-16 用户决策）
 
 # 编辑器
 .vscode/

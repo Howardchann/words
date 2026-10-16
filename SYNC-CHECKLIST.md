@@ -1,101 +1,130 @@
 # light → cloud / dark 内核同步清单
 
-> 生成时间：2026-10-09（对应 light v1.1.59）
-> 用途：把 light 实例累积的功能内核同步到 cloud（三主题）与 dark（纯深色），**外观配色一律不同步**。
-> 本清单由 `git diff --no-index light cloud` 逐文件甄别得出（共 31 个源码/数据文件，另有文档与设计稿）。
+> ⚠️ **本清单已于 2026-10-16（light v1.1.103）换代。**
+> 旧版「A~H 八类 · 逐处字符串替换」口径**已作废**——它只覆盖 v1.1.45 时代的约 7 处差异，收不了 63 个版本的差距（v1.1.45 → v1.1.103 新增了工具页、`pkg-study` 分包、5 个 utils、4 tab 英文化、`pages/weeks` 移除等）。
+> 旧版留档：`_ipa_build/_backup_1016/SYNC-CHECKLIST.md.bak`（追溯当时的逐处判定表用）。
+>
+> **新口径 = 整树铺 + 按实例回填外观层**，参考实现 `_ipa_build/_sync_1103.js`。
 
-## 判定口径
+---
 
-| 类别 | 含义 | 同步方式 |
+## 0. 一句话口径
+
+**把 `light/miniprogram` 整棵树复制到目标实例，再把「外观层」按目标实例的语义回填回去。**
+
+不再逐处甄别「这个类算不算功能类」——因为 light 的 `app.wxss` **本身已含完整 `.theme-dark` token 组**，三实例 `app.wxss` 已逐字节相同，外观差异**只集中在 6 个文件**（见 §2）。
+
+---
+
+## 1. 三实例分工与同步边界
+
+| 实例 | 主题形态 | 同步角色 |
 |---|---|---|
-| **A 纯内核** | 无任何外观成分 | **整文件覆盖**（安全） |
-| **B 页面逻辑** | `.js`，纯逻辑 | 整文件覆盖（覆盖前逐行确认无主题分支） |
-| **C 结构文案** | `.wxml`，功能结构 + 少量文案 | 逐处替换 / 覆盖后人工复核 |
-| **D 样式混装** | `.wxss`，配色 token **与**功能规则同文件 | **禁止整文件覆盖**，逐处字符串替换 |
-| **E 目标独有** | cloud/dark 特有的主题机制 | **绝不动** |
-| **F 目标缺失** | light 新增、目标还没有 | 新增文件 + 注册 |
-| **G 数据** | 词库字段 | 整文件覆盖（须先证明目标无独有内容） |
-| **H 产物/文档** | 盖章、说明文档、设计稿 | 各自维护，不同步 |
+| `light/` | 纯浅色（定死） | **源**（唯一开发入口） |
+| `cloud/` | 三态 auto / 浅色 / 深色 + 手动切换 | 收（回填三态外观层） |
+| `dark/` | 纯深色（定死） | 收（回填静态深色外观层） |
+| `original/` | 2026-09-25 历史快照 | **不参与**（永久冻结，不发布不修改） |
 
-## A 类 · 纯内核（4）
+---
 
-| 文件 | light 独有 / 目标独有 | 内容 |
-|---|---|---|
-| `miniprogram/utils/speech.js` | +72 / −32 | 英音路由（`wuk/`）、慢速取 s 文件、百度只挂美音、`accent` 通道、`BAD_PREGEN_AI` |
-| `miniprogram/utils/data.js` | +89 / −5 | 单词搜索、英文例句挖空、`ipa`/`uk`/`cn` 字段、`PHASE_NAMES` 去雅思化 |
-| `miniprogram/utils/store.js` | +94 / −21 | **SM-2 四档 SRS**（`ef/ivl/step/reps`）+ 老数据惰性迁移 + `sanitizeReviewStats` 扩字段（**不扩会云同步丢 ef/ivl**） |
-| `cloudfunctions/audio-url/index.js` | +1 / −2 | 路径白名单放行 `wuk/[0-8]/\d{4}s?\.mp3` |
+## 2. 同步后「应该剩下多少差异」——这是验收标准
 
-> A 类已逐行确认：目标侧「独有行」全部是**旧实现**，无目标专属功能。
-
-## B 类 · 页面逻辑（5）
-
-| 文件 | light 独有 | 内容 | 备注 |
-|---|---|---|---|
-| `pages/today/today.js` | +69 | `zhOpen` / `onToggleExZh`、点音标模块按口音朗读、`jumpDay`+`jumpWord` 定位 | 需查是否含主题分支 |
-| `pages/review/review.js` | +94 | 复习「填空」tab、`cnOf` 反查补全、SM-2 四档 `gradePreview()` | 同上 |
-| `pages/settings/settings.js` | +4 | 「默认口音」卡逻辑 | |
-| `components/nav-bar/index.js` | +8 | `back` 返回键属性（搜索页用） | |
-| `pages/weeks/weeks.js` | +1 | 「18个月计划总览」标题文案 | 纯文案 |
-
-## C 类 · 结构与文案（5）
-
-| 文件 | light 独有 | 内容 |
-|---|---|---|
-| `pages/today/today.wxml` | +21 | 词行**方案 B**（单词+词性+释义+双音标 flex-wrap 流）、眼睛图标、`.ipa-mod` 双音标模块 |
-| `pages/review/review.wxml` | +39 | 重点词磁贴同构改造 + 填空 tab 面板 |
-| `pages/settings/settings.wxml` | +1 | 口音卡说明文案（英音单词走离线音频） |
-| `pages/weeks/weeks.wxml` | +2 | 「学习计划总览」文案（原「词表总览」） |
-| `components/nav-bar/index.wxml` | +1 | 左区默认 slot（放放大镜） |
-
-## D 类 · 样式（**混装，逐处替换**）（5）
-
-| 文件 | light 独有 | 该同步的功能规则 | 不能动的配色 |
-|---|---|---|---|
-| `miniprogram/app.wxss` | +105 / −15 | `.ex-speak .spk-ico` 36rpx、`.ex-eye` 基线 strut、闭眼图标路径、`.word-head`/`.ipa-row` 版式、绿色喇叭深色变体 | `--nav-fg`、`--win-bg` 等全部配色 token |
-| `pages/review/review.wxss` | +39 | 填空 tab 样式、磁贴版式 | 配色 |
-| `pages/today/today.wxss` | +15 | 词行版式相关 | 配色 |
-| `components/nav-bar/index.wxss` | +9 | 左区 slot 的 `box-sizing` / `padding-left` | 前景色 |
-| `custom-tab-bar/index.wxss` | +4 | 图标尺寸（若与 i-book 相关） | 配色 |
-
-> ⚠️ 铁律（已写入 `light/AI-CONTEXT.md`）：`app.wxss` 是**混装文件**，必须逐处字符串替换，**禁止整文件覆盖**，否则会把 cloud 的换肤与 dark 的深色改坏。
-
-## E 类 · 目标独有（**绝不动**）（6+）
-
-| 文件 | 内容 |
+| 对比 | 允许存在的差异文件 |
 |---|---|
-| `miniprogram/utils/theme.js` | 三主题引擎（light 无此文件逻辑） |
-| `miniprogram/theme.json` | 主题 token 映射（light 无此文件） |
-| `miniprogram/app.js` | `wx.onThemeChange` 跟随系统换肤栈通知 |
-| `miniprogram/app.json` 的 `darkmode` / `themeLocation` / `@winBg` | 主题声明 |
-| 各页 `*.json` 的 `navigationBarTextStyle` | light=`black`、cloud/dark 各不同（**顶部闪白方案的关键，改错会复发**） |
-| `pages/today/today.wxss` 等零散深浅色规则 | 由 `tools/darkicons.js` 生成 |
+| `light` ↔ `cloud` | **6 个**：`miniprogram/app.js` · `miniprogram/app.json` · `pages/settings/settings.js` · `pages/settings/settings.wxml` · `miniprogram/theme.json` · `utils/theme.js` |
+| `light` ↔ `dark` | **2 个**：`miniprogram/app.json` · `utils/theme.js` |
+| `light` ↔ `cloud` ↔ `dark` 的 `cloudfunctions/` | **完全一致**（零差异） |
+| 三实例 `miniprogram/app.wxss` | **逐字节相同**（md5 一致） |
 
-## F 类 · 目标缺失，需新增（4 + 注册）
+**任何超出这个清单的差异 = 同步没做干净，必须查。**
 
-| 文件 | 内容 |
+核对命令：
+
+```bash
+diff -rq light/miniprogram cloud/miniprogram
+diff -rq light/miniprogram dark/miniprogram
+diff -rq light/cloudfunctions cloud/cloudfunctions    # 应无输出
+diff -rq light/cloudfunctions dark/cloudfunctions     # 应无输出
+md5sum light/miniprogram/app.wxss cloud/miniprogram/app.wxss dark/miniprogram/app.wxss
+```
+
+---
+
+## 3. 操作步骤
+
+### 3.1 前置
+
+- 确认 light 侧已盖章、工作区干净（`git status`）
+- **备份**目标实例的 6 个外观文件：`utils/theme.js`、`theme.json`、`app.js`、`app.json`、`pages/settings/settings.js`、`pages/settings/settings.wxml`
+
+### 3.2 铺树
+
+```bash
+cp -r light/miniprogram/. cloud/miniprogram/
+cp -r light/miniprogram/. dark/miniprogram/
+```
+
+### 3.3 回填外观层（**漏一步就白铺**）
+
+1. **还原 `utils/theme.js`** —— cloud 用三态版、dark 用定死深色版。
+   ⚠️ 铺树会把 light 的**定死浅色**版带过去 → **必须立刻还原**（这是最致命的一步，且 `verify-structure.js` 查不出来）。
+2. **确认无 `pages/weeks` 残留**（同步时若树里还在，要删）。
+3. **cloud 专属 5 处**：
+   - `app.js`：补 `wx.onThemeChange` 广播
+   - `app.json`：补 `"backgroundColor": "@winBg"`、`"backgroundColorContent": "@bgContent"`、`"darkmode": true`、`"themeLocation": "theme.json"`
+   - 复原 `theme.json`
+   - `pages/settings/settings.js`：补 `onAppearance`，以及 `onShow` 里的 `theme.sameSet(this, { appearanceMode: theme.mode() })`
+   - `pages/settings/settings.wxml`：补「外观」卡片
+4. **dark 专属 7 处**：`app.json` 的静态深色值——`#0E1618`（窗口底）、`#5E6B66`（未选中）、`#58B394`（选中）、`borderStyle: "black"`、`backgroundTextStyle: "light"` 等。
+
+### 3.4 带出配套文件
+
+```bash
+cp light/tools/verify-structure.js cloud/tools/
+cp light/tools/verify-structure.js dark/tools/
+cp light/cloudfunctions/audio-url/index.js cloud/cloudfunctions/audio-url/    # 若云函数有变
+```
+
+---
+
+## 4. 同步后必跑的自检
+
+```bash
+cd light && node tools/verify-structure.js
+cd cloud && node tools/verify-structure.js
+cd dark  && node tools/verify-structure.js
+```
+
+六项 = JS 语法 / app.json / WXML 标签配对 / WXSS 花括号 / usingComponents / 旧页面残留。
+**六项全过 ≠ 外观正确**（它只查结构），外观必须靠 §2 的 diff 清单核对。
+
+---
+
+## 5. 绝对不要同步的东西
+
+| 项 | 原因 |
 |---|---|
-| `pages/search/search.{js,json,wxml,wxss}` | 单词搜索页（v1.1.46） |
-| `app.json` | 注册 `pages/search/search` |
-| `custom-tab-bar` / `nav-bar` | 搜索入口与返回键（已含在 B/C 类） |
+| `utils/theme.js`、`theme.json`、`app.js`、`app.json`、`pages/settings/settings.*` | 外观层，各实例语义不同（见 §2） |
+| `utils/build-info.js` | 各实例自己 `node tools/stamp-build.js` 盖章 |
+| `AI-CONTEXT.md` / `CHANGELOG.md` / `README.md` | 各实例独立维护，内容按自身实况写 |
+| `light/tools/*.html`、`light/tools/gen-*.js` | 设计稿与效果图脚本，仅 light 保留 |
+| `project.private.config.json` | 各实例的本地调试配置，各自维护（**注意：三实例均已纳入版本管理，不要再把它加回忽略**） |
+| `original/` 整目录 | 历史快照，永久冻结 |
 
-## G 类 · 数据（1）
+---
 
-| 文件 | light 独有 | 内容 |
-|---|---|---|
-| `miniprogram/utils/words.js` | +4 / −4 | 第 6/7/8 字段（美音音标 / 英音音标 / 中文例句）。**整文件覆盖前必须 `git diff --no-index` 证明目标无独有内容**（历史踩坑：同实例内 `review.js` 是 CRLF、其余 LF） |
+## 6. 已知坑（踩过的）
 
-## H 类 · 产物与文档（不同步）
+1. **CRLF / LF 混用**：**CRLF** = `tools.*` · `today.js` · `words.js` · `data.js` · `speech.js` · `app.js` · `app.json`；**LF** = `today.wxml` · `split-senses.js` · `wordforms.js` · `glossary.js` · `CHANGELOG.md`。改前用 node 实测（`indexOf('\r\n')`），按**子串唯一性**替换，不要按行定位。
+2. **`theme.js` 不还原 = 静默毁外观**：cloud 会退回定死浅色、dark 会变浅色，而结构自检**全过**（查不出来）。只能靠 §2 的 diff 清单发现。
+3. **锚点替换在 CRLF 文件上会静默命中 0**：写替换脚本时要先把 `from/to` 的 `\n` 转成目标文件的 EOL，并做「已应用则 SKIP」的幂等判断。
+4. **改共享机制必须三实例同改**：例如 `speech.js` 的 `CACHE_ROOT`（当前 `au6`）——换了就必须三实例一致，否则老设备继续播旧缓存。
+5. **`words.js` 字段改动安全**：只改字段内容、不增删行 → 8115 条不变，索引 / 快照 / `WORD_TOTAL` 全部安全。
+6. **云函数改动要单独部署**：本地改了 `cloudfunctions/` 不等于云端生效，需在开发者工具里「上传并部署」，或 `tcb fn deploy <name> --force -e <envId>`。
 
-- `miniprogram/utils/build-info.js` —— 各实例自己 `node tools/stamp-build.js` 盖章
-- `AI-CONTEXT.md` / `CHANGELOG.md` / `README.md` —— 各实例独立维护（light 的内容不直接倒过去）
-- `light/tools/*.html` —— 设计稿（效果图），仅 light 保留
+---
 
-## 建议的同步批次
+## 7. 提交与发布节奏
 
-1. **第 1 批（低风险）**：A 类 4 个文件整文件覆盖 + 冒烟（朗读三档、搜索、复习四档、音标点读）
-2. **第 2 批（中风险）**：B 类 5 个 `.js` —— 覆盖后逐行确认无主题分支
-3. **第 3 批（高风险）**：C 类 WXML + F 类新增搜索页 —— 涉及 `app.json` 注册与 nav-bar 改动
-4. **第 4 批（最高风险）**：D 类 `.wxss` 逐处替换 —— 每处替换后立刻在看板里核对外观，**最后做**
-
-> 每批完成后单独提交 + 盖章，便于出问题时回滚到上一批。
+- 同步完成后**单独提交一次**（例：`sync: light v1.1.103 内核整树同步 cloud/dark`），便于出问题时回滚到同步前。
+- **推送 GitHub 与上传体验版都攒批**：改完只做本地盖章，等用户明确说「推 / 传」再动作。
