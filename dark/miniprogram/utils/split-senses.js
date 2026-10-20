@@ -2,18 +2,18 @@
 //
 // 背景：同形异音词（object 动词 /əbˈdʒekt/ vs 名词 /ˈɑːbdʒekt/）此前一张卡只配一套
 // 音标/音频，另一读音的义项与读音对不上。本表把这些词拆成主/副两张卡：
-//   主卡 = 原词条，例句与读音不动；m1/p1 存在时收敛释义与词性，使音标/读音/例句/释义一致。
+//   主卡 = 原词条；m1/p1/ipa1/uk1 可统一释义、词性与英美音标，使例句与读音一致。
 //   副卡 = sub 里的另一读音义项（释义/词性/双音标/例句/中译/音频编号一整套）。
-// 只在今日页渲染层展开（today.js renderDay → expand），主表 words.js、DAY_OFF 索引、
-// 云同步快照、WORD_TOTAL 全部零改动。搜索/复习仍以主卡为准。
+// 今日页展开为主/副卡；搜索与复习复用同一主卡归一规则并展示副义项摘要。
+// 副卡不创建独立学习进度身份；主表 words.js、DAY_OFF 索引、云同步快照、WORD_TOTAL 均不改。
 //
-// 副卡音频编号 = 8200~8241 新号段（勿动 8001~8115 的 AI 释义号段）：
+// 副卡音频编号 = 8200~8245 新号段（勿动 8001~8115 的 AI 释义号段）：
 //   美音单词 w/8/82xx.mp3（慢速 82xxs.mp3）
 //   英音单词 wuk/8/82xx.mp3（慢速 82xxs.mp3）
 //   美音例句 s/8/82xx.mp3（慢速 82xxs.mp3）
 //
 // 字段（与 data.js allWords 的映射名一致）：
-//   m1/p1   主卡释义/词性收敛（缺省 = 不动）
+//   m1/p1/ipa1/uk1   主卡释义/词性/英美音标收敛（缺省 = 不动）
 //   sub     副卡：p 词性 m 释义 ipa 美音 uk 英音 ai 音频编号 e 英例 cn 中译
 module.exports = {
 
@@ -24,7 +24,7 @@ module.exports = {
   },
 
   addict: {
-    p1: 'n.', m1: '入迷的人',
+    p1: 'n.', m1: '上瘾者；入迷的人', ipa1: '/ˈædɪkt/', uk1: '/ˈædɪkt/',
     sub: { p: 'v.', m: '使沉溺；使上瘾', ipa: '/əˈdɪkt/', uk: '/əˈdɪkt/', ai: 8201,
       e: 'He was addicted to video games as a teenager.', cn: '他十几岁时对电子游戏上瘾了。' },
   },
@@ -61,8 +61,8 @@ module.exports = {
 
   close: {
     p1: 'adj.', m1: '靠近的',
-    sub: { p: 'n./v.', m: '结束；完结', ipa: '/kloʊz/', uk: '/kləʊz/', ai: 8207,
-      e: 'At the close of the meeting, everyone clapped.', cn: '会议结束时，大家都鼓掌了。' },
+    sub: { p: 'v.', m: '结束；关闭', ipa: '/kloʊz/', uk: '/kləʊz/', ai: 8207,
+      e: 'Please close the door quietly.', cn: '请轻轻地关上门。' },
   },
 
   combat: {
@@ -102,7 +102,7 @@ module.exports = {
   },
 
   degenerate: {
-    p1: 'v.', m1: '退化；堕落',
+    p1: 'v.', m1: '退化；堕落', ipa1: '/dɪˈdʒenəreɪt/', uk1: '/dɪˈdʒenəreɪt/',
     sub: { p: 'adj.', m: '堕落的；退化的', ipa: '/dɪˈdʒenərət/', uk: '/dɪˈdʒenərət/', ai: 8214,
       e: 'Some people say that kind of movie is degenerate.', cn: '有些人说那种电影很堕落。' },
   },
@@ -132,7 +132,7 @@ module.exports = {
   },
 
   elaborate: {
-    p1: 'v.', m1: '详细地说明',
+    p1: 'v.', m1: '详细地说明', ipa1: '/ɪˈlæbəreɪt/', uk1: '/ɪˈlæbəreɪt/',
     sub: { p: 'adj.', m: '精细的；详尽的', ipa: '/ɪˈlæbərət/', uk: '/ɪˈlæbərət/', ai: 8219,
       e: 'She wore an elaborate dress to the party.', cn: '她穿了一条精致的连衣裙去参加聚会。' },
   },
@@ -167,7 +167,7 @@ module.exports = {
   },
 
   moderate: {
-    p1: 'adj.', m1: '适度的；稳健的',
+    p1: 'adj.', m1: '适度的；温和的；中等的', ipa1: '/ˈmɑːdərət/', uk1: '/ˈmɒdərət/',
     sub: { p: 'v.', m: '节制；缓和', ipa: '/ˈmɑːdəreɪt/', uk: '/ˈmɒdəreɪt/', ai: 8225,
       e: 'He tries to moderate how much time he spends online.', cn: '他试着节制自己上网的时间。' },
   },
@@ -209,7 +209,7 @@ module.exports = {
   },
 
   recount: {
-    p1: 'v.', m1: '详述；叙述',
+    p1: 'v.', m1: '详述；叙述', ipa1: '/rɪˈkaʊnt/', uk1: '/rɪˈkaʊnt/',
     sub: { p: 'v.', m: '重新计算；重新清点', ipa: '/ˌriːˈkaʊnt/', uk: '/ˌriːˈkaʊnt/', ai: 8232,
       e: 'The election workers had to recount all the votes.', cn: '选举工作人员不得不重新清点所有选票。' },
   },
@@ -233,13 +233,13 @@ module.exports = {
   },
 
   sow: {
-    p1: 'v.', m1: '播种',
+    p1: 'v.', m1: '播种；播下', ipa1: '/soʊ/', uk1: '/səʊ/',
     sub: { p: 'n.', m: '母猪', ipa: '/saʊ/', uk: '/saʊ/', ai: 8236,
       e: 'The farmer keeps a big sow and ten little pigs.', cn: '农夫养了一头大母猪和十只小猪。' },
   },
 
   use: {
-    p1: 'n.', m1: '使用；习惯',
+    p1: 'n.', m1: '使用；用途', ipa1: '/juːs/', uk1: '/juːs/',
     sub: { p: 'v.', m: '利用；使用', ipa: '/juːz/', uk: '/juːz/', ai: 8237,
       e: 'Can I use your phone to call my mom?', cn: '我可以用你的手机给我妈妈打个电话吗？' },
   },
@@ -252,7 +252,7 @@ module.exports = {
   },
 
   tear: {
-    p1: 'n.',
+    p1: 'n.', m1: '泪滴；眼泪', ipa1: '/tɪr/', uk1: '/tɪə/',
     sub: { p: 'v.', m: '撕裂；撕破', ipa: '/ter/', uk: '/teə/', ai: 8239,
       e: 'Be careful not to tear the paper.', cn: '小心别把纸撕破。' },
   },
@@ -306,24 +306,69 @@ module.exports = {
 // 每张卡补唯一键 k：主卡 = 单词本身，副卡 = 单词 + '~2'（wx:key 不允许重复）。
 // ⚠️ 查表必须用 MAP 而非 module.exports：词表里有单词「expand」，会撞上导出的函数名。
 const MAP = module.exports;
+function normalizePrimary(word) {
+  if (!word || !word.w) return word;
+  const sp = MAP[word.w];
+  // 非拆卡词直接复用对象，避免 8115 词启动时无意义地额外复制大多数词条。
+  if (!sp || typeof sp !== 'object') return word;
+  const out = Object.assign({}, word);
+  if (sp.m1) out.m = sp.m1;
+  if (sp.p1) out.p = sp.p1;
+  if (sp.ipa1) out.ipa = sp.ipa1;
+  if (sp.uk1) out.uk = sp.uk1;
+  if (sp.sub) out.altSense = { p: sp.sub.p, m: sp.sub.m, ipa: sp.sub.ipa, uk: sp.sub.uk, e: sp.sub.e, cn: sp.sub.cn, ai: sp.sub.ai };
+  return out;
+}
+const wfMod = require('./wordforms.js');   // v1.1.108：词形标签按卡词性过滤（wordforms 不依赖本文件，无环）
+
 function expand(list) {
   const out = [];
   let extraIdx = -1;
   for (let i = 0; i < list.length; i++) {
-    const v = list[i];
+    const v = normalizePrimary(list[i]);
     if (extraIdx < 0 && !v.core) extraIdx = out.length;
     v.k = v.w;
     const sp = MAP[v.w];
     if (typeof sp !== 'object' || !sp || !sp.sub) { out.push(v); continue; }
-    if (sp.m1) v.m = sp.m1;
-    if (sp.p1) v.p = sp.p1;
+    // 主/副卡词性不同，变形标签各算各的（tear：主 n. 卡不挂 tore/torn；副 v. 卡才挂）
+    v.wf = wfMod.wfNotes(v.w, v.p);
     out.push(v);
     const s = sp.sub;
     out.push(Object.assign({}, v, {
       k: v.w + '~2', p: s.p, m: s.m, ipa: s.ipa, uk: s.uk, ai: s.ai, e: s.e, cn: s.cn,
+      wf: wfMod.wfNotes(v.w, s.p),
+      altSense: null,
     }));
   }
   return { list: out, extraIdx: extraIdx };
 }
+
+module.exports.normalizePrimary = normalizePrimary;
+
+// 一词一卡（v1.1.110）：把主卡与另一读音的副义项合成一张卡 ——
+// 今日页一张卡里上下排（副义项在虚线以下），不再拆成两张独立卡片。
+// 返回 [{ ...主卡, k, wf, sub: { p,m,ipa,uk,ai,e,cn,wf,k } | null }]。
+// 副卡不创建独立学习身份：进度、收藏、搜索仍只认主卡。
+function cards(list) {
+  const out = [];
+  for (let i = 0; i < list.length; i++) {
+    const v = normalizePrimary(list[i]);
+    v.k = v.w + "~1";
+    const sp = MAP[v.w];
+    if (typeof sp !== "object" || !sp || !sp.sub) { v.sub = null; out.push(v); continue; }
+    // 主 / 副词性不同，变形标签各算各的（tear：主 n. 卡不挂 tore/torn，副 v. 卡才挂）
+    v.wf = wfMod.wfNotes(v.w, v.p);
+    const s = sp.sub;
+    v.sub = {
+      p: s.p, m: s.m, ipa: s.ipa || "", uk: s.uk || "", ai: s.ai, e: s.e, cn: s.cn || "",
+      wf: wfMod.wfNotes(v.w, s.p),
+      k: v.w + "~2",
+    };
+    out.push(v);
+  }
+  return out;
+}
+
+module.exports.cards = cards;
 
 module.exports.expand = expand;

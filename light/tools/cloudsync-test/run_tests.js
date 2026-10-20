@@ -402,8 +402,8 @@ function dump(id) { const c = DB.progress; return c ? c.get(id) : undefined; }
   const bk = JSON.parse(d1.store.exportBackup());
   ok(typeof bk.summary === 'string' && bk.summary.indexOf('导出于') === 0,
     '导出文本顶部含摘要', bk.summary);
-  ok(/已完成 1\/546 天（学至 \d{4}年\d{1,2}月\d{1,2}日）/.test(bk.summary),
-    '摘要含"已完成 N/546 天（学至 日期）"量化信息', bk.summary);
+  ok(/已完成 1\/390 节/.test(bk.summary),
+    '摘要含"已完成 N/390 节"量化信息', bk.summary);
   ok(/复习记录 \d+ 词/.test(bk.summary) && /收藏 \d+ 词/.test(bk.summary),
     '摘要含收藏/复习计数', bk.summary);
   const rBk = d2.store.importBackup(d1.store.exportBackup(), 'merge');

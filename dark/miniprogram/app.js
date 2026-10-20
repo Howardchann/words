@@ -3,7 +3,7 @@ const store = require('./utils/store.js');
 const cloudCfg = require('./utils/cloud.js');
 
 App({
-  globalData: { store: store, jumpDay: 0 },
+  globalData: { store: store, jumpSec: -1 },
 
   onLaunch() {
     // ⚠️ 顺序不能反：store.init() 会立刻发起一次进度同步，走的是 wx.cloud.callFunction，

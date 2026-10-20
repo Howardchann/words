@@ -1,11 +1,14 @@
 // pkg-study/pages/topic/topic.js —— 语法点详情（分包页）
 // 内容：人话开场白 + 定义 / 用法 / 易错点 / 例句（可朗读）/ 课程对应哪几天（可跳到课程原文）
 const GRAMMAR = require('../../data/grammar.js');
+const plan = require('../../../utils/data.js');
 const theme = require('../../../utils/theme.js');
 const speech = require('../../../utils/speech.js');
 const store = require('../../../utils/store.js');
 
-const MAX_DAYS = 24;   // 课程对应天数最多列这么多，超出只提示总数（避免个别基础语法点挂满整页）
+// v1.1.110：课程从「546 天」改为「6 册 / 78 章 / 390 节」，这里列的是**节**（数据里存的仍是旧 day 号，
+// 一节 = 一 day，si = day - 1，逐条一一对应，不需要重刷 grammar.js）。
+const MAX_SECS = 24;   // 课程对应节数最多列这么多，超出只提示总数（避免个别基础语法点挂满整页）
 
 // ---------- 易错点解析（v1.1.68 起）----------
 // 数据源是一整串自由文本：「❌ 错句 ✅ 对句（原因）」、只有错句、或完全不含标记的提示句，格式不统一。
@@ -117,7 +120,19 @@ Page({
     const cat = GRAMMAR.filter(c => c.id === (query && query.c))[0];
     const t = cat && cat.topics[Number(query && query.i) || 0];
     if (!cat || !t) { this.tip('内容缺失'); return; }
-    const all = (t.days || []).map(d => ({ d: d }));
+    // 旧日历日号 → 节：data.js sectionOfDay()（每周 7 天里只有前 5 天有词，别用 d-1 硬减）
+    const all = (t.days || []).map(d => {
+      const si = plan.sectionOfDay(d);
+      const info = plan.sectionInfo(si);
+      if (!info) return { d: d, si: si, short: '第 ' + d + ' 天', loc: '' };
+      return {
+        d: d,
+        si: si,
+        short: info.bookNo + '-' + info.chNo + '-' + info.kNo,
+        loc: info.loc,
+        name: info.title,
+      };
+    });
     // 导航栏短标题（v1.1.80）：本页是系统「原生导航栏」（非自定义），原生标题固定单行 + 超出省略，
     // 长语法点名（如「英语句子的基本结构」）在真机上尾部被截成省略号（用户反馈）。
     // 改用分类名（如「句子基础」）——完整标题本来就在下方头卡里，导航栏只作位置提示。
@@ -127,8 +142,8 @@ Page({
       catName: cat.name,
       t: t,
       notes: notes,
-      days: all.slice(0, MAX_DAYS),
-      dayMore: Math.max(0, all.length - MAX_DAYS),
+      days: all.slice(0, MAX_SECS),
+      dayMore: Math.max(0, all.length - MAX_SECS),
     });
     // 易错点正确句的音频预取（v1.1.82）：音频在 g/ 桶（云盘），但 prefetch 此前只认词表编号、
     // 语法例句 ai=0 被挡 → 从未预热，每次点击都要等云函数签名 + 下载（真机「点击很久才播放」）。
@@ -167,13 +182,14 @@ Page({
     speech.speak(text, { kind: 's' });
   },
 
-  // 跳到课程里讲过这个语法点的那一天（switchTab 不能带参 → 走 globalData 中转）
+  // 跳到课程里讲过这个语法点的那一节（switchTab 不能带参 → 走 globalData 中转）
+  // v1.1.110：jumpDay（1 起的天号）换成 jumpSec（0 起的节下标），今日页只认后者。
   goDay(e) {
-    const d = Number(e.currentTarget.dataset.d) || 0;
-    if (!d) return;
+    const si = Number(e.currentTarget.dataset.si);
+    if (!(si >= 0)) return;
     speech.stop();
     const app = getApp();
-    if (app && app.globalData) { app.globalData.jumpDay = d; app.globalData.jumpWord = ''; }
+    if (app && app.globalData) { app.globalData.jumpSec = si; app.globalData.jumpWord = ''; }
     wx.switchTab({ url: '/pages/today/today', fail: () => this.tip('跳转失败，请再点一次') });
   },
 

@@ -75,11 +75,24 @@
 .tk-empty__sub { margin-top: 14rpx; font-size: 24rpx; color: var(--muted); line-height: 1.7; }
 .tk-note { margin-top: 16rpx; font-size: 23rpx; color: var(--muted2); line-height: 1.7; }
 
-/* ④ 语法速查（分类卡） */
+/* 卡片标题统一带计数（v1.1.109）：标题绿色加粗，规模数字靠右、灰色常规字重。
+   学习记录卡不放 —— 它的三个数字本身就是内容，标题再写一遍是重复。 */
+.section-label--row { display: flex; align-items: baseline; justify-content: space-between; }
+.section-label__n { font-size: 22rpx; font-weight: 400; color: var(--muted3); letter-spacing: 0; }
+
+/* ④ 语法速查 / ⑤ 词形与构词（分类卡） */
 .cat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14rpx; }
 .cat-cell { background: var(--soft); border-radius: 16rpx; padding: 20rpx 22rpx;
   display: flex; align-items: center; justify-content: space-between; }
 .cat-cell--press { background: var(--press-green); }
+/* 分类数为奇数时最后一格（v1.1.106 改法）：跨满末行才能居中，但宽度仍按「一列」算 ——
+   grid 的两列各宽 (100% - 一个 gap) / 2，所以 14rpx 间距下是 50% - 7rpx；宽屏那档 gap 7px → 50% - 3.5px。
+   v1.1.105 写成纯 grid-column: 1 / -1，卡片独占整行 = 一条通栏长卡、文字全贴左，看着像小标题不像按钮。 */
+/* v1.1.107：末格不再用 space-between —— 孤格贴左 + 箭头钉右会在卡片里留一大片空。
+   改成「文字 + 箭头」靠拢成一组、整组居中；箭头间距由 12rpx 收到 8rpx，视觉上贴着文字。 */
+.cat-cell--odd { grid-column: 1 / -1; justify-self: center; width: calc(50% - 7rpx); justify-content: center; }
+.cat-cell--odd .cat-name { flex: 0 1 auto; }
+.cat-cell--odd .cat-cell__go { margin-left: 8rpx; }
 .cat-name { flex: 1; min-width: 0; font-size: 27rpx; font-weight: 700; color: var(--ink); }
 /* 可点击指引（v1.1.77）：分类格右侧加箭头 —— 首层此前只有文字+数字，用户第一眼不知可点。
    v1.1.79 修正：箭头原先写成第一个子元素（渲染在名称左侧），与语法速查页/设置页「箭头在行尾」不一致
@@ -184,6 +197,11 @@
   .tk-bar__input { height: 38px; }
   .cat-grid { gap: 7px; }
   .cat-cell { padding: 10px 11px; border-radius: 8px; }
+  .cat-cell--odd { width: calc(50% - 3.5px); justify-content: center; }
+  .cat-cell--odd .cat-cell__go { margin-left: 4px; }
+  .cat-group + .cat-group { margin-top: 11px; padding-top: 10px; }
+  .cat-group__label { font-size: 11px; margin-bottom: 6px; }
+  .cat-group__n { font-size: 11px; margin-left: 5px; }
   .cat-cell__go { width: 8px; height: 8px; border-width: 1.5px; margin-left: 6px; }
   .ph-chip { min-width: 48px; padding: 6px 8px; font-size: 14px; }
   .ph-cls { height: 34px; line-height: 34px; border-radius: 7px; font-size: 14px; }
@@ -193,4 +211,54 @@
   .ph-big { font-size: 28px; }
   /* 行首喇叭（v1.1.69）：尺寸 = rpx × 0.5，必须显式 px 化，否则 44rpx 在 700px+ 窗口被放大 3 倍 */
   .ex-speak--lead { margin-left: 0; margin-right: 7px; width: 22px; height: 22px; }
+}
+
+/* 多义词副义项摘要：与今日页拆卡共用同一数据，不另建学习进度身份。 */
+.sense-alt{display:flex;flex-wrap:wrap;align-items:baseline;gap:4rpx 10rpx;margin-top:12rpx;padding:10rpx 12rpx;border-left:4rpx solid #9bb9ad;border-radius:0 10rpx 10rpx 0;background:rgba(120,150,135,.08);font-size:23rpx;line-height:1.55;color:#53645d;}
+.sense-alt__label{width:100%;font-size:20rpx;color:#71877c;}
+.sense-alt__pos{font-weight:600;}
+.sense-alt__ipa{color:#667a71;}
+.sense-alt__example,.sense-alt__cn{width:100%;overflow-wrap:anywhere;}
+.sense-alt--tile{margin:8rpx 0 10rpx;}
+
+.sense-alt__play{display:inline-block;padding:3rpx 10rpx;border-radius:16rpx;background:rgba(120,150,135,.15);color:#3f6b58;font-size:21rpx;}
+
+/* ── 搜索结果：变形条 + 变形卡（v1.1.110） ───────────────────── */
+.wf-forms { padding: 2rpx 16rpx 14rpx; }
+.wf-forms__t { font-size: 21rpx; color: var(--muted3); margin: 8rpx 0 10rpx; letter-spacing: 1rpx; }
+.wf-forms__list { display: flex; flex-wrap: wrap; }
+.wf-chip { display: flex; align-items: baseline; padding: 8rpx 16rpx; margin: 0 12rpx 12rpx 0; border-radius: 10rpx; background: var(--soft); border: 1rpx solid var(--line); }
+.wf-chip--link { border-color: var(--cur-line); }
+.wf-chip--press { background: var(--press2); }
+.wf-chip.on { background: var(--press-green); border-color: var(--green); }
+.wf-chip__w { font-size: 25rpx; color: var(--ink); font-weight: 600; }
+.wf-chip--link .wf-chip__w { color: var(--green); border-bottom: 2rpx dotted var(--green); }
+.wf-chip__lb { font-size: 20rpx; color: var(--muted3); margin-left: 8rpx; }
+.wf-chip.on .wf-chip__lb { color: var(--green-press); }
+
+.form-card { margin: 0 16rpx 18rpx; padding: 20rpx 22rpx; border-radius: 18rpx; border: 1rpx dashed var(--card-line); background: var(--soft2); }
+.form-card__head { display: flex; align-items: baseline; }
+.form-card__w { font-size: 32rpx; font-weight: 700; color: var(--ink); }
+.form-card__pos { flex: 1; font-size: 22rpx; color: var(--green); font-style: italic; margin-left: 10rpx; }
+.form-card__x { font-size: 34rpx; color: var(--muted3); padding: 0 6rpx; line-height: 1; }
+.form-card__lb { font-size: 23rpx; color: var(--green); margin-top: 8rpx; }
+.form-card__m { font-size: 25rpx; color: var(--ink2); margin-top: 6rpx; }
+.form-card__foot { display: flex; align-items: center; margin-top: 14rpx; }
+.form-card__act { display: flex; align-items: center; font-size: 24rpx; color: var(--green); margin-right: 30rpx; padding: 6rpx 0; }
+.form-card__act .spk-ico { margin-right: 8rpx; }
+.form-card__note { font-size: 20rpx; color: var(--muted3); margin-top: 10rpx; }
+
+@media (min-width: 700px) {
+  .wf-forms { padding: 1px 8px 7px; }
+  .wf-forms__t { font-size: 10.5px; margin: 4px 0 5px; }
+  .wf-chip { padding: 4px 8px; margin: 0 6px 6px 0; border-radius: 5px; }
+  .wf-chip__w { font-size: 12.5px; }
+  .wf-chip__lb { font-size: 10px; margin-left: 4px; }
+  .form-card { margin: 0 8px 9px; padding: 10px 11px; border-radius: 9px; }
+  .form-card__w { font-size: 16px; }
+  .form-card__pos { font-size: 11px; margin-left: 5px; }
+  .form-card__lb { font-size: 11.5px; margin-top: 4px; }
+  .form-card__m { font-size: 12.5px; margin-top: 3px; }
+  .form-card__act { font-size: 12px; margin-right: 15px; }
+  .form-card__note { font-size: 10px; margin-top: 5px; }
 }

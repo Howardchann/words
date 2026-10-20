@@ -134,3 +134,13 @@
   .rv-wf__t { font-size:11px; margin:0 7px 3px 0; }
   .cloze-en-row { margin-top:15px; }
 }
+
+/* 多义词副义项摘要：与今日页拆卡共用同一数据，不另建学习进度身份。 */
+.sense-alt{display:flex;flex-wrap:wrap;align-items:baseline;gap:4rpx 10rpx;margin-top:12rpx;padding:10rpx 12rpx;border-left:4rpx solid #9bb9ad;border-radius:0 10rpx 10rpx 0;background:rgba(120,150,135,.08);font-size:23rpx;line-height:1.55;color:#53645d;}
+.sense-alt__label{width:100%;font-size:20rpx;color:#71877c;}
+.sense-alt__pos{font-weight:600;}
+.sense-alt__ipa{color:#667a71;}
+.sense-alt__example,.sense-alt__cn{width:100%;overflow-wrap:anywhere;}
+.sense-alt--tile{margin:8rpx 0 10rpx;}
+
+.sense-alt__play{display:inline-block;padding:3rpx 10rpx;border-radius:16rpx;background:rgba(120,150,135,.15);color:#3f6b58;font-size:21rpx;}

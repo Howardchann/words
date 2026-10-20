@@ -44,25 +44,29 @@
 
 <!-- ③ 体系分类目录（手风琴） -->
 <block wx:else>
-  <view class="intro">共 {{total}} 个语法点。两种找法：上面按「用在什么场合」筛，下面按 12 个体系分类翻。每个语法点含一句人话开场白、定义、用法、易错点、例句，能对应上课程的还会挂出「课程里讲过哪几天」。</view>
+  <view class="intro">共 {{total}} 个语法点。两种找法：上面按「用在什么场合」筛，下面按 {{cats.length}} 个体系分类翻（分 {{catGroups.length}} 组）。每个语法点含一句人话开场白、定义、用法、易错点、例句，能对应上课程的还会挂出「课程里讲过哪几节」。</view>
 
-  <view class="card cat" wx:for="{{cats}}" wx:key="id" wx:for-item="C">
-    <view class="cat__head" data-id="{{C.id}}" hover-class="cat__head--press" hover-stay-time="80" bindtap="onToggle">
-      <view class="cat__l">
-        <view class="cat__name">{{C.name}}</view>
-        <view class="cat__intro">{{C.intro}}</view>
+  <!-- v1.1.107：目录按「语法 / 词形与构词」分段，与工具页分类卡分组一致 -->
+  <block wx:for="{{catGroups}}" wx:key="id" wx:for-item="G">
+    <view class="cat-sec">{{G.name}}<text class="cat-sec__n">{{G.list.length}} 类 / {{G.points}} 点</text></view>
+    <view class="card cat" id="cat-{{C.id}}" wx:for="{{G.list}}" wx:key="id" wx:for-item="C">
+      <view class="cat__head" data-id="{{C.id}}" hover-class="cat__head--press" hover-stay-time="80" bindtap="onToggle">
+        <view class="cat__l">
+          <view class="cat__name">{{C.name}}</view>
+          <view class="cat__intro">{{C.intro}}</view>
+        </view>
+        <view class="cat__n">{{C.topics.length}} 个</view>
+        <view class="cat__arrow {{open === C.id ? 'on' : ''}}"></view>
       </view>
-      <view class="cat__n">{{C.topics.length}} 个</view>
-      <view class="cat__arrow {{open === C.id ? 'on' : ''}}"></view>
+      <block wx:if="{{open === C.id}}">
+        <view class="tp" wx:for="{{C.topics}}" wx:key="t" wx:for-index="ti" data-c="{{C.id}}" data-i="{{ti}}"
+              hover-class="tp--press" hover-stay-time="60" bindtap="onTopic">
+          <view class="tp__head"><text class="tp__t">{{item.t}}</text><view class="tp__go"></view></view>
+          <view class="tp__def">{{item.def}}</view>
+        </view>
+      </block>
     </view>
-    <block wx:if="{{open === C.id}}">
-      <view class="tp" wx:for="{{C.topics}}" wx:key="t" data-c="{{C.id}}" data-i="{{index}}"
-            hover-class="tp--press" hover-stay-time="60" bindtap="onTopic">
-        <view class="tp__head"><text class="tp__t">{{item.t}}</text><view class="tp__go"></view></view>
-        <view class="tp__def">{{item.def}}</view>
-      </view>
-    </block>
-  </view>
+  </block>
 </block>
 
 <view class="toast" wx:if="{{toast}}">{{toast}}</view>

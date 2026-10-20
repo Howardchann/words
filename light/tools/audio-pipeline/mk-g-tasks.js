@@ -65,13 +65,15 @@ PHONETIC.forEach(p => (p.ex || []).forEach(e => { if (!plan.wordAi(e.w)) add(e.w
 // ④ 今日页「例句精读」（2026-10-11 补）：每天 g.ex 的句子在 today.wxml 里是 `data-kind="g"` 且**无 ai**
 //    → 客户端走文本哈希（g/ 桶）。此前生成清单只收 grammar.js，**没收 data-p*.js 这个来源** →
 //    912 句里 906 句没有预生成音频，真机点这些喇叭一直是在线音源（音色与全站不一致）。***
-for (let d = 1; d <= plan.TOTAL_DAYS; d++) {
+// v1.1.110：「546 天」→ 390 节；章末自测（原周日 sun）已并入章末节，这里照旧扫 sun
+for (let si = 0; si < plan.SECTION_TOTAL; si++) {
   let x = null;
-  try { x = plan.getDay(d); } catch (e) { }
+  try { x = plan.getSection(si); } catch (e) { }
   if (!x) continue;
   const pick = g => { if (g && g.ex) g.ex.forEach(s => addEx(s, '例句精读')); };
   pick(x.g);
-  pick(x.sun && x.sun.g);
+  const wk = plan.WEEKS[plan.SEC_CH[si]];
+  pick(wk && wk.sun && wk.sun.g);
 }
 
 // ⑤ 词形变体小字（2026-10-11 补）：今日/复习/工具三页的 `data-text="{{F.form}}"` 同样无 ai → 走 g/ 桶。

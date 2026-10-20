@@ -70,14 +70,14 @@
   </view>
 </view>
 
-<!-- 课程里哪几天讲过 -->
+<!-- 课程里哪几节讲过（v1.1.110：天 → 册-章-节） -->
 <view class="card" wx:if="{{days.length}}">
   <view class="section-label">课程对应</view>
   <view class="day-chips">
-    <view class="day-chip" wx:for="{{days}}" wx:key="d" data-d="{{item.d}}"
-          hover-class="day-chip--press" hover-stay-time="60" bindtap="goDay">第 {{item.d}} 天</view>
+    <view class="day-chip" wx:for="{{days}}" wx:key="d" data-si="{{item.si}}"
+          hover-class="day-chip--press" hover-stay-time="60" bindtap="goDay">{{item.short}}</view>
   </view>
-  <view class="note">这些天的「例句精读」讲的就是这个语法点，点一下跳到当天原文。<block wx:if="{{dayMore}}">另有 {{dayMore}} 天也涉及它，未一一列出。</block></view>
+  <view class="note">按「册-章-节」排列。这些节的「例句精读」讲的就是这个语法点，点一下跳到该节原文。<block wx:if="{{dayMore}}">另有 {{dayMore}} 节也涉及它，未一一列出。</block></view>
 </view>
 
 <view class="toast" wx:if="{{toast}}">{{toast}}</view>

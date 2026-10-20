@@ -1,21 +1,23 @@
-// utils/data.js —— 课程数据汇总 + 词表装配（等级制：4 个等级 / 546 天 / 8115 词）
+// utils/data.js —— 课程骨架 + 词表装配（6 册 / 78 章 / 390 节 / 8115 词）
 //
-// 结构说明
+// 结构
 // ────────
-// · utils/data-p1..p6.js  只存**教学内容**：主题、每日标题/目标、语法或技能点、练习、技巧、自检
-// · utils/words.js        8115 词表，顺序＝课程顺序（每天：核心主题词 → 扩展词）
-// · 每天词量由 RAMP 决定
+// · utils/data-p1..p6.js  只存教学内容：每册 13 章，每章 5 节（d[]）+ 章末自测（sun）
+// · utils/words.js        8115 词表，顺序 = 课程顺序（每节：核心主题词 → 扩展词）
+// · SEC_N[]               每节新词数（390 项，显式数据）
+// · CH_SEC[] / BOOK_CHS[] 每章节数（78 项）/ 每册章数（6 项）
 //
-// 546 天排法（对外不再出现「周」，内部仍以 7 天为一组）
-// ───────────
-// 原 52 段课程每 2 段后插 1 个「巩固段」，共 52 + 26 = 78 组（546 天，390 个学习日）。
-// 巩固段不引入新语法，专注复习前两段的词 + 一个词汇/输出技能点。
-// 两条坡道：新课组 14→30 词/天，巩固组 11→25 词/天，合计恰好 8115。
-//
-// 为什么词表按课程顺序排列：这样「某一天要用哪些词」就是一整段连续区间，
-// 偏移量在启动时一次算好（DAY_OFF），运行时零查表开销。
-// 每个词带 ai（音频编号）——音频文件名用的是词频序排名，与本表顺序不同，故必须显式携带。
+// 为什么不再用「每天 N 词 × 5 天」推算（v1.1.110）
+// ─────────────────────────────────────────────
+// 旧模型里 WORD_TOTAL 恒等于 sum(RAMP) × 5，加词必须先凑成 5 的倍数；而且一章 5 节
+// 被强行绑成同一个词量。现在「节」是唯一计量单位：
+//   · 加词 = 在 SEC_N 末尾追加一项（或调大某一项）+ 在对应 data-pX 里补一条节标题；
+//   · 每章节数 / 每册章数各是一份独立数组，跟词数没有倍数关系。
+// 本版 SEC_N 由旧 RAMP 展开固化，390 节的词表边界与旧版逐日完全一致 → 老进度键零迁移。
 const wordforms = require('./wordforms.js');
+const contentOverrides = require('./content-overrides.js');
+const functionalWordOverrides = require('./functional-word-overrides.js');
+const splitSenses = require('./split-senses.js');
 const p1 = require('./data-p1.js');
 const p2 = require('./data-p2.js');
 const p3 = require('./data-p3.js');
@@ -25,29 +27,71 @@ const p6 = require('./data-p6.js');
 const WORD_PARTS = require('./words.js');
 
 const WEEKS = [].concat(p1, p2, p3, p4, p5, p6);
-const TOTAL_DAYS = 546;
-const DOW = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
-// 默认开始日期：取「今天」。
-// 旧版取「下一个周一」——那是「周」还作为对外单位时的遗留，会让新用户先等几天才能开学。
-// 第 1 天就是开始日，无需对齐星期；老用户已存有 startDate，不受影响。
-const DEFAULT_START = (() => {
-  const n = new Date();
-  const p = x => ('0' + x).slice(-2);
-  return n.getFullYear() + '-' + p(n.getMonth() + 1) + '-' + p(n.getDate());
-})();
 
-// 每组的每日新词数（双坡道：新课组 14→30，巩固组 11→25，总量 8115）
-const RAMP = [
-  15, 15, 12, 16, 16, 13, 16, 17, 13, 17, 17, 14, 18,
-  18, 14, 18, 18, 15, 19, 19, 15, 19, 20, 15, 19, 19,
-  15, 20, 20, 16, 20, 21, 16, 21, 21, 17, 22, 22, 17,
-  22, 22, 18, 23, 23, 18, 23, 24, 19, 24, 24, 19, 25,
-  25, 20, 25, 26, 20, 26, 26, 21, 27, 27, 21, 27, 27,
-  22, 28, 28, 22, 28, 29, 23, 29, 29, 23, 30, 25, 30,
+// ── 1. 骨架数据 ─────────────────────────────────────────────────────
+// 每节新词数（390 项）。顺序 = 课程顺序，与 words.js 的词表区间一一对应。
+const SEC_N = [
+  15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 12, 12, 12, 12, 12, 16, 16, 16, 16, 16,
+  16, 16, 16, 16, 16, 13, 13, 13, 13, 13, 16, 16, 16, 16, 16, 17, 17, 17, 17, 17,
+  13, 13, 13, 13, 13, 17, 17, 17, 17, 17, 17, 17, 17, 17, 17, 14, 14, 14, 14, 14,
+  18, 18, 18, 18, 18, 18, 18, 18, 18, 18, 14, 14, 14, 14, 14, 18, 18, 18, 18, 18,
+  18, 18, 18, 18, 18, 15, 15, 15, 15, 15, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19,
+  15, 15, 15, 15, 15, 19, 19, 19, 19, 19, 20, 20, 20, 20, 20, 15, 15, 15, 15, 15,
+  19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 15, 15, 15, 15, 15, 20, 20, 20, 20, 20,
+  20, 20, 20, 20, 20, 16, 16, 16, 16, 16, 20, 20, 20, 20, 20, 21, 21, 21, 21, 21,
+  16, 16, 16, 16, 16, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 17, 17, 17, 17, 17,
+  22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 17, 17, 17, 17, 17, 22, 22, 22, 22, 22,
+  22, 22, 22, 22, 22, 18, 18, 18, 18, 18, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23,
+  18, 18, 18, 18, 18, 23, 23, 23, 23, 23, 24, 24, 24, 24, 24, 19, 19, 19, 19, 19,
+  24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 19, 19, 19, 19, 19, 25, 25, 25, 25, 25,
+  25, 25, 25, 25, 25, 20, 20, 20, 20, 20, 25, 25, 25, 25, 25, 26, 26, 26, 26, 26,
+  20, 20, 20, 20, 20, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 21, 21, 21, 21, 21,
+  27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 21, 21, 21, 21, 21, 27, 27, 27, 27, 27,
+  27, 27, 27, 27, 27, 22, 22, 22, 22, 22, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28,
+  22, 22, 22, 22, 22, 28, 28, 28, 28, 28, 29, 29, 29, 29, 29, 23, 23, 23, 23, 23,
+  29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 23, 23, 23, 23, 23, 30, 30, 30, 30, 30,
+  25, 25, 25, 25, 25, 30, 30, 30, 30, 30,
 ];
 
-// 390 个学习日的核心词数（原有主题词；其余为扩展词。合计 1125）
-// 巩固组全部为扩展词，故对应位置为 0
+// 每章几节（78 项）/ 每册几章（6 项）/ 每册标题
+const CH_SEC = [5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
+  5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
+  5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5];
+const BOOK_CHS = [13, 13, 13, 13, 13, 13];
+const BOOK_META = [
+  { no: 1, title: '第 1 册 · 入门' },
+  { no: 2, title: '第 2 册 · 基础' },
+  { no: 3, title: '第 3 册 · 日常' },
+  { no: 4, title: '第 4 册 · 进阶' },
+  { no: 5, title: '第 5 册 · 拓展' },
+  { no: 6, title: '第 6 册 · 冲刺' },
+];
+
+const SECTION_TOTAL = SEC_N.length;                              // 390
+const WORD_TOTAL = SEC_N.reduce((a, b) => a + b, 0);              // 8115
+const WEEK_COUNT = CH_SEC.length;                                 // 78 章
+const BOOK_COUNT = BOOK_CHS.length;                               // 6 册
+const CHECKIN_DAYS = SECTION_TOTAL;                               // 旧名保留：可打卡单位 = 节
+
+// 册 / 章 / 节 三层偏移
+const BOOK_OFF = [];                                              // 册 → 首章下标
+(function () { let c = 0; BOOK_CHS.forEach(n => { BOOK_OFF.push(c); c += n; }); })();
+const CH_OFF = [];                                                // 章 → 首节下标
+(function () { let s = 0; CH_SEC.forEach(n => { CH_OFF.push(s); s += n; }); })();
+const SEC_CH = [], SEC_K = [], BOOK_OF_CH = [];
+(function () {
+  CH_SEC.forEach((n, ch) => {
+    for (let k = 0; k < n; k++) { SEC_CH.push(ch); SEC_K.push(k); }
+  });
+  BOOK_CHS.forEach((n, b) => { for (let i = 0; i < n; i++) BOOK_OF_CH.push(b); });
+})();
+const SEC_OFF = [];                                               // 节 → 词表起始下标
+(function () { let s = 0; SEC_N.forEach(n => { SEC_OFF.push(s); s += n; }); })();
+
+// 旧名字兼容：RAMP = 每章词数（= 该章首节词数 × 章内节数）。新代码请直接用 SEC_N。
+const RAMP = CH_SEC.map((n, ch) => SEC_N[CH_OFF[ch]]);
+const P1_TOTAL = (function () { let s = 0; for (let i = 0; i < Math.min(13, CH_SEC.length); i++) s += SEC_N[CH_OFF[i]] * CH_SEC[i]; return s; })();
+
 const CORE_CNT = [
   5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 0, 0, 0, 0, 0, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 0, 0, 0, 0, 0, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
   0, 0, 0, 0, 0, 5, 5, 5, 3, 4, 5, 5, 5, 5, 4, 0, 0, 0, 0, 0, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 0, 0, 0, 0, 0, 5, 4, 5, 5, 3,
@@ -61,24 +105,14 @@ const CORE_CNT = [
   3, 3, 4, 3, 3, 3, 0, 2, 2, 4, 0, 0, 0, 0, 0, 4, 5, 4, 1, 2, 0, 0, 0, 0, 0, 4, 4, 3, 2, 4,
 ];
 
-const WORD_TOTAL = 8115;
-const WEEK_COUNT = 78;
-// 可打卡天数（v1.1.67）：每 7 天里第 6 天是弹性复习日（type='sat'，页面不给打卡按钮），
-// 所以「能打卡的天」= 78 组 × 6 天 = 468。工具页学习记录的分母用它，
-// 剩余天数才能随进度真正归零（旧版用 546 作分母，学满 468 天后剩余会永远停在 78）。
-const CHECKIN_DAYS = WEEK_COUNT * 6;
-const P1_TOTAL = RAMP.slice(0, 13).reduce((a, b) => a + b, 0) * 5;   // 前 13 组（入门段）累计词数
-
-// ── 每个学习日的词表起始偏移（0 基），启动时算一次 ────────────────────
-const DAY_OFF = [];
-(function () {
-  let off = 0;
-  for (let w = 0; w < WEEK_COUNT; w++) {
-    for (let k = 0; k < 5; k++) { DAY_OFF.push(off); off += RAMP[w]; }
-  }
+// 新装默认开始日 = 今天（只在「开始学习」前作占位；进度由打卡驱动，不再按自然日推进）
+const DEFAULT_START = (() => {
+  const n = new Date();
+  const p = x => ('0' + x).slice(-2);
+  return n.getFullYear() + '-' + p(n.getMonth() + 1) + '-' + p(n.getDate());
 })();
 
-// 词表延迟解析：8115 行只在首次取词时拆一次，避免启动开销
+// ── 2. 词表 ─────────────────────────────────────────────────────────
 let _words = null;
 function allWords() {
   if (_words) return _words;
@@ -86,13 +120,116 @@ function allWords() {
   const out = new Array(lines.length);
   for (let i = 0; i < lines.length; i++) {
     const c = lines[i].split('\t');
-    out[i] = { w: c[0], p: c[1], m: c[2], e: c[3], ai: c[4] | 0, ipa: c[5] || '', uk: c[6] || '', cn: c[7] || '' };
+    // p0 = 词表原始词性（拆卡/纠错会改 p，但「这个词有哪些词性」要看词表原值，
+    //      否则 use 只剩 n.，变形行就推不出 uses / using / used）
+    const item = { w: c[0], p: c[1], p0: c[1], m: c[2], e: c[3], ai: c[4] | 0, ipa: c[5] || '', uk: c[6] || '', cn: c[7] || '' };
+    // 内容纠错按 ai 锚定，永不改 w/ai；拆卡主卡在所有入口统一归一。
+    Object.assign(item, functionalWordOverrides[item.ai] || {}, contentOverrides[item.ai] || {});
+    out[i] = splitSenses.normalizePrimary(item);
   }
   _words = out;
   return out;
 }
 
-// 占位符替换：{D} 当日词数 {W} 本组词数 {Wp} 上一组词数 {P1} 前 13 组累计
+// 单词 → 词表下标（懒建；搜索、变形跳转共用）
+let _wordIdx = null;
+function wordIndex() {
+  if (_wordIdx) return _wordIdx;
+  _wordIdx = Object.create(null);
+  const ws = allWords();
+  for (let i = 0; i < ws.length; i++) {
+    const k = String(ws[i].w || '').toLowerCase();
+    if (k && !(k in _wordIdx)) _wordIdx[k] = i;
+  }
+  return _wordIdx;
+}
+
+function sectionOfWordIndex(i) {
+  let lo = 0, hi = SEC_OFF.length - 1;
+  while (lo < hi) {
+    const mid = (lo + hi + 1) >> 1;
+    if (SEC_OFF[mid] <= i) lo = mid; else hi = mid - 1;
+  }
+  return lo;
+}
+
+// ── 3. 骨架查询 ─────────────────────────────────────────────────────
+function themeOf(week) {
+  return String((week && week.theme) || '').replace(/巩固周/g, '巩固');
+}
+// sun.t 里带「第 182 天自检：」前缀（旧版按自然日编号），章末自测去掉它
+function quizTitle(t) {
+  const s = String(t || '').replace(/^第\s*\d+\s*天自检[:：]\s*/, '').trim();
+  return s || '本章自测';
+}
+
+const _chWords = [];
+function chapterWords(ch) {
+  if (_chWords[ch] !== undefined) return _chWords[ch];
+  let n = 0;
+  const start = CH_OFF[ch] || 0, cnt = CH_SEC[ch] || 0;
+  for (let i = 0; i < cnt; i++) n += SEC_N[start + i] || 0;
+  _chWords[ch] = n;
+  return n;
+}
+
+// 节信息：{ si, no, ch, chNo, chInBook, book, bookNo, k, kNo, last, n, core, title, chapterTitle, bookTitle, loc }
+function sectionInfo(si) {
+  if (!(si >= 0 && si < SECTION_TOTAL)) return null;
+  const ch = SEC_CH[si], k = SEC_K[si], book = BOOK_OF_CH[ch];
+  const week = WEEKS[ch] || {};
+  const d = (week.d || [])[k] || {};
+  const bookNo = book + 1, chInBook = ch - BOOK_OFF[book] + 1, kNo = k + 1;
+  return {
+    si: si, no: si + 1,
+    ch: ch, chNo: ch + 1, chInBook: chInBook,
+    book: book, bookNo: bookNo,
+    k: k, kNo: kNo,
+    last: k === (CH_SEC[ch] || 0) - 1,
+    n: SEC_N[si] || 0,
+    core: CORE_CNT[si] || 0,
+    title: d.t || '',
+    chapterTitle: themeOf(week),
+    bookTitle: (BOOK_META[book] || {}).title || ('第 ' + bookNo + ' 册'),
+    loc: '第 ' + bookNo + ' 册 · 第 ' + chInBook + ' 章 · 第 ' + kNo + ' 节',
+  };
+}
+
+function chapterInfo(ch) {
+  if (!(ch >= 0 && ch < WEEK_COUNT)) return null;
+  const book = BOOK_OF_CH[ch];
+  const week = WEEKS[ch] || {};
+  const secs = [];
+  for (let k = 0; k < (CH_SEC[ch] || 0); k++) {
+    const si = CH_OFF[ch] + k;
+    secs.push({ si: si, kNo: k + 1, title: ((week.d || [])[k] || {}).t || '', n: SEC_N[si] || 0 });
+  }
+  return {
+    ch: ch, chNo: ch + 1, book: book, bookNo: book + 1,
+    chInBook: ch - BOOK_OFF[book] + 1,
+    title: themeOf(week),
+    words: chapterWords(ch),
+    sections: secs,
+  };
+}
+
+// 「本章自测」：内容取自旧版的周日自检（sun），不打卡、不占进度
+function chapterQuiz(ch) {
+  const wk = WEEKS[ch] || {};
+  const sun = wk.sun || {};
+  const n = CH_SEC[ch] ? SEC_N[CH_OFF[ch]] : 0;
+  const wkTotal = chapterWords(ch);
+  const prev = ch > 0 ? chapterWords(ch - 1) : wkTotal;
+  return {
+    t: quizTitle(sun.t),
+    chapterTitle: themeOf(wk),
+    obj: fill(sun.obj, n, wkTotal, prev),
+    pr: fill(sun.pr, n, wkTotal, prev),
+    tip: fill(sun.tip, n, wkTotal, prev),
+  };
+}
+
+// 占位符替换：{D} 本节词数 {W} 本章词数 {Wp} 上一章词数 {P1} 前 13 章累计
 function fill(s, n, wk, wp) {
   if (!s) return s;
   return String(s)
@@ -102,126 +239,159 @@ function fill(s, n, wk, wp) {
     .replace(/\{P1\}/g, P1_TOTAL);
 }
 
-function fillBlock(o, n, wk, wp) {
-  const r = {};
-  for (const k in o) r[k] = typeof o[k] === 'string' ? fill(o[k], n, wk, wp) : o[k];
-  return r;
-}
-
-// 弹性复习日固定内容（词数为相对本组 5 天新词总量的占位符）
-// v1.1.66：文案去「周」——每 7 天里的第 6 天固定为弹性日，不再对应「周六」。
-const SATURDAY = {
-  t: '弹性复习日',
-  obj: '不安排新内容——补进度、巩固这一轮的词、或好好休息，三选一。',
-  pr: '1) 补进度：这一轮里有落下的学习日，就今天补上。2) 巩固：听写这一轮 {W} 词 + 朗读全部例句。3) 休息：只做 10 分钟随机复习，其余放空。三选一即可，休息不丢人。',
-  tip: '语言学习靠的是"持续在场"而非"每天高强度"。弹性日是计划的一部分，不是偷懒——休息也是复习曲线的一环。',
-};
-
-// 天序号信息：day 1-546 → { wIdx, k }
-function dayInfo(day) {
-  if (day < 1 || day > TOTAL_DAYS) return { wIdx: 0, k: 1 };
-  return { wIdx: Math.floor((day - 1) / 7), k: ((day - 1) % 7) + 1 };
-}
-
-// 由学习日序号取该日词条
-function wordsOfStudyDay(di, perDay) {
-  const start = DAY_OFF[di];
-  const ws = allWords().slice(start, start + perDay);
-  const cn = CORE_CNT[di] || 0;
+function wordsOfSection(si) {
+  const n = SEC_N[si] || 0;
+  const start = SEC_OFF[si] || 0;
+  const ws = allWords().slice(start, start + n);
+  const cn = CORE_CNT[si] || 0;
   for (let i = 0; i < ws.length; i++) {
-    ws[i] = { w: ws[i].w, m: ws[i].m, p: ws[i].p, e: ws[i].e, ai: ws[i].ai, ipa: ws[i].ipa || '', uk: ws[i].uk || '', cn: ws[i].cn || '', core: i < cn };
+    ws[i] = {
+      w: ws[i].w, m: ws[i].m, p: ws[i].p, p0: ws[i].p0, e: ws[i].e, ai: ws[i].ai,
+      ipa: ws[i].ipa || '', uk: ws[i].uk || '', cn: ws[i].cn || '',
+      altSense: ws[i].altSense || null, core: i < cn,
+    };
   }
   return ws;
 }
 
-// 取某一天的学习数据（含弹性日/收尾日特殊处理）
-function getDay(day) {
-  const info = dayInfo(day);
-  const week = WEEKS[info.wIdx];
-  if (!week) return null;
-  const perDay = RAMP[info.wIdx];
-  const wkTotal = perDay * 5;
-  const prevTotal = info.wIdx > 0 ? RAMP[info.wIdx - 1] * 5 : wkTotal;
-
-  if (info.k === 6) return Object.assign({ type: 'sat' }, fillBlock(SATURDAY, perDay, wkTotal, prevTotal));
-  if (info.k === 7) return Object.assign({ type: 'sun' }, fillBlock(week.sun || {}, perDay, wkTotal, prevTotal));
-
-  const d = week.d[info.k - 1];
+// 取某一节的学习数据（含章末自测卡）
+function getSection(si) {
+  const info = sectionInfo(si);
+  if (!info) return null;
+  const week = WEEKS[info.ch];
+  const d = (week && week.d ? week.d[info.k] : null);
   if (!d) return null;
-  const di = info.wIdx * 5 + (info.k - 1);
-  const v = wordsOfStudyDay(di, perDay);
-  const coreCount = CORE_CNT[di] || 0;
+  const n = SEC_N[si];
+  const wkTotal = chapterWords(info.ch);
+  const prevTotal = info.ch > 0 ? chapterWords(info.ch - 1) : wkTotal;
+  const v = wordsOfSection(si);
+  const coreCount = CORE_CNT[si] || 0;
   return {
     type: 'study',
     t: d.t,
-    obj: fill(d.obj, perDay, wkTotal, prevTotal),
-    pr: fill(d.pr, perDay, wkTotal, prevTotal),
-    tip: fill(d.tip, perDay, wkTotal, prevTotal),
+    obj: fill(d.obj, n, wkTotal, prevTotal),
+    pr: fill(d.pr, n, wkTotal, prevTotal),
+    tip: fill(d.tip, n, wkTotal, prevTotal),
     g: d.g,
-    time: Math.round((25 + perDay * 1.2) / 5) * 5 + '分钟',
-    words: perDay,
+    time: Math.round((25 + n * 1.2) / 5) * 5 + '分钟',
+    words: n,
     coreCount: coreCount,
-    extraCount: perDay - coreCount,
+    extraCount: n - coreCount,
     v: v,
+    quiz: info.last ? chapterQuiz(info.ch) : null,
   };
 }
 
-// 由开始日期计算今天对应计划第几天（1 起；0 表示尚未开始）
-function currentDayFromStart(startDateStr) {
-  if (!startDateStr) return 0;   // v1.1.77 空串 = 未开学（准备期）
-  const sd = new Date(startDateStr + 'T00:00:00');
-  const now = new Date();
-  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const diff = Math.floor((today - sd) / 86400000);
-  if (diff < 0) return 0;
-  return Math.min(diff + 1, TOTAL_DAYS);
+// 老名字兼容（v1.1.110 前到处是 getDay(day)）
+function getDay(day) { return getSection(day - 1); }
+
+// 进度键 w{章}d{节} → 节下标；非法 / 旧版弹性日-自检日（d6 / d7）返回 -1
+// 节下标 → 进度键（w{章}d{节}，与旧版逐字节兼容）
+function keyOfSection(si) {
+  if (!(si >= 0 && si < SECTION_TOTAL)) return '';
+  return 'w' + (SEC_CH[si] + 1) + 'd' + (SEC_K[si] + 1);
 }
 
-// 已学词汇池：返回所有已打卡学习日的词汇（供随机复习）
+function sectionOfKey(key) {
+  const m = /^w(\d+)d(\d+)$/.exec(String(key || ''));
+  if (!m) return -1;
+  const ch = parseInt(m[1], 10) - 1, k = parseInt(m[2], 10) - 1;
+  if (!(ch >= 0 && ch < CH_SEC.length)) return -1;
+  if (!(k >= 0 && k < CH_SEC[ch])) return -1;
+  return CH_OFF[ch] + k;
+}
+
+// 老「第 N 天」（1 起，546 天日历口径）→ 节下标（0 起）
+// 旧模型每周 7 天里只有前 5 天排词（后 2 天是弹性日 / 自检日，不打卡），节 = 周 * 5 + 周内第几天；
+// 弹性日没有独立词表，归到本周第 5 节。语法数据（grammar.js 的 days）存的仍是旧日号，
+// 展示/跳转统一走这里换算，**不改数据源**（改了就得重刷 151 个数字、还会动 grammar-map 的扁平序号）。
+function sectionOfDay(day) {
+  const d = Number(day) - 1;
+  if (!(d >= 0)) return -1;
+  const si = Math.floor(d / 7) * 5 + Math.min(d % 7, 4);
+  return si < SECTION_TOTAL ? si : -1;
+}
+
+function sectionStats(checkedDays) {
+  let done = 0;
+  Object.keys(checkedDays || {}).forEach(key => {
+    if (!checkedDays[key]) return;
+    if (sectionOfKey(key) >= 0) done++;
+  });
+  return { done: done, left: Math.max(0, SECTION_TOTAL - done), total: SECTION_TOTAL };
+}
+
+// 已学词汇池：返回所有已打卡节的词汇（供随机复习）
 function learnedWords(checkedDays) {
   const pool = [];
   const seen = {};
   Object.keys(checkedDays || {}).forEach(key => {
     if (!checkedDays[key]) return;
-    const m = /^w(\d+)d(\d+)$/.exec(key);
-    if (!m) return;
-    const day = (parseInt(m[1], 10) - 1) * 7 + parseInt(m[2], 10);
-    const info = dayInfo(day);
-    if (info.k > 5) return;
-    const di = info.wIdx * 5 + (info.k - 1);
-    const ws = wordsOfStudyDay(di, RAMP[info.wIdx]);
-    ws.forEach(v => {
+    const si = sectionOfKey(key);
+    if (si < 0) return;
+    wordsOfSection(si).forEach(v => {
       if (!seen[v.w]) { seen[v.w] = 1; pool.push(v); }
     });
   });
   return pool;
 }
 
-// 语音试听样句：取 Day 1 首个词的例句（走真实音频链路）
+// 目录树：只展开一本册 / 一章，避免一次性 setData 400 个节点
+function bookTree(checkedDays, openBook, openCh, curSi) {
+  const ck = checkedDays || {};
+  const isDone = si => !!ck['w' + (SEC_CH[si] + 1) + 'd' + (SEC_K[si] + 1)];
+  return BOOK_META.map((b, bi) => {
+    let done = 0, total = 0;
+    for (let ch = BOOK_OFF[bi]; ch < BOOK_OFF[bi] + BOOK_CHS[bi]; ch++) {
+      total += CH_SEC[ch];
+      for (let k = 0; k < CH_SEC[ch]; k++) if (isDone(CH_OFF[ch] + k)) done++;
+    }
+    const chapters = [];
+    if (bi === openBook) {
+      for (let i = 0; i < BOOK_CHS[bi]; i++) {
+        const ch = BOOK_OFF[bi] + i;
+        const info = chapterInfo(ch);
+        let cdone = 0;
+        for (let k = 0; k < CH_SEC[ch]; k++) if (isDone(CH_OFF[ch] + k)) cdone++;
+        const secs = [];
+        if (ch === openCh) {
+          info.sections.forEach(s => secs.push({ si: s.si, kNo: s.kNo, title: s.title, done: isDone(s.si), cur: s.si === curSi }));
+        }
+        chapters.push({ ch: ch, chInBook: info.chInBook, title: info.title, done: cdone, total: CH_SEC[ch], open: ch === openCh, secs: secs });
+      }
+    }
+    return { book: bi, no: bi + 1, title: b.title, done: done, total: total, open: bi === openBook, chapters: chapters };
+  });
+}
+
+// 语音试听样句：取第 1 节首个词的例句（走真实音频链路）
 function demo() {
-  const d = getDay(1);
+  const d = getSection(0);
   const w = d && d.v && d.v[0];
   return w ? { word: w.w, example: w.e, ai: w.ai } : null;
 }
 
-// ── 全库搜索（v1.1.46 搜索页）────────────────────────────────────────
-// 词下标 → 所属学习日的「日历天」序号：词表按学习日顺序平铺，DAY_OFF[di] 是第 di 个
-// 学习日的起点。二分定位所属学习日，再按「每组 5 个学习日 + 复习 2 天」换算日历天
-// （di=0 → 第 1 天；di=4 → 第 5 天；di=5 → 第 8 天）。
-// ⚠️ 口径必须与 App 一致：App 里「第 N 天」= 自然日序号（7 天一组），不是学习日序号。
-function dayOfWordIndex(i) {
-  let lo = 0, hi = DAY_OFF.length - 1;
-  while (lo < hi) {
-    const mid = (lo + hi + 1) >> 1;
-    if (DAY_OFF[mid] <= i) lo = mid; else hi = mid - 1;
+// ── 4. 搜索 ─────────────────────────────────────────────────────────
+const SEARCH_LIMIT = 60;
+
+// 变形列表（搜索结果卡用）：规则 + 不规则，has = 词库里另有词条（可跳转）
+function formsOf(it) {
+  const idx = wordIndex();
+  const w = String(it.w || '').toLowerCase();
+  // 本身是变体的词条（used / taken / better）：只给一条「原形」，不再硬推屈折
+  if (!wordforms.noteFor(w).length) {
+    const lem = wordforms.lemma(w).filter(c => c.base !== w && (c.base in idx));
+    if (lem.length) return [{ label: '原形', form: lem[0].base, speak: true, same: false, has: true }];
   }
-  return lo + Math.floor(lo / 5) * 2 + 1;
+  const list = wordforms.formsOf(w, it.p0 || it.p);
+  return list.map(f => ({
+    label: f.label,
+    form: f.form,
+    speak: f.speak !== false,
+    has: f.form !== it.w && (String(f.form).toLowerCase() in idx),
+  }));
 }
 
-// 全库搜索：完全匹配 > 英文前缀 > 英文包含 > 中文释义包含（每组内部保持词表序 = 由易到难 = Day 升序）。
-// 完全匹配必须置顶：搜 good 时若前缀组里有 goods/goodbye 排前面，用户会以为搜错了。
-// 8115 词单次遍历，实测 <5ms，不需要索引。limit 只截断返回条数，total 始终是真实命中数。
-const SEARCH_LIMIT = 60;
 function searchWords(kw, limit) {
   const q = String(kw || '').trim().toLowerCase();
   if (!q) return { total: 0, list: [] };
@@ -235,52 +405,59 @@ function searchWords(kw, limit) {
     else if (lw.indexOf(q) > 0) inc.push(i);
     else if (it.m && it.m.indexOf(q) >= 0) zh.push(i);
   }
-  // 词形归一（v1.1.73）：完全匹配缺失时，把查询词当变体归一回原形（查 taken -> take）。
-  // 归一命中排最前，并带 via 标签（「是 xx 的过去分词」类提示），行首显示一条 muted 小字。
+  // 词形归一：完全匹配缺失时，把查询词当变体归一回原形（查 taken -> take）。
+  // 归一命中排最前，并带 via 标签；查询词本身就是词条时它排第一、原形紧跟其后。
   const viaMap = {};
-  // 词形归一与直查共存（v1.1.73）：making/better/used 这类词本身也是词条（直查命中），
-  // 但用户多半想看原形 —— 归一到的原形排最前并带 via 标签，词条自身照常显示在后。
-  // 完全未命中时同理（taken -> take）。could/would 指向的情态动词暂不在词表，功能词包补入后自动生效。
   {
     const cands = wordforms.lemma(q);
     for (let c = 0; c < cands.length; c++) {
       const base = cands[c].base;
-      if (base === q) break;                 // 原形就是查询词本身，无需归一
+      if (base === q) break;
       let hit = -1;
       for (let i = 0; i < ws.length; i++) {
         if (ws[i].w.toLowerCase() === base) { hit = i; break; }
       }
       if (hit < 0) continue;
-      // -s 类变体：原形是动词开头（v./n. 混性词除外）时，标签应是「第三人称单数」不是「复数」
       let lb = cands[c].label;
       if (lb === wordforms.LBL.pl && ws[hit].p.indexOf('v.') === 0) lb = wordforms.LBL.s;
       viaMap[hit] = lb;
-      // v1.1.94：查询词本身就是词条时，它自己必须排第一（用户点名：搜 wind 第一个必须是 wind）。
-      // 原形紧跟其后并带 via 标签；只有查询词完全没直查命中时，原形才顶到最前（taken -> take）。
       const hasSelf = exact.length > 0;
       exact = exact.filter(function (j) { return j !== hit; });
       if (hasSelf) exact.splice(1, 0, hit); else exact.unshift(hit);
-      break;                                 // 只要最可信的一个候选
+      break;
     }
   }
   const total = exact.length + pre.length + inc.length + zh.length;
   const cap = limit > 0 ? limit : SEARCH_LIMIT;
   const list = exact.concat(pre, inc, zh).slice(0, cap).map(function (i) {
     const it = ws[i];
-    const day = dayOfWordIndex(i);
-    const info = dayInfo(day);
-    return {
-      w: it.w, p: it.p, m: it.m, e: it.e, ai: it.ai, ipa: it.ipa || '', uk: it.uk || '', cn: it.cn || '',
-      day: day, dow: DOW[info.k - 1], wn: info.wIdx + 1,
+    const si = sectionOfWordIndex(i);
+    const info = sectionInfo(si);
+    const row = {
+      w: it.w, p: it.p, p0: it.p0 || it.p, m: it.m, e: it.e, ai: it.ai, ipa: it.ipa || '', uk: it.uk || '', cn: it.cn || '', altSense: it.altSense || null,
+      sec: si, secNo: info ? info.no : 0, bookNo: info ? info.bookNo : 0,
+      chNo: info ? info.chNo : 0, kNo: info ? info.kNo : 0,
+      loc: info ? info.loc : '',
       via: viaMap[i] || '',
-      wf: wordforms.noteFor(it.w),   // [{label:'过去式',form:'took'},...]，无不规则形式为 []
+      wf: wordforms.wfNotes(it.w, it.p),
     };
+    row.forms = formsOf(row);
+    return row;
   });
   return { total: total, list: list };
 }
 
+// 单词定位（搜索里点变形词跳转用）
+function lookup(w) {
+  const idx = wordIndex()[String(w || '').toLowerCase()];
+  if (idx === undefined) return null;
+  const it = allWords()[idx];
+  const si = sectionOfWordIndex(idx);
+  const info = sectionInfo(si);
+  return { w: it.w, sec: si, loc: info ? info.loc : '', bookNo: info ? info.bookNo : 0, chNo: info ? info.chNo : 0, kNo: info ? info.kNo : 0 };
+}
+
 // 英文例句挖空：把目标词（含常见词形变化）替换成 ____，其余部分保留作上下文。
-// 匹配不到（无例句 / 词形变化超出 4 字号范围）返回 ''，该词不参与填空练习。
 function clozeSentence(it) {
   const s = String((it && it.e) || '');
   const w = String((it && it.w) || '');
@@ -295,7 +472,6 @@ function clozeSentence(it) {
 }
 
 // 中文例句挖空练习：为 target 生成 n 个选项（含正确答案），返回打乱后的英文单词数组。
-// 干扰项优先「同词性」（词性首段相同），不足再用整个词库补。刻意不返回释义——练习要求不显示释义。
 function clozeOptions(target, pool, n) {
   const N = Math.max(2, n || 4);
   const src = (pool && pool.length ? pool : allWords());
@@ -315,9 +491,19 @@ function clozeOptions(target, pool, n) {
   return shuffled(cand.concat([target.w]));
 }
 
+// 将收藏快照等旧结构按当前词库归一；只覆盖教学字段，不碰 w/ai/ts 等身份与进度字段。
+let _wordByName = null;
+function normalizeWord(snapshot) {
+  if (!snapshot || !snapshot.w) return snapshot;
+  if (!_wordByName) {
+    _wordByName = Object.create(null);
+    allWords().forEach(it => { _wordByName[String(it.w).toLowerCase()] = it; });
+  }
+  const canonical = _wordByName[String(snapshot.w).toLowerCase()];
+  return canonical ? Object.assign({}, snapshot, canonical, snapshot.ts === undefined ? {} : { ts: snapshot.ts }) : Object.assign({}, snapshot);
+}
+
 // 词形 → 预生成音频编号（工具页音标区的例词播放用）。
-// 词表里有的词直接拿它的 ai（可离线播放）；没有的返回 0，由调用方降级到在线朗读。
-// 首次调用建一次 8115 项的表，之后 O(1)。
 let _aiMap = null;
 function wordAi(word) {
   const w = String(word || '').toLowerCase();
@@ -331,8 +517,10 @@ function wordAi(word) {
 }
 
 module.exports = {
-  WEEKS, TOTAL_DAYS, DOW, DEFAULT_START, SATURDAY,
-  RAMP, CORE_CNT, WORD_TOTAL, WEEK_COUNT, CHECKIN_DAYS, P1_TOTAL, SEARCH_LIMIT,
-  dayInfo, getDay, currentDayFromStart, learnedWords, allWords, demo, clozeOptions, clozeSentence,
-  searchWords, dayOfWordIndex, wordAi,
+  WEEKS, BOOKS: BOOK_META, BOOK_CHS, CH_SEC, SEC_N, SEC_OFF, CH_OFF, BOOK_OFF, SEC_CH, SEC_K, BOOK_OF_CH,
+  SECTION_TOTAL, WORD_TOTAL, WEEK_COUNT, BOOK_COUNT, CHECKIN_DAYS, P1_TOTAL, DEFAULT_START, SEARCH_LIMIT, RAMP,
+  CORE_CNT,
+  sectionInfo, chapterInfo, chapterQuiz, bookTree, sectionOfKey, keyOfSection, sectionOfDay, sectionStats, chapterWords,
+  getSection, getDay, wordsOfSection, learnedWords, allWords, demo,
+  clozeOptions, clozeSentence, searchWords, lookup, wordIndex, wordAi, normalizeWord, sectionOfWordIndex, formsOf,
 };

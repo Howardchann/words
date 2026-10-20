@@ -1,78 +1,99 @@
 <page-meta page-style="{{pageStyle}}" />
 <view class="page-root {{dark ? 'theme-dark' : ''}}">
 <nav-bar title="{{navTitle}}"><view class="nav-search" hover-class="nav-search--press" hover-stay-time="120" bindtap="goSearch" aria-role="button" aria-label="搜索单词"><view class="ico ico-search"></view></view></nav-bar>
-<!-- 今日学习计划 -->
+
 <!-- 准备期：计划尚未开始 -->
 <view class="card prestart-card" wx:if="{{preStart}}">
   <view class="prestart-title">准备期</view>
   <view class="prestart-sub">先熟悉一下，随时可以开始</view>
-  <view class="prestart-days" wx:if="{{daysToStart > 0}}">还有 {{daysToStart}} 天开始学单词</view>
-  <view class="prestart-note" wx:else>还没有学习记录 · 点「开始学习」即开学</view>
+  <view class="prestart-note">还没有学习记录 · 点「开始学习」即从第 1 册第 1 章第 1 节开始</view>
   <view class="tip-box">
-    <view class="tip-text">可以先看看第 1 天的单词，熟悉一下操作：点音标模块听发音（美音 / 英音各读各的），点<view class="ico-inline ico-heart"></view>收藏重点词</view>
+    <view class="tip-text">可以先看看第 1 节的单词，熟悉一下操作：点音标模块听发音（美音 / 英音各读各的），点<view class="ico-inline ico-heart"></view>收藏重点词</view>
   </view>
-  <!-- 单主按钮 + 文字链接（v1.1.92 方案④，用户在方案报告里选定）：
-       主 = 实心绿大按钮「开始学习」（--green-solid 底 + 白字，全站首个实心主按钮）；
-       次 = 其下一行绿字链接「先看看第 1 天（只预览）」，降级为文字、不再是等重的一行。
-       行为完全不变：startLearning（写 startDate=今天，回第 1 天）/ backToToday（只预览不打卡）。 -->
-  <view class="prestart-start" hover-class="prestart-start--press" hover-stay-time="120" bindtap="startLearning" aria-role="button" aria-label="开始学习，从第 1 天开始">
+  <view class="prestart-start" hover-class="prestart-start--press" hover-stay-time="120" bindtap="startLearning" aria-role="button" aria-label="开始学习，从第 1 节开始">
     <view class="prestart-start__tt">开始学习</view>
     <view class="prestart-start__go"></view>
   </view>
-  <view class="prestart-preview" hover-class="prestart-preview--press" hover-stay-time="120" bindtap="backToToday" aria-role="button" aria-label="先看看第 1 天，只预览不打卡">
-    <view class="prestart-preview__tt">先看看第 1 天（只预览）</view>
+  <view class="prestart-preview" hover-class="prestart-preview--press" hover-stay-time="120" bindtap="backToToday" aria-role="button" aria-label="先看看第 1 节，只预览不打卡">
+    <view class="prestart-preview__tt">先看看第 1 节（只预览）</view>
     <view class="prestart-preview__go"></view>
   </view>
 </view>
 
 <block wx:else>
-<!-- 准备期预览提示条：替代原「回到准备期」纯文字链接，常驻顶部一眼可见 -->
-<view class="prep-back" wx:if="{{todayNum === 0}}" hover-class="hover-dim" hover-stay-time="120" bindtap="backToPrep">‹ 返回准备期</view>
+<!-- 准备期预览提示条 -->
+<view class="prep-back" wx:if="{{prepPreview && !preStart}}" hover-class="hover-dim" hover-stay-time="120" bindtap="backToPrep">‹ 返回准备期</view>
 
-  <!-- 日期导航 -->
-  <view class="card day-head">
-    <view class="day-nav">
-      <view class="nav-btn {{viewDay > 1 ? '' : 'nav-btn--dis'}}" hover-class="{{viewDay > 1 ? 'nav-btn--press' : 'none'}}" hover-stay-time="120" bindtap="prevDay">‹ 前一天</view>
-      <view class="day-title">
-        <view class="day-num">第 {{dayNum}} 天</view>
-        <view class="day-dow">{{dowText}}</view>
+<!-- ① 目录（v1.1.110）：册 → 章 → 节 三级；只展开一册一章 -->
+<view class="card dir-card">
+  <view class="dir-head" hover-class="dir-head--press" hover-stay-time="80" bindtap="onDirToggle">
+    <view class="dir-head__l">
+      <view class="dir-loc">{{locText}}</view>
+      <view class="dir-cur">{{sectionTitle}}</view>
+    </view>
+    <view class="dir-btn">{{dirOpen ? '收起' : '目录'}}</view>
+  </view>
+  <block wx:if="{{dirOpen}}">
+    <view class="dir-book" wx:for="{{dirBooks}}" wx:for-item="B" wx:key="book">
+      <view class="dir-book__h {{B.open ? 'on' : ''}}" data-book="{{B.book}}" hover-class="dir-row--press" hover-stay-time="60" bindtap="onDirBook">
+        <text class="dir-book__t">{{B.title}}</text>
+        <text class="dir-book__n">{{B.done}} / {{B.total}}</text>
+        <view class="dir-caret {{B.open ? 'on' : ''}}"></view>
       </view>
-      <view class="nav-btn {{viewDay < totalDays ? '' : 'nav-btn--dis'}}" hover-class="{{viewDay < totalDays ? 'nav-btn--press' : 'none'}}" hover-stay-time="120" bindtap="nextDay">后一天 ›</view>
+      <block wx:if="{{B.open}}">
+        <view class="dir-ch" wx:for="{{B.chapters}}" wx:for-item="C" wx:key="ch">
+          <view class="dir-ch__h {{C.open ? 'on' : ''}}" data-ch="{{C.ch}}" hover-class="dir-row--press" hover-stay-time="60" bindtap="onDirCh">
+            <text class="dir-ch__no">{{C.chInBook}}</text>
+            <text class="dir-ch__t">{{C.title}}</text>
+            <text class="dir-ch__n">{{C.done}} / {{C.total}}</text>
+            <view class="dir-caret {{C.open ? 'on' : ''}}"></view>
+          </view>
+          <view class="dir-secs" wx:if="{{C.open}}">
+            <view class="dir-sec {{S.cur ? 'cur' : ''}}" wx:for="{{C.secs}}" wx:for-item="S" wx:key="si"
+                  data-si="{{S.si}}" hover-class="dir-row--press" hover-stay-time="60" bindtap="onDirSec">
+              <view class="dir-dot {{S.done ? 'done' : ''}}"></view>
+              <view class="dir-sec__t">{{S.kNo}}. {{S.title}}</view>
+            </view>
+          </view>
+        </view>
+      </block>
     </view>
-    <view class="phase-line">{{theme}}</view>
-    <!-- v1.1.97：「回到今天」按自然日算 → 改为「回到当前进度」= curDay（第一个未完成日）。
-         目标日由 today.js 的 backToProgress() 提供，页面不再跟自然日滚动。 -->
-    <view class="is-today" wx:if="{{dayNum !== curDay && curDay > 0}}" hover-class="hover-dim" hover-stay-time="120" bindtap="backToProgress">回到当前进度（第 {{curDay}} 天）</view>
+  </block>
+</view>
+
+<!-- ② 章头 + 打卡 -->
+<view class="card head-card">
+  <!-- 方案 A：册/章号与节标题目录卡已有 → 章标题居中进导航行；目标与时长并成一行灰字 -->
+  <view class="head-top">
+    <view class="head-nav {{viewSec > 0 ? '' : 'head-nav--dis'}}" hover-class="{{viewSec > 0 ? 'head-nav--press' : 'none'}}" hover-stay-time="80" bindtap="prevSec">‹ 上一节</view>
+    <view class="head-ch">{{chapterTitle}}</view>
+    <view class="head-nav {{viewSec < totalSec - 1 ? '' : 'head-nav--dis'}}" hover-class="{{viewSec < totalSec - 1 ? 'head-nav--press' : 'none'}}" hover-stay-time="80" bindtap="nextSec">下一节 ›</view>
   </view>
-
-  <!-- 标题与目标 -->
-  <view class="card">
-    <view class="section-label">{{dayData.t}}</view>
-    <view class="obj-text" wx:if="{{dayData.obj}}">目标：{{dayData.obj}}</view>
-    <view class="time-text" wx:if="{{dayData.time}}">建议时长：{{dayData.time}}</view>
-
-    <!-- 打卡 -->
-    <view class="checkin-btn" wx:if="{{dayData.type !== 'sat'}}">
-      <button class="btn-primary btn-fit {{todayNum === 0 ? 'btn-primary--dis' : ''}}" wx:if="{{!checked}}" hover-class="btn-press" hover-stay-time="0" bindtap="onCheckin">完成打卡<view class="ico ico-check" style="margin-left:var(--ico-gap);margin-right:0"></view></button>
-      <view class="done-state" wx:else>今日已完成<view class="ico ico-check" style="margin-left:var(--ico-gap);margin-right:0"></view></view>
-      <button class="btn-ghost btn-cancel btn-fit" wx:if="{{checked}}" hover-class="btn-press" hover-stay-time="0" bindtap="onCheckin"><view class="ico ico-undo"></view>取消打卡</button>
+  <view class="head-meta" wx:if="{{dayData.obj || dayData.time}}"><text wx:if="{{dayData.obj}}">目标：{{dayData.obj}}</text><text wx:if="{{dayData.obj && dayData.time}}"> · </text><text wx:if="{{dayData.time}}">约 {{dayData.time}}</text></view>
+  <view class="is-today" wx:if="{{viewSec !== curSec}}" hover-class="hover-dim" hover-stay-time="120" bindtap="backToProgress">回到当前进度（第 {{curSec + 1}} / {{totalSec}} 节）</view>
+  <view class="checkin-btn">
+    <button class="btn-primary btn-fit" wx:if="{{!checked}}" hover-class="btn-press" hover-stay-time="0" bindtap="onCheckin">完成打卡<view class="ico ico-check" style="margin-left:var(--ico-gap);margin-right:0"></view></button>
+    <view class="done-row" wx:else>
+      <view class="done-state">本节已完成<view class="ico ico-check" style="margin-left:var(--ico-gap);margin-right:0"></view></view>
+      <text class="done-dot">·</text>
+      <view class="done-cancel" hover-class="hover-dim" hover-stay-time="120" bindtap="onCheckin" aria-role="button" aria-label="取消打卡">取消打卡</view>
     </view>
   </view>
+</view>
 
-  <!-- 学习日：词汇 -->
-  <view class="card" wx:if="{{dayData.type === 'study'}}">
-    <view class="section-label">本日词汇（{{vocab.length}}）</view>
-    <view class="speak-all-row">
-      <button class="btn-ghost btn-speak-all {{playingMode === 'queue' ? 'btn-speak-all--active' : ''}}" hover-class="btn-press" bindtap="onSpeakAll"><view class="ico {{playingMode === 'queue' ? 'ico-stop' : 'ico-play'}}"></view>{{playingMode === 'queue' ? '停止朗读' : '朗读全部'}}</button>
-    </view>
-    <block wx:for="{{vocab}}" wx:key="k">
-      <view class="group-tag" wx:if="{{index === 0 && coreCount > 0}}">主题词 · {{coreCount}}</view>
-      <view class="group-tag group-tag--extra" wx:if="{{index === extraStart}}">扩展词 · {{extraCount}}</view>
-      <view class="word-row{{hlWord === item.w ? ' word-row--hl' : ''}}" id="w{{index}}">
-      <view class="word-main">
-        <view class="word-head"><text class="word-en"><text wx:if="{{playingText === item.w && (playingKey === '' || playingKey === item.k)}}" class="kara-lit">{{karaLit}}</text>{{playingText === item.w && (playingKey === '' || playingKey === item.k) ? karaRest : item.w}}</text><text class="word-pos">{{item.p}}</text><view class="word-zh">{{item.m}}</view>
-        <!-- 双音标模块（v1.1.51 方案A）：美音绿系 / 英音蓝系，各带小喇叭，点模块即按该口音朗读。
-             无音标的短语仍渲染美音模块（只有喇叭）以保留朗读入口。 -->
+<!-- ③ 本节词汇（一词一卡） -->
+<view class="wbar">
+  <view class="wbar__t">本节词汇<text class="wbar__n">{{cards.length}}</text></view>
+  <button class="btn-ghost btn-speak-all {{playingMode === 'queue' ? 'btn-speak-all--active' : ''}}" hover-class="btn-press" bindtap="onSpeakAll"><view class="ico {{playingMode === 'queue' ? 'ico-stop' : 'ico-play'}}"></view>{{playingMode === 'queue' ? '停止朗读' : '朗读全部'}}</button>
+</view>
+
+<block wx:for="{{cards}}" wx:key="k">
+  <view class="group-tag" wx:if="{{index === 0 && coreCount > 0}}">主题词 · {{coreCount}}</view>
+  <view class="group-tag group-tag--extra" wx:if="{{index === extraStart}}">扩展词 · {{extraCount}}</view>
+  <view class="card wcard {{hlWord === item.w ? 'wcard--hl' : ''}}" id="w{{index}}">
+    <view class="wcard__head">
+      <view class="wcard__main">
+        <view class="word-head"><text class="word-en"><text wx:if="{{playingText === item.w && (playingKey === '' || playingKey === item.k)}}" class="kara-lit">{{karaLit}}</text>{{playingText === item.w && (playingKey === '' || playingKey === item.k) ? karaRest : item.w}}</text><text class="word-pos">{{item.p}}</text><view class="word-zh">{{item.m}}</view></view>
         <view class="ipa-row">
           <view class="ipa-mod {{playingText === item.w && (playingKey === '' || playingKey === item.k) && playingAccent === 'us' ? 'on' : ''}}"
                 hover-class="speak-hover" hover-stay-time="120"
@@ -81,63 +102,101 @@
                 wx:if="{{item.uk}}"
                 hover-class="speak-hover" hover-stay-time="120"
                 data-text="{{item.w}}" data-k="{{item.k}}" data-ai="{{item.ai}}" data-kind="w" data-accent="uk" bindtap="onSpeakWord"><view class="spk-ico {{playingText === item.w && (playingKey === '' || playingKey === item.k) && playingAccent === 'uk' ? 'spk-ico--on' : ''}}"></view><text class="ipa-txt">{{item.uk}}</text></view>
-        </view></view>
-        <!-- 其他词形（v1.1.77）：固定常驻（不再只跟 2s 跳转高亮），点词形即朗读该形式 -->
-        <view class="wf-line" wx:if="{{item.wf.length}}">
-          <view class="wf-line__t {{wfKey === item.w + ':' + F.form ? 'wf-line__t--on' : ''}}" wx:for="{{item.wf}}" wx:for-item="F" wx:key="form"
-                hover-class="none" hover-stay-time="0"
-                data-text="{{F.form}}" data-key="{{item.w}}:{{F.form}}" catchtap="onSpeakWfToday">{{F.label}} {{F.form}}</view>
         </view>
-        <!-- 变体标注（v1.1.75）：搜索结果卡上的「『took』是它的过去式」随跳转带到定位行下，
-             与高亮同生共死（2s 自动清空），用户不会忘了自己查的是哪种形式 -->
+        <!-- 变形（v1.1.110）：规则 + 不规则全列；点一下朗读该形式（词表内的走 w/ 桶） -->
+        <view class="wf-line" wx:if="{{item.wf.length}}">
+          <block wx:for="{{item.wf}}" wx:for-item="F" wx:key="form">
+            <view class="wf-line__t" wx:if="{{F.speak === false}}">{{F.label}} {{F.form}}</view>
+            <view class="wf-line__t {{wfKey === item.k + ':' + F.form ? 'wf-line__t--on' : ''}}" wx:else
+                  hover-class="none" hover-stay-time="0"
+                  data-text="{{F.form}}" data-key="{{item.k}}:{{F.form}}" catchtap="onSpeakWfToday">{{F.label}} {{F.form}}</view>
+          </block>
+        </view>
         <view class="hl-via" wx:if="{{hlWord === item.w && hlVia}}">「{{hlQ}}」是它的{{hlVia}}</view>
         <view class="word-example-row">
           <view class="word-example"
-                data-text="{{item.e}}" data-ai="{{item.ai}}" data-kind="s" bindtap="onSpeakWord"><text wx:if="{{playingText === item.e}}" class="kara-lit">{{karaLit}}</text>{{playingText === item.e ? karaRest : item.e}}</view>
-          <view class="ex-speak {{playingText === item.e ? 'playing' : ''}}"
+                data-text="{{item.e}}" data-ai="{{item.ai}}" data-kind="s" data-k="{{item.k}}" bindtap="onSpeakWord"><text wx:if="{{playingText === item.e && (playingKey === '' || playingKey === item.k)}}" class="kara-lit">{{karaLit}}</text>{{playingText === item.e && (playingKey === '' || playingKey === item.k) ? karaRest : item.e}}</view>
+          <view class="ex-speak {{playingText === item.e && (playingKey === '' || playingKey === item.k) ? 'playing' : ''}}"
                 hover-class="speak-hover" hover-stay-time="120"
-                data-text="{{item.e}}" data-ai="{{item.ai}}" data-kind="s" bindtap="onSpeakWord"><view class="spk-ico {{playingText === item.e ? 'spk-ico--on' : ''}}"></view></view>
-          <view class="ex-eye" wx:if="{{item.cn}}" hover-class="none" hover-stay-time="120" data-w="{{item.w}}" catchtap="onToggleExZh"><view class="eye-ico {{zhOpen[item.w] ? 'eye-ico--on' : ''}}"></view></view>
+                data-text="{{item.e}}" data-ai="{{item.ai}}" data-kind="s" data-k="{{item.k}}" bindtap="onSpeakWord"><view class="spk-ico {{playingText === item.e && (playingKey === '' || playingKey === item.k) ? 'spk-ico--on' : ''}}"></view></view>
+          <view class="ex-eye" wx:if="{{item.cn}}" hover-class="none" hover-stay-time="120" data-k="{{item.k}}" catchtap="onToggleExZh"><view class="eye-ico {{zhOpen[item.k] ? 'eye-ico--on' : ''}}"></view></view>
         </view>
-        <view class="ex-cn" wx:if="{{item.cn && zhOpen[item.w]}}">{{item.cn}}</view>
+        <view class="ex-cn" wx:if="{{item.cn && zhOpen[item.k]}}">{{item.cn}}</view>
       </view>
       <view class="word-star {{item.starred ? 'on' : ''}}" data-index="{{index}}" hover-class="hover-dim" hover-stay-time="120" bindtap="onStar"><view class="star-ico {{item.starred ? 'star-ico--on' : 'star-ico--off'}}"></view></view>
+    </view>
+
+    <!-- 另一读音 / 词义（同一张卡，虚线以下） -->
+    <block wx:if="{{item.sub}}">
+      <view class="wcard__sub">
+        <view class="wcard__sub-t">另一读音 · {{item.sub.p}}</view>
+        <view class="word-head"><view class="word-zh wcard__sub-m">{{item.sub.m}}</view></view>
+        <view class="ipa-row">
+          <view class="ipa-mod {{playingText === item.w && playingKey === item.sub.k && playingAccent === 'us' ? 'on' : ''}}"
+                wx:if="{{item.sub.ipa}}"
+                hover-class="speak-hover" hover-stay-time="120"
+                data-text="{{item.w}}" data-k="{{item.sub.k}}" data-ai="{{item.sub.ai}}" data-kind="w" data-accent="us" bindtap="onSpeakWord"><view class="spk-ico {{playingText === item.w && playingKey === item.sub.k && playingAccent === 'us' ? 'spk-ico--on' : ''}}"></view><text class="ipa-txt">{{item.sub.ipa}}</text></view>
+          <view class="ipa-mod ipa-mod--uk {{playingText === item.w && playingKey === item.sub.k && playingAccent === 'uk' ? 'on' : ''}}"
+                wx:if="{{item.sub.uk}}"
+                hover-class="speak-hover" hover-stay-time="120"
+                data-text="{{item.w}}" data-k="{{item.sub.k}}" data-ai="{{item.sub.ai}}" data-kind="w" data-accent="uk" bindtap="onSpeakWord"><view class="spk-ico {{playingText === item.w && playingKey === item.sub.k && playingAccent === 'uk' ? 'spk-ico--on' : ''}}"></view><text class="ipa-txt">{{item.sub.uk}}</text></view>
+        </view>
+        <view class="wf-line" wx:if="{{item.sub.wf.length}}">
+          <block wx:for="{{item.sub.wf}}" wx:for-item="F" wx:key="form">
+            <view class="wf-line__t" wx:if="{{F.speak === false}}">{{F.label}} {{F.form}}</view>
+            <view class="wf-line__t {{wfKey === item.sub.k + ':' + F.form ? 'wf-line__t--on' : ''}}" wx:else
+                  hover-class="none" hover-stay-time="0"
+                  data-text="{{F.form}}" data-key="{{item.sub.k}}:{{F.form}}" catchtap="onSpeakWfToday">{{F.label}} {{F.form}}</view>
+          </block>
+        </view>
+        <view class="word-example-row">
+          <view class="word-example"
+                data-text="{{item.sub.e}}" data-ai="{{item.sub.ai}}" data-kind="s" data-k="{{item.sub.k}}" bindtap="onSpeakWord"><text wx:if="{{playingText === item.sub.e && playingKey === item.sub.k}}" class="kara-lit">{{karaLit}}</text>{{playingText === item.sub.e && playingKey === item.sub.k ? karaRest : item.sub.e}}</view>
+          <view class="ex-speak {{playingText === item.sub.e && playingKey === item.sub.k ? 'playing' : ''}}"
+                hover-class="speak-hover" hover-stay-time="120"
+                data-text="{{item.sub.e}}" data-ai="{{item.sub.ai}}" data-kind="s" data-k="{{item.sub.k}}" bindtap="onSpeakWord"><view class="spk-ico {{playingText === item.sub.e && playingKey === item.sub.k ? 'spk-ico--on' : ''}}"></view></view>
+          <view class="ex-eye" wx:if="{{item.sub.cn}}" hover-class="none" hover-stay-time="120" data-k="{{item.sub.k}}" catchtap="onToggleExZh"><view class="eye-ico {{zhOpen[item.sub.k] ? 'eye-ico--on' : ''}}"></view></view>
+        </view>
+        <view class="ex-cn" wx:if="{{item.sub.cn && zhOpen[item.sub.k]}}">{{item.sub.cn}}</view>
       </view>
     </block>
   </view>
+</block>
 
-  <!-- 学习日：例句精读（语法内容保留，仅换标题口径） -->
-  <view class="card" wx:if="{{dayData.type === 'study' && dayData.g}}">
-    <view class="section-label">{{dayData.g.label || '例句精读'}} · {{dayData.g.t}}</view>
-    <view class="grammar-exp">{{dayData.g.exp}}</view>
-    <!-- 例句精读（v1.1.85）：每条 = {v 显示原文, spk 是否有可朗读的英文}。
-         含汉字的句子（「每天 5 分钟回忆，胜过 20 分钟抄写。」）不渲染喇叭 —— 此前它们带喇叭，
-         点下去是在线 TTS 读中文（与全站 Azure 音色完全两回事）。
-         v1.1.91：方法日（g.plain）无序号、样式降格为左侧细竖线的浅色补充条 —— 这些中文要点与上方
-         背景色注释区是同一件事的两种说法，并列编号会显得重复。point 日（有英文例句）保持编号列表。 -->
-    <view class="grammar-ex {{dayData.g.plain ? 'grammar-ex--sup' : ''}}" wx:for="{{dayData.g.ex}}" wx:key="v">
-      <view class="ex-no" wx:if="{{!dayData.g.plain}}">{{index + 1}}.</view>
-      <text class="grammar-ex-text"><text wx:if="{{playingText === item.v}}" class="kara-lit">{{karaLit}}</text>{{playingText === item.v ? karaRest : item.v}}</text>
-      <view class="ex-speak {{playingText === item.v ? 'playing' : ''}}" wx:if="{{item.spk}}"
-            hover-class="speak-hover" hover-stay-time="120"
-            data-text="{{item.v}}" data-kind="g" bindtap="onSpeakWord"><view class="spk-ico {{playingText === item.v ? 'spk-ico--on' : ''}}"></view></view>
-    </view>
+<!-- ④ 章末自测（旧版的周日自检）：只展示，不打卡、不占进度 -->
+<view class="card quiz-card" wx:if="{{dayData.quiz}}">
+  <view class="section-label">本章自测 · 可选</view>
+  <view class="quiz-t">{{dayData.quiz.t}}</view>
+  <view class="obj-text" wx:if="{{dayData.quiz.obj}}">目标：{{dayData.quiz.obj}}</view>
+  <view class="practice-line" wx:for="{{quizLines}}" wx:key="no"><text class="prac-no">{{item.no}}.</text><text>{{item.text}}</text></view>
+  <view class="tip-text" wx:if="{{dayData.quiz.tip}}">{{dayData.quiz.tip}}</view>
+  <view class="quiz-note">不打卡、不计进度 —— 想休息就跳过。</view>
+</view>
+
+<!-- ⑤ 例句精读 -->
+<view class="card" wx:if="{{dayData.g}}">
+  <view class="section-label">{{dayData.g.label || '例句精读'}} · {{dayData.g.t}}</view>
+  <view class="grammar-exp">{{dayData.g.exp}}</view>
+  <view class="grammar-ex {{dayData.g.plain ? 'grammar-ex--sup' : ''}}" wx:for="{{dayData.g.ex}}" wx:key="v">
+    <view class="ex-no" wx:if="{{!dayData.g.plain}}">{{index + 1}}.</view>
+    <text class="grammar-ex-text"><text wx:if="{{playingText === item.v}}" class="kara-lit">{{karaLit}}</text>{{playingText === item.v ? karaRest : item.v}}</text>
+    <view class="ex-speak {{playingText === item.v ? 'playing' : ''}}" wx:if="{{item.spk}}"
+          hover-class="speak-hover" hover-stay-time="120"
+          data-text="{{item.v}}" data-kind="g" bindtap="onSpeakWord"><view class="spk-ico {{playingText === item.v ? 'spk-ico--on' : ''}}"></view></view>
   </view>
+</view>
 
-  <!-- 弹性日/收尾日不再单独渲染卡片：标题与目标卡已显示 dayData.t + obj，
-       旧版这里再渲染一次「弹性复习日/收尾自检 + 同一段 obj」，造成整段文字重复 -->
+<!-- ⑥ 练习任务 -->
+<view class="card" wx:if="{{dayData.pr}}">
+  <view class="section-label">练习任务</view>
+  <view class="practice-line" wx:for="{{prLines}}" wx:key="no"><text class="prac-no">{{item.no}}.</text><text>{{item.text}}</text></view>
+</view>
 
-  <!-- 练习任务 -->
-  <view class="card" wx:if="{{dayData.pr}}">
-    <view class="section-label">{{dayData.type === 'sun' ? '自检任务' : (dayData.type === 'sat' ? '今日可选任务' : '练习任务')}}</view>
-    <view class="practice-line" wx:for="{{prLines}}" wx:key="no"><text class="prac-no">{{item.no}}.</text><text>{{item.text}}</text></view>
-  </view>
-
-  <!-- 学习提示 -->
-  <view class="card tip-box" wx:if="{{dayData.tip}}">
-    <view class="section-label">学习提示</view>
-    <view class="tip-text">{{dayData.tip}}</view>
-  </view>
+<!-- ⑦ 学习提示 -->
+<view class="card tip-box" wx:if="{{dayData.tip}}">
+  <view class="section-label">学习提示</view>
+  <view class="tip-text">{{dayData.tip}}</view>
+</view>
 </block>
 
 <feedback id="fb"/>

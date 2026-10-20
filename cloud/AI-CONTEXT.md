@@ -17,18 +17,19 @@
 
 ---
 
-## ⚡ 当前进度快照（2026-10-16 · 功能内核 = light v1.1.103）
+## ⚡ 当前进度快照（2026-10-19 · 功能内核 = light v1.1.107）
 
-**本实例现状**：功能内核于 2026-10-16 由 light **整树同步**（提交 `476310e`，63 版差距一次性收口）；外观层仍为**三色调整**（auto / 浅色 / 深色 + 手动切换）——这是本实例与 light、dark 的**唯一区别**。
+**本实例现状**：功能内核于 2026-10-19 同步至 v1.1.107（含 v1.1.104 修正层、v1.1.105/106 词形规则、v1.1.107 分类分组）；外观层仍为**三色调整**（auto / 浅色 / 深色 + 手动切换）——这是本实例与 light、dark 的**唯一区别**。
 
 **与 light 的差异 = 6 个文件**：`miniprogram/app.js`、`miniprogram/app.json`、`pages/settings/settings.js`、`pages/settings/settings.wxml`、`miniprogram/theme.json`、`utils/theme.js`。
 
 **同步进来的功能内核**：
 
 - **数据**：8115 词表（功能词 115 条在最前，ai 8001~8115）· 拆卡 overlay `split-senses.js` · `data-p1~p6`
-- **音频**：Cambridge 官方音频管线（v1.1.101/102）· addict 副卡改 Merriam-Webster 官方源（v1.1.103）· 缓存根 **`au6`**
+- **音频**：Cambridge 官方音频管线（v1.1.101/102）· addict 副卡改 Merriam-Webster 官方源（v1.1.103）· 例句音频重做 66 个（v1.1.105）+ 新增 22 个（v1.1.106）+ 24 个（v1.1.107）· 缓存根 **`au7`**
 - **页面**：工具页（学习记录 / 搜索 / 音标区 / 语法区）· `pkg-study` 分包（grammar / topic）· dock 栏 · 4 tab 英文化 · `pages/weeks` 移除
-- **新增 utils**：`glossary.js` · `phonetic.js` · `split-senses.js` · `study-cats.js` · `wordforms.js`
+- **新增 utils**：`glossary.js` · `phonetic.js` · `split-senses.js` · `study-cats.js` · `wordforms.js` · `content-overrides.js` · `functional-word-overrides.js`
+- **语法**：15 分类 / 78 语法点，分两组（语法 12 类 / 71 点 + 词形与构词 3 类 / 7 点：词形规则 4 + 英美拼写 1 + 构词法 2）
 - **云函数**：`audio-url` 的 `PATH_RE` 纳入 `wuk/`（英音单词桶）；`sync` 函数保持原样
 - **存储键名统一**：`ielts-365-store` → `words-store`、`BACKUP_TAG` `ielts-365` → `words`、搜索关键词键 → `words-search-kw`（三实例逐字节相同）；旧键**只读兼容**（读到即迁移写新键、旧键保留），旧 tag 备份**仍可导入**
 - **同步方式**：`_ipa_build/_sync_1103.js`（整树 `cp` + 按实例回填外观层）→ 随后跑 `node tools/verify-structure.js` 六项自检

@@ -1,8 +1,12 @@
-// pages/today/today.js —— 今日学习计划
+// pages/today/today.js —— 今日学习（6 册 / 78 章 / 390 节，v1.1.110）
+//
+// 单位说明：课程不再按「第 N 天」推进，改为「节」。进度键仍然是 w{章}d{节}（d = 1..5），
+// 与旧版逐字节相同 —— 老用户的打卡记录直接落在对应的节上，零迁移。
+// 章末自测（旧版的周日自检）挂在每章第 5 节下面，只展示、不打卡、不计进度。
 const plan = require('../../utils/data.js');
 // 例句精读「可朗读」判定（v1.1.85，与 _ipa_build/mk_g_tasks.js 的 looksSentence 同口径）：
 // 含汉字（注释/提示行）、填空 ___、箭头替换、「标签:」开头、无句末标点、英文词 <3 → 都不给喇叭。
-// 词数下限 3：Day1 就有「I'm from China.」这类三词真句，不能按 4 挡。
+// 词数下限 3：第 1 节就有「I'm from China.」这类三词真句，不能按 4 挡。
 function exSpk(s) {
   if (!s) return false;
   if (/[\u4e00-\u9fff]/.test(s)) return false;
@@ -11,57 +15,67 @@ function exSpk(s) {
   if (/^[A-Za-z][A-Za-z ]{0,12}:\s/.test(s)) return false;
   if (/^\d/.test(s)) return false;                          // 日程条目（10:45 - 11:45 writing…）
   if (/^(Day|Box|Minute|Week)\s*\d/i.test(s)) return false; // 打卡/计划条目（Day 5: mixed practice…）
-  // v1.1.86：句末允许跟一个短括号补充 —— `The town that I visited was quiet. (not where)`
-  // 是语法真例句（对照 where/that 的用法），此前被「以 ) 结尾 = 没有句末标点」误挡掉喇叭。
+  // 句末允许跟一个短括号补充 —— `The town that I visited was quiet. (not where)` 是语法真例句
   return /[.!?]["']?\s*(\([^)]{0,24}\))?\s*$/.test(String(s).trim());
 }
 const store = require('../../utils/store.js');
 const theme = require('../../utils/theme.js');
 const speech = require('../../utils/speech.js');
 const wordforms = require('../../utils/wordforms.js');
-const splitSenses = require('../../utils/split-senses.js');   // 拆卡 overlay（v1.1.98）
+const splitSenses = require('../../utils/split-senses.js');
+
+// 「1) 2) 3)」编号拆行（数据源是一整段，无换行符）
+function splitPr(s) {
+  if (!s) return [];
+  return String(s).split(/(?=\d\)\s)/).map(x => {
+    const m = x.match(/^(\d+)\)\s*/);
+    return { no: m ? m[1] : '', text: m ? x.slice(m[0].length) : x };
+  });
+}
 
 Page({
   data: {
-    // 主题在 data 初始化阶段就确定（与 tabBar v1.1.7 同款）：首帧即正确深浅，
-    // onLoad 的 setData 实测晚 1-3 帧才上屏（09-26 录屏 f103/116/128 白光根因）
+    // 主题在 data 初始化阶段就确定（与 tabBar 同款）：首帧即正确深浅
     dark: theme.isDark(),
     pageStyle: theme.isDark() ? 'background-color:#0E1618;' : '',
-    // 自定义导航栏（v1.1.33）：标题走 data 绑定 <nav-bar title>，不再调 setNavigationBarTitle
     navTitle: '今日单词',
-    // ⚠️ 必须初始化为 0（falsy）：首次 onShow 才会走「默认落点」分支（准备期倒计时卡/
-    // 第一个未完成日）。若是 1，冷启动直接命中「保持浏览位置」分支，准备期用户永远
-    // 看到 Day 1——09-26 用户实测清除记录/改日期后仍显示 Day 1 的根因之一
-    viewDay: 0,
-    totalDays: plan.TOTAL_DAYS,
-    todayNum: 0,
-    curDay: 0,          // 打卡驱动的「当前进度日」= 第一个未完成日（v1.1.97：页面不再跟自然日滚动）
+
+    viewSec: -1,          // 当前浏览的节（0 基）；-1 = 尚未渲染
+    curSec: 0,            // 打卡驱动的「当前进度节」= 第一个未打卡的节
+    totalSec: plan.SECTION_TOTAL,
     preStart: false,
-    daysToStart: 0,
-    dayNum: 1,
-    dowText: '',       // 日期副标题：星期（周一~周日）；等级模块下线后，这行从「等级名」改回星期
-    theme: '',
-    dayData: null,
-    vocab: [],
-    zhOpen: {},        // 例句中文展开表 { 单词: 1 }（v1.1.53，默认不显示）
-    extraStart: -1,   // 扩展词在 vocab 中的起始下标（-1 表示全是核心词）
+    prepPreview: false,   // 准备期点了「先看看第 1 节」：允许预览，但给一条返回准备期的入口
+
+    // 位置（章头 / 目录共用）
+    bookNo: 1, chNo: 1, chInBook: 1, kNo: 1, secNo: 1,
+    chapterTitle: '', sectionTitle: '', locText: '',
+
+    dayData: null,       // 节内容（已剔除 v）
+    prLines: [],
+    quizLines: [],
+    cards: [],           // 一词一卡：主卡 + sub 副义项合并
+    zhOpen: {},          // 例句中文展开表（按卡片 key，主/副分开）
     coreCount: 0,
     extraCount: 0,
+    extraStart: -1,
     checked: false,
-    hlWord: '',       // 从搜索页跳来时的定位高亮词（v1.1.46），2s 后自动清空
-    hlVia: '',        // 变体标注（v1.1.75）：『took』是它的过去式 —— 搜索结果卡的标注在定位行下延续
-    hlQ: '',          // 用户当时输入的查询词（标注主语）
-    playingText: '',
-    playingKey: '',
-    playingAccent: '',
-    wfText: '',      // 词形小标签播放态（v1.1.78）：与词条播放态隔离，防变体文本撞词条误亮词卡
-    wfKey: '',       // 词形高亮唯一键（v1.1.81）：词+':'+形式，防多卡同 form 串亮
+
+    hlWord: '', hlVia: '', hlQ: '',
+
+    // 目录（v1.1.110）：只展开一册 / 一章，避免一次 setData 400 个节点
+    dirOpen: false,
+    dirBooks: [],
+    openBook: 0,
+    openCh: -1,
+
+    playingText: '', playingKey: '', playingAccent: '',
+    wfText: '', wfKey: '',
     playingMode: 'idle',
+    karaLit: '', karaRest: '',
     pluginOk: false,
   },
 
   onLoad() {
-    // 同值守卫：data 已初始化为主题值，此处通常 0 次 setData
     theme.applyPage(this); theme.syncTabBar(this);
     const ok = speech.initPlugin();
     speech.setRate(store.get('rate'));
@@ -69,7 +83,7 @@ Page({
     speech.setEngine(store.get('engine'));
     speech.setEngineMode(store.get('engineMode') || 'auto');
     this._offSpeech = speech.onStateChange((payload) => {
-      // 词形播放分支（v1.1.78）：wfText 存在期间主行 playingText/卡拉OK 一律冻结，播完清 wfText
+      // 词形播放分支：wfText 存在期间主行 playingText/卡拉OK 一律冻结，播完清 wfText
       if (this.data.wfText) {
         if (!payload.playing) { this.setData({ wfText: '', wfKey: '' }); return; }
         if (payload.text === this.data.wfText) {
@@ -93,49 +107,41 @@ Page({
   },
 
   applyTheme() { theme.applyPage(this); theme.syncTabBar(this); },
+
   onShow() {
     theme.syncTabBar(this, 0);
     this.applyTheme();
     store.onResume();
-    // 跨页跳天（等级页点某天 / 搜索页点结果）：switchTab 不能带参，一律走 globalData 中转。
-    // jumpWord 只有搜索页会设，消费后立即清掉 —— 否则下次切 tab 回来会再定位一次。
+    // 跨页跳转（搜索页点结果 / 语法点「课程里讲过」）：switchTab 不能带参，走 globalData 中转。
     const app = getApp();
-    const jump = app.globalData.jumpDay || 0;
+    const rawJump = app.globalData.jumpSec;
+    const hasJump = typeof rawJump === 'number' && rawJump >= 0;
+    const jump = hasJump ? rawJump : -1;
     const jumpWord = app.globalData.jumpWord || '';
     const jumpVia = app.globalData.jumpVia || null;
-    app.globalData.jumpDay = 0;
+    app.globalData.jumpSec = -1;
     app.globalData.jumpWord = '';
     app.globalData.jumpVia = null;
-    const todayNum = plan.currentDayFromStart(store.get('startDate'));
-    // v1.1.97：彻底取消自然日滚动。curDay = 打卡驱动的「当前进度日」（第一个未完成日）；
-    // 所有学习日都打过卡才回退自然日 todayNum。页面上唯一的"回到…"入口与跨天重置都以它为准。
-    const curDay = store.firstUnfinishedDay() || todayNum || 1;
+
+    const started = !!store.get('startDate');
+    const cur = store.firstUnfinishedSection();
+    const curSec = cur >= 0 ? cur : plan.SECTION_TOTAL - 1;
     const d0 = new Date();
     const dateKey = d0.getFullYear() + '-' + (d0.getMonth() + 1) + '-' + d0.getDate();
-    // 切 tab 返回（无 jump 且页面未销毁）：**仅当天**保持离开时的浏览位置与准备期预览态，只刷新打卡/同步数据。
-    // 跨自然日回来（或冷启动）一律走默认落点 = curDay —— 昨天点了开始学习但没打卡，今天进来仍是第 1 天。
-    if (!jump && this.data.viewDay && this._browseDate === dateKey) {
-      // 同值守卫：todayNum/daysToStart 多数时候没变，裸 setData 会整树重渲染（切 tab 闪屏）
+    // 切 tab 返回（无 jump 且页面未销毁）：保持离开时的浏览位置，只刷新打卡/同步数据
+    if (!hasJump && this.data.viewSec >= 0 && this._browseDate === dateKey) {
       this._browseDate = dateKey;
-      theme.sameSet(this, { todayNum, curDay, daysToStart: this._daysToStart() });
-      this.renderDay(this.data.viewDay);
-      // 防御：理论上 jump 与 jumpWord 同生共死，走不到这条分支；万一 jumpDay 被别的入口清了，
-      // jumpWord 仍应生效（搜索页的定位不该因为绕路而丢）
+      theme.sameSet(this, { curSec: curSec, preStart: !started });
+      this.renderSec(this.data.viewSec);
       if (jumpWord) this._scrollToWord(jumpWord, 0, jumpVia);
       return;
     }
-    // 默认落点 = 第一个未完成的学习日（打卡驱动）：没学/没学完，第二天仍停在这一天；
-    // 全部完成时回退自然日 todayNum。从等级页跳转（jump）或手动翻页不受影响。
-    const preStart = todayNum === 0 && !jump;
     this._browseDate = dateKey;
-    theme.sameSet(this, { todayNum, curDay, preStart, daysToStart: this._daysToStart() });
-    // 准备期不渲染日内容：renderDay 会把标题改成「第 N 天 · 等级」，
-    // 准备期标题应保持「今日单词」；日数据由「先看看第 1 天」入口按需渲染
-    if (preStart) { this._setTitle(null); return; }
-    let viewDay = jump || curDay;
-    if (viewDay < 1) viewDay = 1;
-    if (viewDay > plan.TOTAL_DAYS) viewDay = plan.TOTAL_DAYS;
-    this.renderDay(viewDay);
+    theme.sameSet(this, { curSec: curSec, preStart: !started });
+    // 准备期不渲染节内容：日数据由「先看看第 1 节」入口按需渲染
+    if (!started && !hasJump) { this._setTitle(); return; }
+    const target = hasJump ? jump : curSec;
+    this.renderSec(Math.max(0, Math.min(plan.SECTION_TOTAL - 1, target)));
     if (jumpWord) this._scrollToWord(jumpWord, 0, jumpVia);
   },
 
@@ -146,8 +152,7 @@ Page({
     this._offSpeech = null;
   },
 
-  // 搜索入口（v1.1.67）：搜索已并入「工具」tab 页 —— 这里切到工具页并让输入框聚焦。
-  // switchTab 不能带参，走 globalData 中转（工具页 onShow 消费后立即清标记，避免下次切 tab 又弹键盘）。
+  // 搜索入口：切到工具页并让输入框聚焦（switchTab 不能带参，走 globalData）
   goSearch() {
     const app = getApp();
     if (app && app.globalData) app.globalData.toolsFocus = true;
@@ -160,28 +165,24 @@ Page({
     });
   },
 
-  // 从搜索页跳来时的定位（v1.1.46）：等渲染上屏 → 量目标行位置 → 滚进视口 → 闪一下。
-  // renderDay 的 setData 是异步的，量不到（还没上屏）就重试，最多 5 次（v1.1.49 由 3 次放宽，
-  // 低端机上首屏渲染慢于 360ms 时不会再把定位丢掉）；高亮只在首次进入时设，重试不重复设。
-  // 词形标签点读（v1.1.77）：与工具页 onSpeakWf 同构，变体音频走 g/ 桶（按文本哈希）
+  // 词形标签点读：变体音频走 g/ 桶（按文本哈希）；词表内的形式走 w/ 桶
   onSpeakWfToday(e) {
     const t = e.currentTarget.dataset.text;
-    const key = e.currentTarget.dataset.key || t;   // v1.1.81：唯一键=词+':'+形式 —— were/was/been 三卡同有「be」，纯 form 键会三处同亮
+    const key = e.currentTarget.dataset.key || t;
     if (!t) return;
-    if (this.data.wfKey === key) { speech.togglePause(); return; }   // 再点同标签 = 暂停
+    if (this.data.wfKey === key) { speech.togglePause(); return; }
     if (this.data.playingText || this.data.playingAccent) {
-      this.setData({ playingText: '', playingAccent: '' });         // 词条→词形切换：清主行态
+      this.setData({ playingText: '', playingAccent: '' });
     }
     this.setData({ wfText: t, wfKey: key });
     const wfAi = plan.wordAi(t);
-    speech.speak(t, wfAi ? { ai: wfAi, kind: 'w' } : { kind: 'g' });   // 词表内形式（be/do/take…）走 w/ 桶 = 与单词同一文件（v1.1.85）
+    speech.speak(t, wfAi ? { ai: wfAi, kind: 'w' } : { kind: 'g' });
   },
 
   _scrollToWord(w, tries, via) {
     const n = tries || 0;
-    const idx = (this.data.vocab || []).findIndex(v => v.w === w);
-    // 词还没上屏（renderDay 的 setData 尚未落到视图层）→ 稍后重试，别静默放弃（v1.1.48）
-    if (idx < 0) { if (n < 5) setTimeout(() => this._scrollToWord(w, n + 1), 120); return; }
+    const idx = (this.data.cards || []).findIndex(v => v.w === w);
+    if (idx < 0) { if (n < 5) setTimeout(() => this._scrollToWord(w, n + 1, via), 120); return; }
     if (n === 0) {
       this._clearHl();
       this.setData({ hlWord: w, hlVia: (via && via.via) || '', hlQ: (via && via.q) || '' });
@@ -193,8 +194,7 @@ Page({
         .selectViewport().scrollOffset()
         .exec(res => {
           const rect = res && res[0], sv = res && res[1];
-          if (!rect || !sv) { if (n < 5) this._scrollToWord(w, n + 1); return; }
-          // 上移 140px：让目标行落在导航栏下方一点，而不是贴着屏幕顶端
+          if (!rect || !sv) { if (n < 5) this._scrollToWord(w, n + 1, via); return; }
           wx.pageScrollTo({ scrollTop: Math.max(0, rect.top + sv.scrollTop - 140), duration: 320 });
         });
     }, n === 0 ? 180 : 160);
@@ -202,89 +202,79 @@ Page({
 
   _clearHl() { if (this._hlTimer) { clearTimeout(this._hlTimer); this._hlTimer = null; } },
 
-  // 导航标题统一出口（v1.1.33 起为自定义导航栏）：恒为「今日单词」。
-  // v1.1.68：不再随天数变化 —— 导航栏的「第 N 天」与下方 day-head 卡里的「第 N 天」是同一个数，
-  // 并排显示属重复（用户真机指出）。标题是 data 字段，经 sameSet 同值守卫绑定到 <nav-bar>，换 tab 不会串。
-  _setTitle() {
-    theme.sameSet(this, { navTitle: '今日单词' });
-  },
+  _setTitle() { theme.sameSet(this, { navTitle: '今日单词' }); },
 
-  _daysToStart() {
-    const sd = new Date((store.get('startDate') || plan.DEFAULT_START) + 'T00:00:00');
-    const now = new Date();
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    return Math.max(0, Math.ceil((sd - today) / 86400000));
-  },
-
-  renderDay(day) {
-    const info = plan.dayInfo(day);
-    const week = plan.WEEKS[info.wIdx];
-    const raw = plan.getDay(day);
-    // dayData 里剔除词汇数组 v，避免与 vocab 重复 setData 两份（传输量翻倍）
+  // ── 渲染一节 ──────────────────────────────────────────────
+  renderSec(si) {
+    const info = plan.sectionInfo(si);
+    if (!info) return;
+    const raw = plan.getSection(si);
+    // dayData 里剔除词汇数组 v，避免与 cards 重复 setData 两份
     const dayData = raw ? Object.assign({}, raw) : null;
     if (dayData) delete dayData.v;
-    // 词形标签（v1.1.80）：换成 wfNotes —— 正向（原形→不规则变化）+ 反向（变体→原形，如 were→原形 be）。
-    // 原来只用 noteFor，功能词包里的 was/were/been/am/is/are 作今日单词时词形行是空的。
-    // 拆卡展开（v1.1.98）：命中 split-senses 的词拆成主/副两张卡（主卡在前）。
-    // expand 只改写这里传入的浅拷贝，plan 缓存与 words.js 主表零改动。
-    const _exp = splitSenses.expand((raw && raw.v ? raw.v : []).map(v => Object.assign({}, v, { starred: store.isStarred(v.w), wf: wordforms.wfNotes(v.w) })));
-    const list = _exp.list;
-    // 例句精读（v1.1.85）：这些句子在模板里是 `data-kind="g"` 且**没有词表编号** → 走文本哈希（g/ 桶）。
-    // ⚠️ 两点：① 含汉字的句子（「每天 5 分钟回忆，胜过 20 分钟抄写。」）没有可朗读的英文 → 标 spk=false，
-    //    模板据此不渲染喇叭（此前它们带喇叭，点下去是在线 TTS 读中文）；② 句子文本要提前收进 g/ 桶，
-    //    否则真机点一次就等一次云函数签名 + 下载（与 v1.1.82 语法例句同一类问题）。
+    // 一词一卡（v1.1.110）：splitSenses.cards 把主卡与副义项合成一张卡（副义项挂在 .sub）
+    const cards = splitSenses.cards((raw && raw.v ? raw.v : []).map(v => Object.assign({}, v, {
+      starred: store.isStarred(v.w),
+      // 只带 wfNotes（词形要点：不规则形 + 读音提醒）；完整屈折表在工具页搜索结果里给，
+      // 今日页 30 个词全列 4 个变形会把卡片撑爆（用户要的「百度式变形」是搜索场景）。
+      wf: wordforms.wfNotes(v.w, v.p),
+    })));
+    const coreCount = dayData ? dayData.coreCount || 0 : 0;
+    let extraStart = -1;
+    cards.forEach((v, i) => { if (extraStart < 0 && !v.core) extraStart = i; });
+    // 例句精读：含汉字的句子没有可朗读的英文 → spk=false，模板据此不渲染喇叭
     let gEx = [];
     if (dayData && dayData.g) {
-      const ex = (dayData.g.ex || []).map(s => ({ v: s, spk: exSpk(s) }));   // 注释类（提示/例词清单/Tag/日程）一律不给喇叭
+      const ex = (dayData.g.ex || []).map(s => ({ v: s, spk: exSpk(s) }));
       gEx = ex.filter(x => x.spk);
-      // v1.1.87：这张卡只在「确实有可朗读的英文例句」时才叫「例句精读」。
-      // 纯方法日（主动回忆法/影子跟读/时间安排……）的讲解里没有任何英文语言点，
-      // 例句是中文要点、也不给喇叭 → 标题改叫「今日要点」，避免名不副实。
-      // v1.1.91：方法日（无可朗读英文的纯要点日）给 plain 标记 —— 模板据此去掉「1. 2.」序号，      // 把与上方注释区并列的中文要点降格为浅色补充条（避免「同一件事说两遍」的观感）。      const gLabel = gEx.length ? '例句精读' : '今日要点';
-      dayData.g = Object.assign({}, dayData.g, { ex: ex, label: gLabel, plain: !gEx.length });   // 浅拷贝后换新对象，避免污染 plan 的缓存数据
+      const gLabel = gEx.length ? '例句精读' : '今日要点';
+      dayData.g = Object.assign({}, dayData.g, { ex: ex, label: gLabel, plain: !gEx.length });
     }
-    const coreCount = dayData ? dayData.coreCount || 0 : 0;
-    // 练习任务按 "1) 2) 3)" 编号拆行（数据源里是一整段，无换行符）
-    const prLines = dayData && dayData.pr ? String(dayData.pr).split(/(?=\d\)\s)/).map(s => { const m = s.match(/^(\d+)\)\s*/); return { no: m ? m[1] : '', text: m ? s.slice(m[0].length) : s }; }) : [];
-    // 同日同状态（打卡/收藏位未变）直接跳过整页 setData：
-    // 微信 setData 不做深度 diff，同值也会整树重渲染 —— 这就是切 tab 回页「闪一下像重新渲染」的根源
-    const sig = [day, store.isChecked(info.wIdx + 1, info.k) ? 1 : 0, list.map(v => v.starred ? 1 : 0).join('')].join('|');
-    if (sig === this._daySig) {
-      this._setTitle(day);
+    const prLines = splitPr(dayData && dayData.pr);
+    const quizLines = splitPr(dayData && dayData.quiz && dayData.quiz.pr);
+    const sig = [si, store.isChecked(info.ch + 1, info.k + 1) ? 1 : 0, cards.map(v => v.starred ? 1 : 0).join('')].join('|');
+    if (sig === this._secSig) {
+      theme.sameSet(this, { curSec: this.data.curSec, preStart: false });
       return;
     }
-    this._daySig = sig;
+    this._secSig = sig;
     this.setData({
-      viewDay: day,
-      dayNum: day,
-      dowText: info.dow,
-      theme: week.theme,
-      dayData,
-      prLines,
-      vocab: list,
-      extraStart: _exp.extraIdx >= 0 ? _exp.extraIdx : -1,
+      viewSec: si,
+      bookNo: info.bookNo, chNo: info.chNo, chInBook: info.chInBook, kNo: info.kNo, secNo: info.no,
+      chapterTitle: info.chapterTitle, sectionTitle: info.title, locText: info.loc,
+      dayData: dayData,
+      prLines: prLines,
+      quizLines: quizLines,
+      cards: cards,
+      extraStart: extraStart,
       coreCount: coreCount,
-      extraCount: list.length - coreCount,
-      checked: store.isChecked(info.wIdx + 1, info.k),
+      extraCount: cards.length - coreCount,
+      checked: store.isChecked(info.ch + 1, info.k + 1),
     });
-    this._setTitle(day);
-    // 后台把当天音频预拉进本地缓存（静默，失败不影响播放）
-    if (list.length) {
+    this._setTitle();
+    // 后台把本节音频预拉进本地缓存（静默，失败不影响播放）
+    if (cards.length) {
       const items = [];
-      list.forEach(v => { items.push({ ai: v.ai, kind: 'w' }); items.push({ ai: v.ai, kind: 's' }); });
-      speech.prefetch(items.slice(0, 40), 0);   // 全天只签链接（v1.1.72），落盘交给滑动窗口
-      if (gEx.length) speech.prefetch(gEx.map(x => ({ text: x.v })), 0);   // 例句精读（v1.1.85）：走 g/ 桶哈希
+      cards.forEach(v => {
+        items.push({ ai: v.ai, kind: 'w' }); items.push({ ai: v.ai, kind: 's' });
+        if (v.sub) { items.push({ ai: v.sub.ai, kind: 'w' }); items.push({ ai: v.sub.ai, kind: 's' }); }
+      });
+      speech.prefetch(items.slice(0, 40), 0);
+      if (gEx.length) speech.prefetch(gEx.map(x => ({ text: x.v })), 0);
       this._prefetchWindow(0);
     }
   },
 
-  prevDay() { if (this.data.viewDay > 1) { speech.stop(); this.renderDay(this.data.viewDay - 1); } },
-  nextDay() {
-    if (this.data.viewDay < plan.TOTAL_DAYS) { speech.stop(); this.renderDay(this.data.viewDay + 1); }
+  prevSec() {
+    if (this.data.viewSec > 0) { speech.stop(); this.renderSec(this.data.viewSec - 1); wx.pageScrollTo({ scrollTop: 0, duration: 0 }); }
   },
-  // v1.1.88：准备期唯一「开学」入口（设置页的「计划开始日期」模块已删除）。
-  // startDate 由空串 → 今天 → currentDayFromStart 返 1：今日页立刻变成第 1 天，打卡放开。
-  // 之后即便当天没打卡，下次进来仍是第 1 天（firstUnfinishedDay 驱动），不会退回准备期。
+  nextSec() {
+    if (this.data.viewSec >= 0 && this.data.viewSec < plan.SECTION_TOTAL - 1) {
+      speech.stop(); this.renderSec(this.data.viewSec + 1); wx.pageScrollTo({ scrollTop: 0, duration: 0 });
+    }
+  },
+
+  // 准备期唯一「开学」入口：写 startDate=今天 → 今日页立刻进入第 1 节，打卡放开
   startLearning() {
     const pad = n => ('0' + n).slice(-2);
     const d = new Date();
@@ -292,65 +282,87 @@ Page({
     store.set('startDate', iso);
     getCurrentPages().forEach(pg => { if (pg.resetView) pg.resetView(); });
     speech.stop();
-    this._daySig = null;
-    this.setData({ preStart: false, viewDay: 0 });
+    this._secSig = null;
+    this.setData({ preStart: false, prepPreview: false, viewSec: -1 });
     this.onShow();
-    this.fb().toast('已开始 · 第 1 天', 1500);
+    this.fb().toast('已开始 · 第 1 节', 1500);
   },
-  // 准备期预览入口「先看看第 1 天」：直接渲染第 1 天（不打卡、不写 startDate）。
+  // 准备期预览入口「先看看第 1 节」：直接渲染（不打卡、不写 startDate）
   backToToday() {
-    const t = this.data.todayNum || 1;
     speech.stop();
-    // 准备期（preStart）点「先看看第 1 天」：必须退出准备期卡片，否则 renderDay 渲染了也被 wx:if 盖住
-    this.setData({ preStart: false });
-    this.renderDay(t);
+    this.setData({ preStart: false, prepPreview: !store.get('startDate') });
+    this.renderSec(0);
+    wx.pageScrollTo({ scrollTop: 0, duration: 0 });
   },
-  // v1.1.97：手动翻页后「回到当前进度」—— 目标日 = curDay（第一个未完成日），不再按自然日算。
-  // 页内 chip 只在 dayNum !== curDay 时才出现，所以这里不需要额外守卫。
   backToProgress() {
     speech.stop();
-    let t = this.data.curDay || 1;
-    if (t > plan.TOTAL_DAYS) t = plan.TOTAL_DAYS;
+    const t = Math.max(0, Math.min(plan.SECTION_TOTAL - 1, this.data.curSec || 0));
     this.setData({ preStart: false });
-    this.renderDay(t);
+    this.renderSec(t);
+    wx.pageScrollTo({ scrollTop: 0, duration: 0 });
   },
-
-  resetView() {
-    // 清除记录 / 点「开始学习」后调用：丢弃浏览位置，下次 onShow 走默认落点
-    // （startDate 置为今天 → todayNum=1，直接进第 1 天；只有云端同步来的未来日期才进倒计时卡）
-    this._daySig = null;
-    this.setData({ viewDay: 0 });
-  },
-
+  resetView() { this._secSig = null; this.setData({ viewSec: -1 }); },
   backToPrep() {
-    // 准备期浏览某天后返回倒计时卡（todayNum=0 时今日页顶部「回到准备期」入口）
     speech.stop();
-    this._daySig = null;
-    this.setData({ preStart: true, viewDay: 0 });
-    this._setTitle(null); // 标题同步回「今日单词」，否则残留「第 N 天」
+    this._secSig = null;
+    this.setData({ preStart: true, prepPreview: false, viewSec: -1 });
+    this._setTitle();
+  },
+
+  // ── 目录 ─────────────────────────────────────────────────
+  _dirData() {
+    const ck = store.get('checkedDays');
+    return plan.bookTree(ck, this.data.openBook, this.data.openCh, this.data.viewSec);
+  },
+  onDirToggle() {
+    if (this.data.dirOpen) { this.setData({ dirOpen: false }); return; }
+    // 打开时默认定位到当前所在的册 / 章
+    const si = this.data.viewSec >= 0 ? this.data.viewSec : 0;
+    const info = plan.sectionInfo(si) || { book: 0, ch: 0 };
+    this.setData({ dirOpen: true, openBook: info.book, openCh: info.ch }, () => {
+      this.setData({ dirBooks: this._dirData() });
+    });
+  },
+  onDirBook(e) {
+    const b = Number(e.currentTarget.dataset.book);
+    // 再点一次 = 收起该册（openBook=-1 时 bookTree 对所有册都返回空 chapters）
+    const nb = b === this.data.openBook ? -1 : b;
+    this.setData({ openBook: nb, openCh: -1 }, () => this.setData({ dirBooks: this._dirData() }));
+  },
+  onDirCh(e) {
+    const ch = Number(e.currentTarget.dataset.ch);
+    this.setData({ openCh: ch === this.data.openCh ? -1 : ch }, () => this.setData({ dirBooks: this._dirData() }));
+  },
+  onDirSec(e) {
+    const si = Number(e.currentTarget.dataset.si);
+    if (!(si >= 0)) return;
+    speech.stop();
+    this.setData({ dirOpen: false });
+    this.renderSec(si);
+    wx.pageScrollTo({ scrollTop: 0, duration: 0 });
   },
 
   fb() { return this.selectComponent('#fb'); },
 
   onCheckin() {
-    // 准备期只预览不打卡：打卡会把「还没开学的日子」记成已完成，进度与云同步全乱
-    if (this.data.todayNum === 0) { this.fb().toast('开始后才能打卡', 1200); return; }
-    const info = plan.dayInfo(this.data.viewDay);
-    const now = store.toggleCheck(info.wIdx + 1, info.k);
+    // 准备期只预览不打卡
+    if (this.data.preStart) { this.fb().toast('开始后才能打卡', 1200); return; }
+    const info = plan.sectionInfo(this.data.viewSec);
+    if (!info) return;
+    const now = store.toggleCheck(info.ch + 1, info.k + 1);
     this.setData({ checked: now });
-    // 反馈统一走 feedback 组件白卡轻提示（原生黑块已废除）
     if (now) this.fb().toast('打卡成功', 900);
+    this._secSig = null;
   },
 
   // ---- 朗读 ----
-  // 一个 handler 通吃：音标模块（带 data-accent=us|uk）、例句、语法例句（不带 accent → 用全局口音）
   onSpeakWord(e) {
     const ds = e.currentTarget.dataset;
     const text = ds.text || ds.example || ds.word;
     if (!text) return;
-    if (this.data.wfText) this.setData({ wfText: '', wfKey: '' });   // 词形→词条切换：先收词形态
+    if (this.data.wfText) this.setData({ wfText: '', wfKey: '' });
     const accent = ds.accent || '';
-    const key = ds.k || '';   // 拆卡(v1.1.99): 点单卡喇叭只亮该卡; 朗读全部 key 为空走旧逻辑
+    const key = ds.k || '';
     const same = this.data.playingText === text && (this.data.playingAccent || '') === accent && this.data.playingKey === key;
     if (same) {
       const r = speech.togglePause();
@@ -358,21 +370,23 @@ Page({
       return;
     }
     const ai = Number(ds.ai) || 0;
-    this.setData({ playingKey: key });   // 先落 key 再 speak：speak 内 notify 是同步回调，
-                                         // 后设会先渲染一帧「主副同亮」（v1.1.100 验收修复）
+    this.setData({ playingKey: key });
     speech.speak(text, { ai: ai, kind: ds.kind || 's', accent: accent });
-    // 滑动窗口（v1.1.72）：以正在播的词为基点，往后备 2 个词的音频
-    const vi = this.data.vocab.findIndex(v => v.ai === ai);
+    const vi = this.data.cards.findIndex(v => v.ai === ai);
     if (vi >= 0) this._prefetchWindow(vi);
   },
 
   onSpeakAll() {
-    if (!this.data.vocab.length) return;
+    if (!this.data.cards.length) return;
     if (this.data.playingMode === 'queue') { speech.stop(); return; }
     const items = [];
-    this.data.vocab.forEach(v => {
+    this.data.cards.forEach(v => {
       items.push({ text: v.w, ai: v.ai, kind: 'w' });
       if (v.e) items.push({ text: v.e, ai: v.ai, kind: 's' });
+      if (v.sub) {
+        items.push({ text: v.w, ai: v.sub.ai, kind: 'w' });
+        if (v.sub.e) items.push({ text: v.sub.e, ai: v.sub.ai, kind: 's' });
+      }
     });
     speech.speakQueue(items);
     this._prefetchWindow(0);
@@ -380,40 +394,38 @@ Page({
 
   onStar(e) {
     const i = e.currentTarget.dataset.index;
-    const v = this.data.vocab[i];
+    const v = this.data.cards[i];
     if (!v) return;
     const starred = store.toggleStar(v);
-    const patch = {};
-    // 拆卡后同词有主/副两卡（v1.1.98）：收藏态按 w 同步到两张卡
-    this.data.vocab.forEach((it, j) => { if (it.w === v.w) patch['vocab[' + j + '].starred'] = starred; });
-    this.setData(patch);
+    this.setData({ ['cards[' + i + '].starred']: starred });
   },
 
-  // 滑动窗口预取（v1.1.72）：从 startIdx 起连 3 个词，各备 3 个文件 =
-  // 单词正常速 + 单词慢速 + 例句（例句速度跟全局慢速开关）。约 150KB，失败静默。
-  // 用户往下听时窗口跟着滚 —— 连续听不打断，慢速首播也不走网络。
   _prefetchWindow(startIdx) {
-    const list = this.data.vocab;
+    const list = this.data.cards;
     if (!list.length) return;
     const items = [];
     for (let i = startIdx; i < Math.min(startIdx + 3, list.length); i++) {
       const v = list[i];
-      if (!v || !v.ai) continue;
-      items.push({ ai: v.ai, kind: 'w', slow: false });
-      items.push({ ai: v.ai, kind: 'w', slow: true });
-      if (v.e) items.push({ ai: v.ai, kind: 's' });
+      if (v && v.ai) {
+        items.push({ ai: v.ai, kind: 'w', slow: false });
+        items.push({ ai: v.ai, kind: 'w', slow: true });
+        if (v.e) items.push({ ai: v.ai, kind: 's' });
+      }
+      if (v && v.sub && v.sub.ai) {
+        items.push({ ai: v.sub.ai, kind: 'w', slow: false });
+        items.push({ ai: v.sub.ai, kind: 'w', slow: true });
+        if (v.sub.e) items.push({ ai: v.sub.ai, kind: 's' });
+      }
     }
     speech.prefetch(items);
   },
 
-  // 例句中文眼睛开关（v1.1.53）：按词记展开态，默认不显示。
-  // 用「整对象替换」而不是 setData({'zhOpen.' + w: ...}) —— 词条含空格（get up）等字符，
-  // 拼数据路径不可靠；整表只有当天十几~几十个词，开销可忽略。
+  // 例句中文眼睛开关：按卡片 key（主/副分开）
   onToggleExZh(e) {
-    const w = e.currentTarget.dataset.w;
-    if (!w) return;
+    const k = e.currentTarget.dataset.k;
+    if (!k) return;
     const m = Object.assign({}, this.data.zhOpen);
-    if (m[w]) delete m[w]; else m[w] = 1;
+    if (m[k]) delete m[k]; else m[k] = 1;
     this.setData({ zhOpen: m });
   },
 });

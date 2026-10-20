@@ -6,11 +6,11 @@
 // 关键设计
 // ────────
 // 1. 本页是 tab 页（常驻不销毁）——原独立搜索页那套「关键词落盘 + switchTab 回来恢复现场」的
-//    绕行逻辑全部删除：输入框内容与结果列表天然保留。跳某一天仍走 globalData.jumpDay/jumpWord。
-// 2. 学习记录分母 = 可打卡天数 468（546 天里 78 个弹性日不给打卡），
-//    剩余天数因此能随进度真正归零；不再显示百分比（与「还剩几天」语义重复，用户点名去掉）。
-//    第二行显示「已学单词 N 个」——等级下线后不再出现 L1~L4（用户：只显示单词就好了）。
-// 3. 语法全文放分包 pkg-study（71 个语法点），主包只留 12 个分类目录 —— 避免启动包被撑爆。
+//    绕行逻辑全部删除：输入框内容与结果列表天然保留。跳某一节走 globalData.jumpSec/jumpWord。
+// 2. 学习记录三分母 = 全书 390 节（v1.1.110 起，「546 天」换成「册/章/节」，一节课打卡一次），
+//    三格 =「已学 N 节 / 已学 N 词 / 还剩 N 节」；不再显示百分比（与「还剩几节」语义重复，用户点名去掉）。
+//    「已学单词 N 个」= 已打卡节里的词条去重计数（用户：只显示单词就好了）。
+// 3. 语法全文放分包 pkg-study（75 个语法点），主包只留 13 个分类目录 —— 避免启动包被撑爆。
 // 4. 音标只有 44 个、体积小，直接内联本页；详情用「常驻面板」（上表选音标、下方详情固定不动，
 //    默认选中第一个音标所以永不留白、零遮罩），取代初版底部弹层（整片白遮罩太突兀）。
 // 5. 音标排在语法之前：音标与查单词同属「即时查一下」（矮、就地看），语法是「系统学一块」
@@ -21,6 +21,21 @@ const theme = require('../../utils/theme.js');
 const speech = require('../../utils/speech.js');
 const PHONETIC = require('../../utils/phonetic.js');
 const STUDY_CATS = require('../../utils/study-cats.js');
+const STUDY_GROUPS = require('../../utils/study-groups.js');
+
+// 工具页分组（v1.1.109）：把 study-groups 的 id 列表换成真实分类对象，顺带带上计数。
+function catGroupOf(id) {
+  const g = STUDY_GROUPS.filter(x => x.id === id)[0];
+  if (!g) return { id: id, name: '', count: 0, points: 0, list: [] };
+  return {
+    id: g.id,
+    name: g.name,
+    count: g.count,
+    points: g.points,
+    list: g.ids.map(cid => STUDY_CATS.filter(c => c.id === cid)[0]).filter(Boolean),
+  };
+}
+
 const GLOSSARY = require('../../utils/glossary.js');
 
 const DEBOUNCE = 160;
@@ -85,12 +100,11 @@ Page({
     pageStyle: theme.isDark() ? 'background-color:#0E1618;' : '',
     navTitle: '工具',
 
-    // ① 学习记录
-    learnedDays: 0,
-    leftDays: plan.CHECKIN_DAYS,
-    totalCheckin: plan.CHECKIN_DAYS,
+    // ① 学习记录（v1.1.110：单位从「天」改为「节」）
+    learnedSecs: 0,
+    leftSecs: plan.SECTION_TOTAL,
+    totalSec: plan.SECTION_TOTAL,
     learnedWords: 0,
-    todayNum: 0,
     // 两个入口格的数字（v1.1.95 由设置页迁入）
     starredCount: 0,
     reviewCount: 0,
@@ -112,10 +126,13 @@ Page({
     jumpingW: '',
     karaLit: '',
     karaRest: '',
+    formCard: null,   // { ri, form, label, base, pos, m, ai } 搜索结果里的「变形卡」
 
-    // ③ 语法速查（主包只放分类目录，全文在分包）
-    cats: STUDY_CATS,
-    catTotal: STUDY_CATS.reduce((a, c) => a + c.count, 0),
+    // ③ 语法速查 / ④ 词形与构词（主包只放分类目录，全文在分包）
+    // v1.1.109：拆成两张独立卡片，各自带一条注释和自己的「类 / 点」计数 ——
+    // 此前两段挤在一张卡里共用顶部注释，第二段悬在卡中间像顺带放的。
+    grGrammar: catGroupOf('grammar'),
+    grWordform: catGroupOf('wordform'),
 
     // ③ 音标（大类 + 子类筛选；面板紧跟网格下方，永不排到屏外）
     phCls: 'vowel',
@@ -216,16 +233,15 @@ Page({
   },
 
   // ---------- ① 学习记录 ----------
-  // 已学 = 真实打卡天数；还剩 = 可打卡天数 − 已学（弹性日不打卡、不计入分母）
+  // 已学 = 已打卡的节；还剩 = 总节数 − 已学
   refreshRecord() {
-    const learnedDays = store.checkedCount();
-    const leftDays = Math.max(0, plan.CHECKIN_DAYS - learnedDays);
+    const learnedSecs = store.checkedCount();
+    const leftSecs = Math.max(0, plan.SECTION_TOTAL - learnedSecs);
     const learnedWords = store.checkedWordCount();
-    const todayNum = plan.currentDayFromStart(store.get('startDate'));
     // 两个入口格的数字（v1.1.95）：同一次 setData 带出去，切 tab 回来即刷新
     const starredCount = (store.get('starredWords') || []).length;
     const reviewCount = store.activeReviewCount();
-    theme.sameSet(this, { learnedDays, leftDays, learnedWords, todayNum, starredCount, reviewCount });
+    theme.sameSet(this, { learnedSecs, leftSecs, learnedWords, starredCount, reviewCount });
   },
 
   // 学习记录两入口的按压与跳转（v1.1.95 由设置页原样迁入）。为什么要这套手动按压：
@@ -291,27 +307,34 @@ Page({
     speech.stop();
     try { wx.setStorageSync('words-search-kw', kw); } catch (err) {}
     const r = plan.searchWords(kw);
-    this.setData({ total: r.total, list: r.list, more: r.total > r.list.length });
+    // 变形条只在「第一条且与原词完全匹配」时展示：60 条结果每行都挂 5 个变形会糊成一片。
+    const q = String(kw || '').trim().toLowerCase();
+    r.list.forEach((it, i) => { it.showForms = i === 0 && !!q && it.w.toLowerCase() === q && it.forms.length > 0; });
+    this.setData({ total: r.total, list: r.list, more: r.total > r.list.length, formCard: null });
   },
 
-  // 点结果行 → 跳到该词所在的 Day 并定位高亮（整行除喇叭外都是跳转区）
+  // 点结果行 → 跳到该词所在的节并定位高亮（整行除喇叭外都是跳转区）
   onJump(e) {
     const ds = e.currentTarget.dataset;
-    const w = ds.w;
-    const day = Number(ds.day) || 0;
-    if (!w || !day) { this.fb().toast('这个词没有所属学习日'); return; }
+    const sec = Number(ds.sec);
+    if (!ds.w || ds.sec === undefined || !(sec >= 0)) { this.fb().toast('这个词没有所属章节'); return; }
+    this._jumpTo(ds.w, sec, ds.via ? { via: ds.via, q: this.data.kw } : null);
+  },
+
+  // 跳到某节并定位高亮（搜索结果 / 变形词共用）
+  _jumpTo(w, sec, via) {
     const now = Date.now();
     if (this._jumping && now - (this._jumpAt || 0) < JUMP_LOCK_MS) return;
     this._jumping = true; this._jumpAt = now;
     if (this._deb) { clearTimeout(this._deb); this._deb = null; }
     speech.stop();
     const app = getApp();
-    app.globalData.jumpDay = day;
+    app.globalData.jumpSec = sec;
     app.globalData.jumpWord = w;
     // 变体标注随行携带（v1.1.75）：结果卡上的「『took』是它的过去式」在今日页定位行下延续显示，
     // 用户点过去之后不至于忘了自己查的是什么形式。消费后由今日页清空。
-    app.globalData.jumpVia = ds.via ? { via: ds.via, q: this.data.kw } : null;
-    this.setData({ jumpingW: w });
+    app.globalData.jumpVia = via || null;
+    this.setData({ jumpingW: w, formCard: null });
     const release = () => {
       this._jumping = false; this._jumpAt = 0;
       if (this._wd) { clearTimeout(this._wd); this._wd = null; }
@@ -336,6 +359,47 @@ Page({
     go(false);
   },
 
+  // 变形条（v1.1.110）：本身在词库里有词条 → 跳到那张卡；没有 → 就地展开一张「变形卡」
+  onFormTap(e) {
+    const ds = e.currentTarget.dataset;
+    const ri = Number(ds.ri), fi = Number(ds.fi);
+    const row = this.data.list[ri];
+    if (!row || !row.forms) return;
+    const F = row.forms[fi];
+    if (!F) return;
+    if (F.has) {
+      const hit = plan.lookup(F.form);
+      if (!hit) return;
+      this._jumpTo(hit.w, hit.sec, { via: F.label, q: row.w });
+      return;
+    }
+    // 同一条变形再点一次 = 收起
+    const cur = this.data.formCard;
+    if (cur && cur.ri === ri && cur.form === F.form) { this.setData({ formCard: null }); return; }
+    this.setData({
+      formCard: {
+        ri: ri, form: F.form, label: F.label, base: row.w, pos: row.p,
+        m: row.m, ai: plan.wordAi(F.form),
+      },
+    });
+  },
+  onFormClose() { this.setData({ formCard: null }); },
+  // 变形卡里的朗读：词表内有该形式 → w/ 桶；没有 → g/ 桶哈希（与词形标签同一口径）
+  onSpeakForm(e) {
+    const ds = e.currentTarget.dataset;
+    const t = ds.text;
+    if (!t) return;
+    const ai = Number(ds.ai) || 0;
+    speech.speak(t, ai ? { ai: ai, kind: 'w' } : { kind: 'g' });
+  },
+  // 变形卡里的「查看原词」
+  onFormBase(e) {
+    const w = e.currentTarget.dataset.w;
+    const hit = w ? plan.lookup(w) : null;
+    if (!hit) { this.fb().toast('这个词没有所属章节'); return; }
+    this._jumpTo(hit.w, hit.sec, null);
+  },
+
   // 朗读：音标模块带 data-accent（各读各的口音），例句不带 → 用全局口音
   onSpeak(e) {
     const ds = e.currentTarget.dataset;
@@ -349,6 +413,13 @@ Page({
       return;
     }
     speech.speak(text, { ai: Number(ds.ai) || 0, kind: ds.kind || 'w', accent: accent });
+  },
+
+  // 多义词副义项点读：使用副卡独立 ai 编号，避免同拼写时误播主卡读音。
+  onSpeakAltSense(e) {
+    const ds = e.currentTarget.dataset;
+    if (!ds.text || !Number(ds.ai)) return;
+    speech.speak(ds.text, { ai: Number(ds.ai), kind: 'w', accent: ds.accent || '' });
   },
 
   // 朗读不规则变体小字（v1.1.73）：文本 = 单词本身（was、took…），走 g/ 桶预生成音频。

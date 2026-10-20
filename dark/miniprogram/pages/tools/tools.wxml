@@ -4,12 +4,12 @@
 
 <!-- ① 学习记录（v1.1.95）：三格进度 + 两个入口（重点词 / 复习记录，由设置页顶部迁入，
      设置页从此只剩「设置」，不再出现第二张学习记录卡）。
-     已学天数分母 = 可打卡天数（弹性日不占名额，口径写在设置-关于） -->
+     v1.1.110：分母 = 全书 390 节（旧「546 天 / 468 可打卡天」口径已废弃） -->
 <view class="card rec-card">
   <view class="section-label">学习记录</view>
   <view class="rec-row">
     <view class="rec-item">
-      <view class="rec-num">{{learnedDays}}<text class="rec-unit">天</text></view>
+      <view class="rec-num">{{learnedSecs}}<text class="rec-unit">节</text></view>
       <view class="rec-label">已学</view>
     </view>
     <view class="rec-div"></view>
@@ -19,8 +19,8 @@
     </view>
     <view class="rec-div"></view>
     <view class="rec-item">
-      <view class="rec-num">{{leftDays}}<text class="rec-unit">天</text></view>
-      <view class="rec-label">预计还剩</view>
+      <view class="rec-num">{{leftSecs}}<text class="rec-unit">节</text></view>
+      <view class="rec-label">还剩</view>
     </view>
   </view>
 
@@ -46,7 +46,7 @@
 
 <!-- ② 查单词 -->
 <view class="card search-card">
-  <view class="section-label">查单词</view>
+  <view class="section-label section-label--row">查单词<text class="section-label__n">{{wordTotal}} 词</text></view>
   <view class="tk-bar">
     <view class="ico ico-search tk-bar__ico"></view>
     <input class="tk-bar__input" value="{{kw}}" focus="{{focus}}" confirm-type="search"
@@ -56,12 +56,12 @@
     <view class="tk-bar__clear" wx:if="{{kw}}" hover-class="hover-dim" hover-stay-time="120" bindtap="onClear">×</view>
   </view>
 
-  <view class="tk-hint" wx:if="{{!kw}}">全库共 <text class="tk-hint__n">{{wordTotal}}</text> 个单词；只输入前几个字母也能搜到（如 nano → nanotechnology）。</view>
+  <view class="tk-hint" wx:if="{{!kw}}">全库共 <text class="tk-hint__n">{{wordTotal}}</text> 个单词，按 6 册 · 78 章 · 390 节 编排；只输入前几个字母也能搜到（如 nano → nanotechnology）。搜到原形时，下面会列出它的全部变形。</view>
   <view class="tk-meta" wx:if="{{kw && total > 0}}">找到 <text class="tk-meta__n">{{total}}</text> 个结果{{more ? '，仅显示前 ' + list.length + ' 个' : ''}}</view>
 
   <!-- 结果行与今日页词行同构：图标 = 朗读，其它位置 = 跳到该词所在的 Day -->
-  <block wx:for="{{list}}" wx:key="w">
-    <view class="word-row tk-row" data-w="{{item.w}}" data-day="{{item.day}}" data-via="{{item.via}}"
+  <block wx:for="{{list}}" wx:key="w" wx:for-index="ri">
+    <view class="word-row tk-row" data-w="{{item.w}}" data-sec="{{item.sec}}" data-via="{{item.via}}"
           hover-class="tk-row--press" hover-start-time="0" hover-stay-time="60" bindtap="onJump">
       <view class="word-main">
         <view class="word-head"><text class="word-en"><text wx:if="{{playingText === item.w}}" class="kara-lit">{{karaLit}}</text>{{playingText === item.w ? karaRest : item.w}}</text><text class="word-pos">{{item.p}}</text><view class="word-zh">{{item.m}}</view>
@@ -74,11 +74,15 @@
                   hover-class="speak-hover" hover-stay-time="120" hover-stop-propagation="{{true}}"
                   data-text="{{item.w}}" data-ai="{{item.ai}}" data-kind="w" data-accent="uk" catchtap="onSpeak"><view class="spk-ico {{playingText === item.w && playingAccent === 'uk' ? 'spk-ico--on' : ''}}"></view><text class="ipa-txt">{{item.uk}}</text></view>
           </view></view>
+        <view class="sense-alt" wx:if="{{item.altSense}}"><text class="sense-alt__label">另一读音/词义</text><text class="sense-alt__play" data-text="{{item.w}}" data-ai="{{item.altSense.ai}}" catchtap="onSpeakAltSense">▶ 读副义项</text><text class="sense-alt__pos">{{item.altSense.p}}</text><text class="sense-alt__gloss">{{item.altSense.m}}</text><text class="sense-alt__ipa" wx:if="{{item.altSense.ipa}}">美 {{item.altSense.ipa}}</text><text class="sense-alt__ipa" wx:if="{{item.altSense.uk}}">英 {{item.altSense.uk}}</text><text class="sense-alt__example" wx:if="{{item.altSense.e}}">{{item.altSense.e}}</text><text class="sense-alt__cn" wx:if="{{item.altSense.cn}}">{{item.altSense.cn}}</text></view>
         <view class="wf-via" wx:if="{{item.via}}">「{{kw}}」是它的{{item.via}}</view>
         <view class="wf-note" wx:if="{{item.wf.length}}">
-          <view class="wf-note__t {{wfKey === item.w + ':' + F.form ? 'wf-note__t--on' : ''}}" wx:for="{{item.wf}}" wx:for-item="F" wx:key="form"
-                hover-class="hover-dim" hover-stay-time="120" hover-stop-propagation="{{true}}"
-                data-text="{{F.form}}" data-key="{{item.w}}:{{F.form}}" catchtap="onSpeakWf">{{F.label}} {{F.form}}</view>
+          <block wx:for="{{item.wf}}" wx:for-item="F" wx:key="form">
+            <view class="wf-note__t" wx:if="{{F.speak === false}}">{{F.label}} {{F.form}}</view>
+            <view class="wf-note__t {{wfKey === item.w + ':' + F.form ? 'wf-note__t--on' : ''}}" wx:else
+                  hover-class="hover-dim" hover-stay-time="120" hover-stop-propagation="{{true}}"
+                  data-text="{{F.form}}" data-key="{{item.w}}:{{F.form}}" catchtap="onSpeakWf">{{F.label}} {{F.form}}</view>
+          </block>
         </view>
         <view class="word-example-row">
           <view class="word-example"><text wx:if="{{playingText === item.e}}" class="kara-lit">{{karaLit}}</text>{{playingText === item.e ? karaRest : item.e}}</view>
@@ -86,8 +90,42 @@
                 hover-class="speak-hover" hover-stay-time="120" hover-stop-propagation="{{true}}"
                 data-text="{{item.e}}" data-ai="{{item.ai}}" data-kind="s" catchtap="onSpeak"><view class="spk-ico {{playingText === item.e ? 'spk-ico--on' : ''}}"></view></view>
         </view>
-        <view class="tk-day">第 {{item.day}} 天<text class="tk-day__go">{{jumpingW === item.w ? ' 跳转中…' : ' ›'}}</text></view>
+        <view class="tk-day">{{item.loc}}<text class="tk-day__go">{{jumpingW === item.w ? ' 跳转中…' : ' ›'}}</text></view>
       </view>
+    </view>
+
+    <!-- 变形条（v1.1.110）：只在第一条且与原词完全匹配时出现。
+         有独立词条的变形（used / better / took…）点一下直接跳到那张卡；
+         词库没单独收录的（uses / using…）点一下就地展开一张「变形卡」。 -->
+    <view class="wf-forms" wx:if="{{item.showForms}}">
+      <view class="wf-forms__t">变形 · {{item.forms.length}}</view>
+      <view class="wf-forms__list">
+        <view class="wf-chip {{F.has ? 'wf-chip--link' : ''}} {{formCard && formCard.ri === ri && formCard.form === F.form ? 'on' : ''}}"
+              wx:for="{{item.forms}}" wx:for-item="F" wx:for-index="fi" wx:key="form"
+              data-ri="{{ri}}" data-fi="{{fi}}"
+              hover-class="wf-chip--press" hover-stay-time="60" catchtap="onFormTap">
+          <text class="wf-chip__w">{{F.form}}</text>
+          <text class="wf-chip__lb">{{F.label}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 变形卡：词库没收录该形式时的兜底卡（词形 + 是原词的哪种变形 + 原词释义 + 朗读） -->
+    <view class="form-card" wx:if="{{formCard && formCard.ri === ri}}">
+      <view class="form-card__head">
+        <text class="form-card__w">{{formCard.form}}</text>
+        <text class="form-card__pos">{{formCard.pos}}</text>
+        <view class="form-card__x" hover-class="hover-dim" hover-stay-time="60" catchtap="onFormClose">×</view>
+      </view>
+      <view class="form-card__lb">{{formCard.base}} 的{{formCard.label}}</view>
+      <view class="form-card__m">{{formCard.m}}</view>
+      <view class="form-card__foot">
+        <view class="form-card__act" hover-class="hover-dim" hover-stay-time="60"
+              data-text="{{formCard.form}}" data-ai="{{formCard.ai}}" catchtap="onSpeakForm"><view class="spk-ico"></view>朗读</view>
+        <view class="form-card__act" hover-class="hover-dim" hover-stay-time="60"
+              data-w="{{formCard.base}}" catchtap="onFormBase">查看 {{formCard.base}} ›</view>
+      </view>
+      <view class="form-card__note">词库没有单独收录这个形式，释义沿用原形。</view>
     </view>
   </block>
 
@@ -102,7 +140,7 @@
      现在：大类（元音/辅音）→ 子类（短元音/双元音…）两级筛选，屏幕上最多 3 行音标，面板紧跟其下；
      说明文字也移到最前，不再吊在最底。 -->
 <view class="card">
-  <view class="section-label">音标</view>
+  <view class="section-label section-label--row">音标<text class="section-label__n">{{phonTotal}} 个</text></view>
 
   <!-- 大类：元音 / 辅音 -->
   <view class="ph-class">
@@ -164,11 +202,11 @@
 </view>
 
 <!-- ⑤ 术语小词典（v1.1.94，v1.1.97 定名）：零基础用户在词卡释义（me（宾格））和词性标签（n./v.）里
-     撞见「行话」时，语法速查按天编排、当下找不到对应讲解 —— 这里给一页「行话词典」。
+     撞见「行话」时，语法速查按体系分类编排、当下找不到对应讲解 —— 这里给一页「行话词典」。
      结构与音标卡同构（分类段控 → 胶囊网格 → 常驻面板），默认选中第一条所以永不留白。
      命名经用户确认：「语法术语速查」六字拗口 →「术语小词典」；卡片量词与音标卡统一为「个」。 -->
 <view class="card">
-  <view class="section-label">术语小词典</view>
+  <view class="section-label section-label--row">术语小词典<text class="section-label__n">{{glTotal}} 条</text></view>
 
   <view class="ph-class">
     <view class="ph-cls {{glGroup === item.id ? 'on' : ''}}" wx:for="{{glGroups}}" wx:key="id" data-id="{{item.id}}"
@@ -194,17 +232,35 @@
   <view class="tk-note">共 {{glTotal}} 个术语。词性缩写 = 单词卡上单词后的小标签（n. / v. / adj. …）；语法术语 = 释义括弧、语法讲解里的行话。卡上遇到看不懂的小字，来这里查一条就走。</view>
 </view>
 
-<!-- ④ 语法速查：本页只给目录（全文在分包，避免撑大启动包） -->
+<!-- ④ 语法速查：本页只给目录（全文在分包，避免撑大启动包）
+     v1.1.109：与下面的「词形与构词」拆成两张独立卡片 —— 各带一条注释、各自的「类 / 点」计数。
+     边界：这张卡只讲「句子怎么搭」，拼写与构词一律不混进来。 -->
 <view class="card">
-  <view class="section-label">语法速查</view>
+  <view class="section-label section-label--row">语法速查<text class="section-label__n">{{grGrammar.count}} 类 / {{grGrammar.points}} 点</text></view>
   <view class="cat-grid">
-    <view class="cat-cell" wx:for="{{cats}}" wx:key="id" data-id="{{item.id}}"
+    <!-- 分类数为奇数时，最后一格与其余卡同宽、在末行居中；格内「文字 + 箭头」靠拢成一组 -->
+    <view class="cat-cell {{grGrammar.list.length % 2 === 1 && index === grGrammar.list.length - 1 ? 'cat-cell--odd' : ''}}"
+          wx:for="{{grGrammar.list}}" wx:for-item="C" wx:key="id" data-id="{{C.id}}"
           hover-class="cat-cell--press" hover-stay-time="80" bindtap="onCatTap">
-      <view class="cat-name">{{item.name}}</view>
+      <view class="cat-name">{{C.name}}</view>
       <view class="cat-cell__go"></view>
     </view>
   </view>
-  <view class="tk-note">共 {{catTotal}} 个语法点：一句人话开场白 + 定义 + 用法 + 易错点 + 例句，能对应上课程的还会挂出「课程里讲过哪几天」。点分类进入；也可以进速查页按「用在什么场合」筛。</view>
+  <view class="tk-note">讲「句子怎么搭」：时态、从句、语态、特殊句式。每点含一句人话开场白 + 定义 + 用法 + 易错点 + 例句，能对应上课程的还会挂出「课程里讲过哪几节」。点分类进入，也可以进速查页按「用在什么场合」筛。</view>
+</view>
+
+<!-- ⑤ 词形与构词：只讲「单词怎么变、怎么读、怎么造新词」，与上面的语法区互不重叠 -->
+<view class="card">
+  <view class="section-label section-label--row">词形与构词<text class="section-label__n">{{grWordform.count}} 类 / {{grWordform.points}} 点</text></view>
+  <view class="cat-grid">
+    <view class="cat-cell {{grWordform.list.length % 2 === 1 && index === grWordform.list.length - 1 ? 'cat-cell--odd' : ''}}"
+          wx:for="{{grWordform.list}}" wx:for-item="C" wx:key="id" data-id="{{C.id}}"
+          hover-class="cat-cell--press" hover-stay-time="80" bindtap="onCatTap">
+      <view class="cat-name">{{C.name}}</view>
+      <view class="cat-cell__go"></view>
+    </view>
+  </view>
+  <view class="tk-note">讲「单词怎么变」：名词复数、-ing / -ed 怎么拼怎么读、英美拼写差异、前后缀怎么造新词。与上面语法区的边界——这里只看字母怎么改，不管句子怎么用。</view>
 </view>
 
 <feedback id="fb"/>

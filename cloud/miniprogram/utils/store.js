@@ -146,7 +146,14 @@ function toggleCheck(w, k) {
   data.updatedAt = now; saveLocal(); schedulePush(); emit();
   return checked;
 }
-function checkedCount() { return Object.keys(data.checkedDays || {}).length; }
+// 已学「节」数（v1.1.110）：只认 w{章}d{1..5}，旧版的 d6/d7（弹性日 / 自检日）不再计入。
+function checkedCount() {
+  let n = 0;
+  Object.keys(data.checkedDays || {}).forEach(k => {
+    if (data.checkedDays[k] && plan.sectionOfKey(k) >= 0) n++;
+  });
+  return n;
+}
 // 已学单词数（去重）：工具页学习记录的「已学单词 N 个」用它。
 // 口径 = 所有已打卡学习日词汇的并集（周日/弹性日不产生新词，不计入）。
 function checkedWordCount() {
@@ -154,25 +161,26 @@ function checkedWordCount() {
   return plan.learnedWords(data.checkedDays || {}).length;
 }
 
-// 进度游标：第一个「需要打卡且未打卡」的学习日。
-// 没学 / 没学完，第二天打开仍停在这一天 —— 进度由打卡驱动，不由自然日驱动
-// （自然日只作「回到今天 Day N」的参照，见 today 页）。
-// 弹性日（type='sat'）没有打卡按钮，跳过；无内容的天也跳过。
-// 返回 0 = 全部完成，由调用方回退自然日。
-function firstUnfinishedDay() {
-  for (let day = 1; day <= plan.TOTAL_DAYS; day++) {
-    const raw = plan.getDay(day);
-    if (!raw || raw.type === 'sat') continue;
-    const info = plan.dayInfo(day);
-    if (!data.checkedDays[checkKey(info.wIdx + 1, info.k)]) return day;
+// 进度游标：第一个未打卡的节（v1.1.110：课程单位从「天」改为「节」）。
+// 没学 / 没学完，下次打开仍停在这一节 —— 进度由打卡驱动，不由自然日驱动。
+// 返回节下标；-1 = 全部完成。
+function firstUnfinishedSection() {
+  for (let si = 0; si < plan.SECTION_TOTAL; si++) {
+    if (!data.checkedDays[plan.keyOfSection(si)]) return si;
   }
-  return 0;
+  return -1;
 }
-function weekCheckedMap(wIdx) {
-  const map = {}; for (let k = 1; k <= 7; k++) map[k] = !!data.checkedDays[checkKey(wIdx + 1, k)]; return map;
+function chapterCheckedMap(ch) {
+  const map = {};
+  const total = plan.CH_SEC[ch] || 0;
+  for (let k = 1; k <= total; k++) map[k] = !!data.checkedDays[checkKey(ch + 1, k)];
+  return map;
 }
-function weekCheckedCount(wIdx) {
-  let n = 0; for (let k = 1; k <= 7; k++) if (data.checkedDays[checkKey(wIdx + 1, k)]) n++; return n;
+function chapterCheckedCount(ch) {
+  let n = 0;
+  const total = plan.CH_SEC[ch] || 0;
+  for (let k = 1; k <= total; k++) if (data.checkedDays[checkKey(ch + 1, k)]) n++;
+  return n;
 }
 
 // ---------------- 重点词 ----------------
@@ -505,15 +513,10 @@ function exportBackup() {
   const now = Date.now();
   const cn = d => d.getFullYear() + '年' + (d.getMonth() + 1) + '月' + d.getDate() + '日';
   const nd = new Date(now);
-  let maxDay = 0;
-  Object.keys(data.checkedDays || {}).forEach(k => {
-    const m = /^w(\d{1,2})d([1-7])$/.exec(k);
-    if (m) maxDay = Math.max(maxDay, (Number(m[1]) - 1) * 7 + Number(m[2]));
-  });
-  const sd = new Date((data.startDate || plan.DEFAULT_START) + 'T00:00:00');
-  sd.setDate(sd.getDate() + Math.max(0, maxDay - 1));
-  const learnText = maxDay > 0
-    ? '已完成 ' + checkedCount() + '/' + plan.TOTAL_DAYS + ' 天（学至 ' + cn(sd) + '）'
+  // v1.1.110：进度单位改为「节」，不再按自然日推算「学到哪天」
+  const stats = plan.sectionStats(data.checkedDays || {});
+  const learnText = stats.done > 0
+    ? '已完成 ' + stats.done + '/' + stats.total + ' 节'
     : '尚未开始学习';
   const summary = '导出于 ' + cn(nd) + ' · ' + learnText +
     ' · 收藏 ' + (data.starredWords || []).length + ' 词 · 复习记录 ' + activeReviewCount() + ' 词';
@@ -706,7 +709,7 @@ function resetProgress() {
 
 module.exports = {
   init, onResume, flush, onChange, get, set,
-  isChecked, toggleCheck, checkedCount, checkedWordCount, firstUnfinishedDay, weekCheckedCount, weekCheckedMap,
+  isChecked, toggleCheck, checkedCount, checkedWordCount, firstUnfinishedSection, chapterCheckedCount, chapterCheckedMap,
   isStarred, toggleStar, reviewWord, getReviewStats, gradePreview, dueWords, activeReviewCount, resetProgress,
   sync, syncNow, setSyncEnabled, cloudStatus,
   exportBackup, importBackup

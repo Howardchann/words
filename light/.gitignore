@@ -16,3 +16,6 @@ Thumbs.db
 
 # 音频管线工作目录（中间产物 + 本地输出镜像，可随时删）
 tools/audio-pipeline/_work/
+
+# 数据校验脚本的产物（每次跑 validate-days.js 都会重写）
+tools/validate-report.txt

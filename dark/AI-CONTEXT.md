@@ -1,7 +1,7 @@
 # AI-CONTEXT —— dark 实例（纯深色版）
 
-> **当前版本：功能内核 = light v1.1.103**（2026-10-16 整树同步，提交 `476310e`，63 版差距收口）
-> 8115 词表 · 剑桥官方音频管线 · 工具页（学习记录/搜索/音标区/语法区）· `pkg-study` 分包 · dock 栏 · 缓存 `au6` · 4 tab 英文化 · `pages/weeks` 移除 · `audio-url` 的 `PATH_RE` 补 `wuk/`。外观层**定死深色**，与 light 的差异仅 `app.json` 与 `utils/theme.js` 两个文件。
+> **当前版本：功能内核 = light v1.1.107**（2026-10-19 同步，含 v1.1.104 修正层）
+> 8115 词表 · 剑桥官方音频管线 · 工具页（学习记录/搜索/音标区/语法区）· `pkg-study` 分包（15 分类 / 78 语法点，分「语法 12 类 + 词形与构词 3 类」）· dock 栏 · 缓存 **`au7`** · 4 tab 英文化 · `pages/weeks` 移除 · `audio-url` 的 `PATH_RE` 补 `wuk/`。外观层**定死深色**，与 light 的差异仅 `app.json` 与 `utils/theme.js` 两个文件。
 > 详见 [CHANGELOG.md](./CHANGELOG.md)。
 
 > **音频生成管线不在本实例**：见 `../light/tools/audio-pipeline/`（2026-10-16 入库，仅 light 一份；cloud/dark 不复制）。

@@ -1,11 +1,12 @@
 // pkg-study/pages/grammar/grammar.js —— 语法速查 · 体系目录（分包页）
 //
-// 为什么在分包：71 个语法点全文（讲解 + 例句）约 50KB，放主包会顶到 2048KB 上限。
-// 主包只留 12 个分类目录（utils/study-cats.js），点分类才把分包拉下来。
+// 为什么在分包：78 个语法点全文（讲解 + 例句）约 79KB，放主包会顶到 2048KB 上限。
+// 主包只留 15 个分类目录（utils/study-cats.js），点分类才把分包拉下来。
 //
 // 本页刻意不使用任何自定义组件（原生导航栏 + 自绘轻提示）：
 // 分包只依赖主包的 JS 模块（require ../../../utils/...），把组件解析的风险降到零。
 const GRAMMAR = require('../../data/grammar.js');
+const STUDY_GROUPS = require('../../../utils/study-groups.js');
 const theme = require('../../../utils/theme.js');
 const speech = require('../../../utils/speech.js');
 const store = require('../../../utils/store.js');
@@ -23,9 +24,19 @@ const TAG_LIST = [
   { full: '商务沟通', short: '商务' },
 ];
 
+// 分类分组（v1.1.107）：语法 / 词形与构词，与工具页共用同一份 utils/study-groups.js。
+// 目录按组分段渲染，和工具页分类卡的分组口径保持一致。
+const CAT_GROUPS = STUDY_GROUPS.map(g => ({
+  id: g.id,
+  name: g.name,
+  points: g.points,
+  list: g.ids.map(id => GRAMMAR.filter(c => c.id === id)[0]).filter(Boolean),
+}));
+
 Page({
   data: {
     cats: GRAMMAR,
+    catGroups: CAT_GROUPS,
     open: '',        // 展开的分类 id
     q: '',           // 过滤关键词
     hits: [],        // 过滤命中 [{t, def, c, i, catName}]
@@ -43,7 +54,16 @@ Page({
     speech.setEngineMode(store.get('engineMode') || 'auto');
     // 从工具页点分类进来时带上 ?cat=xxx → 直接展开该分类
     const cat = (query && query.cat) || '';
-    if (cat) this.setData({ open: cat });
+    if (cat) {
+      this.setData({ open: cat });
+      // v1.1.108（用户真机反馈）：只展开不滚位 —— 目标分类在页面深处（如特殊句式是第 12 张卡），
+      // 视口停在页顶，看起来像「没跳」。等展开渲染完，把该分类卡头滚到视口顶部。
+      wx.nextTick(() => {
+        setTimeout(() => {
+          wx.pageScrollTo({ selector: '#cat-' + cat, duration: 300, fail: () => {} });
+        }, 150);
+      });
+    }
   },
   onShow() { theme.applyPage(this); },
   onHide() { speech.stop(); },
@@ -54,7 +74,7 @@ Page({
     this.setData({ open: this.data.open === id ? '' : id });
   },
 
-  // 过滤：71 条不建索引，直接现扫（<1ms）；输入框不自动聚焦，不存在键盘闪的问题
+  // 过滤：78 条不建索引，直接现扫（<1ms）；输入框不自动聚焦，不存在键盘闪的问题
   onInput(e) {
     const q = String(e.detail.value || '').trim();
     if (!q) { this.setData({ q: '', hits: [] }); return; }

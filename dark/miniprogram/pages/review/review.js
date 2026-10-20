@@ -116,9 +116,13 @@ Page({
     // 收藏列表同值守卫（新数组实例同值也会触发重渲染）；ipa/uk/cn 渲染时反查补全（v1.1.50）
     // wf（其他词形，v1.1.80）是派生字段、快照里没有 → 每次渲染都算
     const raw = store.get('starredWords') || [];
-    const starred = raw.map(v => Object.assign({}, v, {
-      ipa: v.ipa || ipaOf(v.w), uk: v.uk || ukOf(v.w), cn: v.cn || cnOf(v.w), wf: wordforms.wfNotes(v.w),
-    }));
+    const starred = raw.map(v => {
+      const canonical = plan.normalizeWord(v);
+      return Object.assign({}, canonical, {
+        ipa: canonical.ipa || ipaOf(v.w), uk: canonical.uk || ukOf(v.w), cn: canonical.cn || cnOf(v.w),
+        wf: wordforms.wfNotes(v.w, canonical.p), starred: true,
+      });
+    });
     const sj = JSON.stringify(starred);
     if (sj !== this._starredJson) { this._starredJson = sj; this.setData({ starred }); }
   },
@@ -167,9 +171,10 @@ Page({
     // v1.1.38：去掉自动朗读 —— 朗读统一走卡片上的喇叭（onSpeakCurrent），点进卡片是静默的
     // v1.1.91：重点词快照只存 {w,m,p,e,ai,ts}，无 ipa/uk（store.js 注释同）——随机/到期卡抽到收藏词时
     // 此前不反查，导致美音胶囊无字、英音胶囊整块不渲染（真机反馈 were 只有一个读音）。此处与收藏列表同口径补齐。
-    const c = Object.assign({}, item, {
-      ipa: item.ipa || ipaOf(item.w), uk: item.uk || ukOf(item.w), cn: item.cn || cnOf(item.w),
-      starred: store.isStarred(item.w), wf: wordforms.wfNotes(item.w),
+    const canonical = plan.normalizeWord(item);
+    const c = Object.assign({}, canonical, {
+      ipa: canonical.ipa || ipaOf(item.w), uk: canonical.uk || ukOf(item.w), cn: canonical.cn || cnOf(item.w),
+      starred: store.isStarred(item.w), wf: wordforms.wfNotes(item.w, canonical.p),
     });
     this.setData({ currentDue: c, showZh: false, dueHint: this._hints(item.w), wfText: '', wfKey: '' });
     this._prefetchCard(c);   // v1.1.80：抽到词就把音频备好，第一次点即出声
@@ -188,9 +193,10 @@ Page({
     const pool = store.dueWords(this.refreshPool());
     if (pool.length) {
       const item = pool[Math.floor(Math.random() * pool.length)];
-      const next = Object.assign({}, item, {
-        ipa: item.ipa || ipaOf(item.w), uk: item.uk || ukOf(item.w), cn: item.cn || cnOf(item.w),
-        starred: store.isStarred(item.w), wf: wordforms.wfNotes(item.w),
+      const canonical = plan.normalizeWord(item);
+      const next = Object.assign({}, canonical, {
+        ipa: canonical.ipa || ipaOf(item.w), uk: canonical.uk || ukOf(item.w), cn: canonical.cn || cnOf(item.w),
+        starred: store.isStarred(item.w), wf: wordforms.wfNotes(item.w, canonical.p),
       });
       this.setData({ currentDue: next, showZh: false, dueHint: this._hints(next.w), wfText: '', wfKey: '' }); // v1.1.38：下一词同样不自动朗读
       this._prefetchCard(next);
@@ -251,7 +257,7 @@ Page({
     const pool = this.refreshPool();
     if (!pool.length) {
       this.setData({ currentRandom: null });
-      this.fb().toast('先去打卡几天，词汇池才有内容');
+      this.fb().toast('先打卡一两节，词汇池才有内容');
       return;
     }
     const starred = store.get('starredWords') || [];
@@ -261,9 +267,10 @@ Page({
     // v1.1.38：去掉自动朗读，与到期 tab 统一为手动喇叭
     // v1.1.91：重点词快照只存 {w,m,p,e,ai,ts}，无 ipa/uk（store.js 注释同）——随机/到期卡抽到收藏词时
     // 此前不反查，导致美音胶囊无字、英音胶囊整块不渲染（真机反馈 were 只有一个读音）。此处与收藏列表同口径补齐。
-    const c = Object.assign({}, item, {
-      ipa: item.ipa || ipaOf(item.w), uk: item.uk || ukOf(item.w), cn: item.cn || cnOf(item.w),
-      starred: store.isStarred(item.w), wf: wordforms.wfNotes(item.w),
+    const canonical = plan.normalizeWord(item);
+    const c = Object.assign({}, canonical, {
+      ipa: canonical.ipa || ipaOf(item.w), uk: canonical.uk || ukOf(item.w), cn: canonical.cn || cnOf(item.w),
+      starred: store.isStarred(item.w), wf: wordforms.wfNotes(item.w, canonical.p),
     });
     this.setData({ currentRandom: c, showZh: false, wfText: '', wfKey: '' });
     this._prefetchCard(c);   // v1.1.80：切词即预取
@@ -315,6 +322,13 @@ Page({
   // 其他词形标签朗读（v1.1.80）：走 g/ 桶（按文本哈希预生成），与今日页/工具页同款。
   // 独立 wfText 态 —— 词形朗读文本可能与卡片上的单词/例句相同，只亮标签自己
   //（与 v1.1.78 治「点 been 误亮结果卡」同一套做法）。
+  // 多义词副义项点读：使用副卡 ai 编号，不复用主卡音频。
+  onSpeakAltSense(e) {
+    const ds = e.currentTarget.dataset;
+    if (!ds.text || !Number(ds.ai)) return;
+    speech.speak(ds.text, { ai: Number(ds.ai), kind: 'w', accent: ds.accent || '' });
+  },
+
   onSpeakWf(e) {
     const t = e.currentTarget.dataset.text;
     const key = e.currentTarget.dataset.key || t;   // v1.1.81：唯一键=词+':'+形式，防磁贴列表同 form 串亮

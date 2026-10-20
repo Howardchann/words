@@ -37,11 +37,12 @@ let playToken = 0, audioTimeout = null, audioOptDone = false;
 //          appropriate/advocate/aggregate/duplicate/contest），**云端替换的是同名同路径文件**
 //          → 老设备本地缓存会继续播旧读音。同样用换根目录强制重取（au2 → au3）。
 // v1.1.103：B 档 7 例句音频替换（s/0、s/7）+ addict 副卡 8201 换 MW 官方音频（w/8、wuk/8）→ au5 → au6。
+// v1.1.105：16 条例句音频重做（s/）+ 3 条课程例句 + 14 条新「词形规则」例句（g/）→ au6 → au7。
 // 旧目录在模块加载时一次性清除（失败静默，下次启动再试）。
-const CACHE_ROOT = (wx.env && wx.env.USER_DATA_PATH ? wx.env.USER_DATA_PATH : '') + '/au6';
-const CACHE_ROOT_OLD = (wx.env && wx.env.USER_DATA_PATH ? wx.env.USER_DATA_PATH : '') + '/au5';
-const CACHE_ROOT_OLD2 = (wx.env && wx.env.USER_DATA_PATH ? wx.env.USER_DATA_PATH : '') + '/au4';
-const CACHE_ROOT_OLD3 = (wx.env && wx.env.USER_DATA_PATH ? wx.env.USER_DATA_PATH : '') + '/au3';
+const CACHE_ROOT = (wx.env && wx.env.USER_DATA_PATH ? wx.env.USER_DATA_PATH : '') + '/au7';
+const CACHE_ROOT_OLD = (wx.env && wx.env.USER_DATA_PATH ? wx.env.USER_DATA_PATH : '') + '/au6';
+const CACHE_ROOT_OLD2 = (wx.env && wx.env.USER_DATA_PATH ? wx.env.USER_DATA_PATH : '') + '/au5';
+const CACHE_ROOT_OLD3 = (wx.env && wx.env.USER_DATA_PATH ? wx.env.USER_DATA_PATH : '') + '/au4';
 try { wx.getFileSystemManager().rmdirSync(CACHE_ROOT_OLD, true); } catch (e) {}
 try { wx.getFileSystemManager().rmdirSync(CACHE_ROOT_OLD2, true); } catch (e) {}
 try { wx.getFileSystemManager().rmdirSync(CACHE_ROOT_OLD3, true); } catch (e) {}

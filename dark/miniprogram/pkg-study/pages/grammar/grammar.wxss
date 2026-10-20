@@ -25,6 +25,10 @@ page { padding-bottom: calc(44rpx + env(safe-area-inset-bottom)); }
 .tagchip.on { background: var(--press-green); color: var(--green-press); font-weight: 700; }
 .tagchip--press { opacity: .8; }
 
+/* 分组小标题（v1.1.107）：语法 / 词形与构词。比卡片名小一号、绿色，起分隔作用 */
+.cat-sec { margin: 30rpx 32rpx 6rpx; font-size: 23rpx; font-weight: 700; color: var(--green); letter-spacing: 1rpx; }
+.cat-sec__n { margin-left: 12rpx; font-size: 21rpx; font-weight: 400; color: var(--muted3); letter-spacing: 0; }
+
 /* 分类卡（手风琴） */
 .cat { padding: 6rpx 28rpx; }
 /* 行尾顺序（v1.1.79 核实）：名称/简介 → 数量 → 箭头。三处都统一「箭头在行尾」，
@@ -76,6 +80,8 @@ page { padding-bottom: calc(44rpx + env(safe-area-inset-bottom)); }
   .cat__name { font-size: 15px; }
   .tp__t { font-size: 14px; }
   .cat__n { font-size: 12px; }
+  .cat-sec { margin: 15px 16px 3px; font-size: 12px; }
+  .cat-sec__n { margin-left: 6px; font-size: 11px; }
   /* 宽屏（≥700px）rpx 会 1:1 变 px，箭头按半值给 px（16rpx→8px） */
   .cat__arrow { width: 8px; height: 8px; border-width: 1.5px; margin-left: 7px; }
   .tp__go { width: 8px; height: 8px; border-width: 1.5px; margin-left: 8px; }
